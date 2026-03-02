@@ -1,4 +1,4 @@
-import { Brand, Cart, Category, DeliveryZone, Order, Product, ProductListItem } from "@/lib/types";
+import { Brand, Cart, Category, DeliveryZone, Order, Product, ProductListItem, PublicContentPage } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
 type ProductFilters = { q?: string; category?: string; brand?: string };
@@ -62,6 +62,19 @@ export async function fetchCategories(): Promise<Category[]> {
 
 export async function fetchBrands(): Promise<Brand[]> {
   return apiGet<Brand[]>("/catalog/brands");
+}
+
+export async function fetchPublicContentPage(slug: string): Promise<PublicContentPage | null> {
+  const response = await fetch(`${API_BASE}/content/pages/${encodeURIComponent(slug)}/`, {
+    cache: "no-store"
+  });
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new Error(`API error ${response.status} on /content/pages/${slug}/`);
+  }
+  return (await response.json()) as PublicContentPage;
 }
 
 export async function fetchCart(session?: string): Promise<{ cart: Cart; session: string }> {

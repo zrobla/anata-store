@@ -99,6 +99,15 @@ export type Order = {
   }>;
 };
 
+export type PublicContentPage = {
+  id: string;
+  slug: string;
+  title: string;
+  body_html: string;
+  is_published: boolean;
+  updated_at: string;
+};
+
 export type SellerProduct = {
   id: string;
   name: string;
