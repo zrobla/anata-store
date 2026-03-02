@@ -6,8 +6,9 @@ import { ProductCard } from "@/components/product-card";
 import { fetchHomeProducts } from "@/lib/api";
 
 export const metadata: Metadata = {
-  title: "Accueil smartphones premium",
-  description: "Catalogue premium smartphones, tablettes, montres et accessoires Samsung.",
+  title: "Accueil - Boutique en ligne smartphones et accessoires premium",
+  description:
+    "Anata Store: la boutique en ligne premium pour smartphones, tablettes, montres et accessoires.",
   alternates: {
     canonical: "/"
   }

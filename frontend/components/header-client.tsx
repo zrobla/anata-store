@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { buildCategoryTree, getTopBrands } from "@/lib/navigation";
+import { STORE_ADDRESS_SHORT, STORE_MAP_URL } from "@/lib/store-info";
 import { Brand, Category } from "@/lib/types";
 
 type HeaderClientProps = {
@@ -43,7 +44,9 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
     <header className="sticky top-0 z-50">
       <div className="hidden border-b border-slate-700 bg-slate-900 text-slate-200 md:block">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-1.5 text-xs">
-          <p className="tracking-wide text-slate-300">ANATA STORE - Premium smartphones & devices</p>
+          <p className="tracking-wide text-slate-300">
+            ANATA STORE - Boutique en Ligne premium + boutique physique au {STORE_ADDRESS_SHORT}
+          </p>
           <div className="flex items-center gap-4">
             <Link href="/pages/contact" className="hover:text-white">
               Aide & Support
@@ -296,6 +299,18 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
                 >
                   Mes commandes
                 </Link>
+              </div>
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Boutique physique</p>
+                <p className="mt-1 text-xs text-slate-700">{STORE_ADDRESS_SHORT}</p>
+                <a
+                  href={STORE_MAP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-700"
+                >
+                  Ouvrir Maps
+                </a>
               </div>
             </div>
           </aside>

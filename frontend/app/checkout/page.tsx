@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { fetchDeliveryZones } from "@/lib/api";
 import { formatFcfa } from "@/lib/currency";
+import { STORE_ADDRESS_SHORT, STORE_MAP_URL } from "@/lib/store-info";
 import { DeliveryZone } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
@@ -120,6 +121,18 @@ export default function CheckoutPage() {
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <h1 className="font-display text-3xl">Checkout COD</h1>
         <p className="mt-2 text-sm text-slate-600">Paiement a la livraison uniquement.</p>
+        <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs text-emerald-900">
+          <p className="font-semibold">Boutique physique disponible</p>
+          <p className="mt-0.5">Assistance et retrait possible au {STORE_ADDRESS_SHORT}.</p>
+          <a
+            href={STORE_MAP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex rounded-lg border border-emerald-300 px-2.5 py-1 font-semibold text-emerald-800"
+          >
+            Voir l'adresse sur Maps
+          </a>
+        </div>
         <form className="mt-6 grid gap-3" onSubmit={onSubmit}>
           <input required name="full_name" placeholder="Nom complet" className="rounded-lg border px-3 py-2" />
           <input required name="phone" placeholder="Telephone" className="rounded-lg border px-3 py-2" />

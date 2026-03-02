@@ -47,7 +47,7 @@ export function HomeHero({ products }: HomeHeroProps) {
             </h1>
 
             <p className="hero-fade-up max-w-2xl text-sm text-slate-200">
-              Notre selection est orientee performance reelle, autonomie et fiabilite. Tu compares vite, tu decides
+              Notre boutique en ligne est orientee performance reelle, autonomie et fiabilite. Tu compares vite, tu decides
               mieux, tu commandes sans stress.
             </p>
           </div>
