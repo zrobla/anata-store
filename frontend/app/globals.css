@@ -93,6 +93,33 @@ body {
   }
 }
 
+@keyframes heroFeaturedSlide {
+  0%,
+  28% {
+    transform: translateX(0%);
+  }
+  33%,
+  61% {
+    transform: translateX(-100%);
+  }
+  66%,
+  94% {
+    transform: translateX(-200%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes heroBadgeSlide {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .hero-gradient-shift {
   background: linear-gradient(120deg, #0f172a, #111827, #083344);
   background-size: 170% 170%;
@@ -117,4 +144,32 @@ body {
 
 .hero-card-in {
   animation: heroCardIn 0.5s ease-out both;
+}
+
+.hero-featured-track {
+  animation: heroFeaturedSlide 15s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-featured-track:hover {
+  animation-play-state: paused;
+}
+
+.hero-badge-track {
+  animation: heroBadgeSlide 22s linear infinite;
+  will-change: transform;
+}
+
+.hero-badge-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-featured-track {
+    animation: none;
+  }
+
+  .hero-badge-track {
+    animation: none;
+  }
 }

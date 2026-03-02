@@ -3,7 +3,6 @@ import { Manrope, Space_Grotesk } from "next/font/google";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { TrustStrip } from "@/components/trust-strip";
 import { Providers } from "@/app/providers";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import "@/app/globals.css";
@@ -84,7 +83,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <Providers>
           <Header />
-          <TrustStrip />
           <main className="mx-auto min-h-[70vh] w-full max-w-6xl px-4 py-6">{children}</main>
           <Footer />
         </Providers>

@@ -145,25 +145,30 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
             onClick={closeMenu}
             className="fixed inset-0 z-[70] bg-black/45 md:hidden"
           />
-          <aside className="fixed left-0 top-0 z-[71] h-screen w-[88%] max-w-sm overflow-y-auto bg-white shadow-2xl md:hidden">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <p className="font-display text-xl text-slate-900">Navigation</p>
-              <button
-                type="button"
-                onClick={closeMenu}
-                className="rounded-lg border border-slate-300 px-2 py-1 text-sm text-slate-700"
-              >
-                Fermer
-              </button>
+          <aside className="fixed left-0 top-0 z-[71] h-screen w-[88%] max-w-sm overflow-y-auto border-r border-slate-200 bg-slate-50 shadow-2xl md:hidden">
+            <div className="border-b border-slate-200 bg-gradient-to-r from-ink via-slate-900 to-cyan-900 px-4 py-3 text-white">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200">Menu</p>
+              <div className="mt-1 flex items-center justify-between gap-3">
+                <p className="font-display text-xl">Navigation</p>
+                <button
+                  type="button"
+                  onClick={closeMenu}
+                  className="rounded-lg border border-white/30 px-2 py-1 text-sm text-white/95"
+                >
+                  Fermer
+                </button>
+              </div>
             </div>
 
-            <div className="border-b border-slate-200 px-4 py-3">
-              <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+            <div className="border-b border-slate-200 bg-white px-4 py-3">
+              <div className="grid grid-cols-2 gap-1.5 rounded-xl bg-slate-100 p-1">
                 <button
                   type="button"
                   onClick={() => setMobileTab("categories")}
-                  className={`rounded-lg px-3 py-2 text-xs font-semibold ${
-                    mobileTab === "categories" ? "bg-white text-slate-900 shadow" : "text-slate-600"
+                  className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                    mobileTab === "categories"
+                      ? "bg-ink text-white shadow-[0_6px_16px_-10px_rgba(15,23,42,0.85)]"
+                      : "text-slate-600 hover:text-slate-800"
                   }`}
                 >
                   Categories
@@ -171,8 +176,10 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
                 <button
                   type="button"
                   onClick={() => setMobileTab("brands")}
-                  className={`rounded-lg px-3 py-2 text-xs font-semibold ${
-                    mobileTab === "brands" ? "bg-white text-slate-900 shadow" : "text-slate-600"
+                  className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                    mobileTab === "brands"
+                      ? "bg-ink text-white shadow-[0_6px_16px_-10px_rgba(15,23,42,0.85)]"
+                      : "text-slate-600 hover:text-slate-800"
                   }`}
                 >
                   Marques
@@ -181,19 +188,19 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
             </div>
 
             {mobileTab === "categories" && (
-              <div className="space-y-1 px-3 py-3">
+              <div className="space-y-1.5 px-3 py-3">
                 <Link
                   href="/s?q=samsung"
                   onClick={closeMenu}
-                  className="block rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800"
+                  className="block rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-900"
                 >
                   Tout le catalogue
                 </Link>
                 {categoryTree.map((node) => {
                   const expanded = expandedCategoryId === node.category.id;
                   return (
-                    <div key={node.category.id} className="rounded-lg border border-slate-200">
-                      <div className="flex items-center justify-between gap-2 px-3 py-2">
+                    <div key={node.category.id} className="rounded-xl border border-slate-200 bg-white">
+                      <div className="flex items-center justify-between gap-2 px-3 py-2.5">
                         <Link
                           href={`/c/${node.category.slug}`}
                           onClick={closeMenu}
@@ -213,13 +220,13 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
                         )}
                       </div>
                       {expanded && node.children.length > 0 && (
-                        <div className="grid gap-1 border-t border-slate-100 px-3 py-2">
+                        <div className="grid gap-1 border-t border-slate-100 bg-slate-50 px-3 py-2">
                           {node.children.map((child) => (
                             <Link
                               key={child.category.id}
                               href={`/c/${child.category.slug}`}
                               onClick={closeMenu}
-                              className="rounded-md px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                              className="rounded-md px-2 py-1 text-xs text-slate-700 hover:bg-white"
                             >
                               {child.category.name}
                             </Link>
@@ -230,42 +237,50 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
                   );
                 })}
                 {categoryTree.length === 0 && (
-                  <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">Categories indisponibles.</p>
+                  <p className="rounded-lg bg-white px-3 py-2 text-xs text-slate-600">Categories indisponibles.</p>
                 )}
               </div>
             )}
 
             {mobileTab === "brands" && (
-              <div className="grid gap-1 px-3 py-3">
+              <div className="grid gap-1.5 px-3 py-3">
                 {topBrands.map((brand) => (
                   <Link
                     key={brand.id}
                     href={`/b/${brand.slug}`}
                     onClick={closeMenu}
-                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50/70"
                   >
                     {brand.name}
                   </Link>
                 ))}
                 {topBrands.length === 0 && (
-                  <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">Marques indisponibles.</p>
+                  <p className="rounded-lg bg-white px-3 py-2 text-xs text-slate-600">Marques indisponibles.</p>
                 )}
               </div>
             )}
 
-            <div className="border-t border-slate-200 px-3 py-3">
+            <div className="border-t border-slate-200 bg-white px-3 py-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Liens rapides</p>
-              <div className="grid gap-1">
-                <Link href="/compare" onClick={closeMenu} className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+              <div className="grid gap-1.5">
+                <Link
+                  href="/compare"
+                  onClick={closeMenu}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
                   Comparer
                 </Link>
-                <Link href="/cart" onClick={closeMenu} className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                <Link
+                  href="/cart"
+                  onClick={closeMenu}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
                   Panier
                 </Link>
                 <Link
                   href="/account/orders"
                   onClick={closeMenu}
-                  className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                 >
                   Mes commandes
                 </Link>
