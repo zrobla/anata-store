@@ -379,6 +379,10 @@ class Command(BaseCommand):
             slug="ecouteurs",
             defaults={"name": "Ecouteurs", "sort_order": 4, "is_active": True},
         )
+        ordinateurs, _ = Category.objects.get_or_create(
+            slug="ordinateurs",
+            defaults={"name": "Ordinateurs", "sort_order": 5, "is_active": True},
+        )
 
         internal_source, _ = InventorySource.objects.get_or_create(
             name="Entrepot Abidjan",
@@ -399,6 +403,7 @@ class Command(BaseCommand):
             "tablettes": tablettes,
             "montres-connectees": montres,
             "ecouteurs": ecouteurs,
+            "ordinateurs": ordinateurs,
         }
 
         product_count = 0

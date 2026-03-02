@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { useSellerAuth } from "@/components/seller-auth-provider";
+import { formatFcfa } from "@/lib/currency";
 import { fetchSellerOrders, updateSellerOrderStatus } from "@/lib/seller-api";
 import { SellerOrder, SellerOrderStatus } from "@/lib/types";
 
@@ -16,7 +17,7 @@ const STATUSES: SellerOrderStatus[] = [
 ];
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 export default function SellerOrdersPage() {

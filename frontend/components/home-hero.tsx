@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { formatFcfa } from "@/lib/currency";
 import { ProductListItem } from "@/lib/types";
 
 type HomeHeroProps = {
@@ -8,7 +9,7 @@ type HomeHeroProps = {
 };
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 function imageUrl(product: ProductListItem) {
@@ -72,7 +73,7 @@ export function HomeHero({ products }: HomeHeroProps) {
                   >
                     <div className="grid h-full grid-cols-[1fr_auto] items-center gap-1.5">
                       <div>
-                        <p className="text-[9px] uppercase tracking-wide text-cyan-100">Best Choice du moment</p>
+                        <p className="text-[9px] uppercase tracking-wide text-cyan-100">Meilleur choix du moment</p>
                         <p className="mt-0.5 line-clamp-1 font-display text-sm md:text-base">{product.name}</p>
                         <div className="mt-1 flex items-center gap-2">
                           <p className="text-[11px] font-semibold text-fuel">{fcfa(product.min_promo_price ?? product.min_price)}</p>

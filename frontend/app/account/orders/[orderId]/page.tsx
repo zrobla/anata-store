@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 
 import { BackLink } from "@/components/back-link";
 import { fetchMyOrderDetail } from "@/lib/api";
+import { formatFcfa } from "@/lib/currency";
 import { Order } from "@/lib/types";
 
 const ACCESS_TOKEN_KEY = "client_access_token";
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 export default function AccountOrderDetailPage() {

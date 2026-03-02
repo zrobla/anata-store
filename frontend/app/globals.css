@@ -120,6 +120,51 @@ body {
   }
 }
 
+@keyframes whatsappBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes whatsappRingPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+@keyframes whatsappGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes whatsappHintIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .hero-gradient-shift {
   background: linear-gradient(120deg, #0f172a, #111827, #083344);
   background-size: 170% 170%;
@@ -164,12 +209,37 @@ body {
   animation-play-state: paused;
 }
 
+.whatsapp-hint {
+  animation: whatsappHintIn 0.45s ease-out both;
+}
+
+.whatsapp-float {
+  animation: whatsappBob 4.2s ease-in-out infinite;
+}
+
+.whatsapp-ring {
+  animation: whatsappRingPulse 2.8s ease-out infinite;
+}
+
+.whatsapp-button {
+  background: linear-gradient(120deg, #128c7e, #25d366, #1fab5b);
+  background-size: 180% 180%;
+  animation: whatsappGradient 9s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-featured-track {
     animation: none;
   }
 
   .hero-badge-track {
+    animation: none;
+  }
+
+  .whatsapp-hint,
+  .whatsapp-float,
+  .whatsapp-ring,
+  .whatsapp-button {
     animation: none;
   }
 }

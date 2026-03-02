@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useSellerAuth } from "@/components/seller-auth-provider";
+import { formatFcfa } from "@/lib/currency";
 import { fetchSellerInventoryItems, fetchSellerOrders, fetchSellerProducts } from "@/lib/seller-api";
 import { SellerInventoryItem, SellerOrder, SellerProduct } from "@/lib/types";
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 export default function SellerDashboardPage() {

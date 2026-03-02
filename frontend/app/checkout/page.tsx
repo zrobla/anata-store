@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { BackLink } from "@/components/back-link";
 import { fetchDeliveryZones } from "@/lib/api";
+import { formatFcfa } from "@/lib/currency";
 import { DeliveryZone } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
@@ -138,7 +139,7 @@ export default function CheckoutPage() {
             >
               {zones.map((zone) => (
                 <option key={zone.id} value={zone.id}>
-                  {zone.name} - frais {new Intl.NumberFormat("fr-FR").format(zone.fee_amount)} FCFA -{" "}
+                  {zone.name} - frais {formatFcfa(zone.fee_amount)} -{" "}
                   {zone.eta_days_min}-{zone.eta_days_max} jours
                 </option>
               ))}
@@ -146,7 +147,7 @@ export default function CheckoutPage() {
           </label>
           {selectedZone && (
             <p className="text-xs text-slate-600">
-              Frais livraison estimes: {new Intl.NumberFormat("fr-FR").format(selectedZone.fee_amount)} FCFA.
+              Frais livraison estimes: {formatFcfa(selectedZone.fee_amount)}.
             </p>
           )}
           {error && <p className="text-sm text-red-600">{error}</p>}

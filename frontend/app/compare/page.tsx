@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { BackLink } from "@/components/back-link";
 import { addToCart, fetchProductBySlug } from "@/lib/api";
+import { formatFcfa } from "@/lib/currency";
+import { availabilityLabel } from "@/lib/labels";
 import { CompareItem, clearCompareItems, readCompareItems, removeCompareItem } from "@/lib/compare";
 import { Product } from "@/lib/types";
 
@@ -14,7 +16,7 @@ type ComparedProduct = {
 };
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 function attrLabel(compare: CompareItem, key: string) {
@@ -145,7 +147,7 @@ export default function ComparePage() {
                 {fcfa(compare.promoPriceAmount ?? compare.priceAmount)}
               </p>
               <ul className="mt-3 space-y-1 text-xs text-slate-700">
-                <li>Disponibilite: {compare.availabilityStatus.replaceAll("_", " ")}</li>
+                <li>Disponibilite: {availabilityLabel(compare.availabilityStatus)}</li>
                 <li>Stockage: {attrLabel(compare, "storage")}</li>
                 <li>Couleur: {attrLabel(compare, "color")}</li>
                 <li>RAM: {attrLabel(compare, "ram")}</li>

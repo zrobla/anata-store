@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { useSellerAuth } from "@/components/seller-auth-provider";
+import { formatFcfa } from "@/lib/currency";
 import {
   createSellerProduct,
   createSellerVariant,
@@ -702,8 +703,7 @@ export default function SellerProductsPage() {
                   <p className="text-slate-500">
                     {(products.find((product) => product.id === variant.product)?.name || variant.product) +
                       " - " +
-                      new Intl.NumberFormat("fr-FR").format(variant.price_amount) +
-                      " FCFA"}
+                      formatFcfa(variant.price_amount)}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <button

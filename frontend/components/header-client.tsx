@@ -60,7 +60,7 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
 
       <div className="border-b border-white/20 bg-ink/95 backdrop-blur">
         <div className="mx-auto grid max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 text-mist">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
@@ -71,7 +71,7 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
             </button>
             <Link
               href="/"
-              className="flex items-center overflow-hidden rounded-xl bg-white px-3 py-1.5 shadow-md ring-1 ring-white/60 border border-fuel/25"
+              className="hidden items-center overflow-hidden rounded-xl border border-fuel/25 bg-white px-3 py-1.5 shadow-md ring-1 ring-white/60 md:flex"
             >
               <Image
                 src="/anata-store-logo-1.png"
@@ -83,6 +83,20 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
               />
             </Link>
           </div>
+
+          <Link
+            href="/"
+            className="mx-auto flex items-center overflow-hidden rounded-xl border border-fuel/25 bg-white px-3 py-1.5 shadow-md ring-1 ring-white/60 md:hidden"
+          >
+            <Image
+              src="/anata-store-logo-1.png"
+              alt="Anata Store"
+              width={228}
+              height={70}
+              className="h-11 w-auto scale-[1.75] object-contain sm:h-12"
+              priority
+            />
+          </Link>
 
           <form
             action="/s"
@@ -108,14 +122,7 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
             </Link>
           </nav>
 
-          <nav className="ml-auto flex items-center gap-2 md:hidden">
-            <Link href="/s?q=samsung" className="rounded-lg border border-slate-500 px-2 py-1 text-xs">
-              Search
-            </Link>
-            <Link href="/cart" className="rounded-lg border border-slate-500 px-2 py-1 text-xs">
-              Panier
-            </Link>
-          </nav>
+          <div className="h-9 w-9 md:hidden" aria-hidden="true" />
         </div>
 
         <div className="mx-auto max-w-6xl px-4 pb-3 md:hidden">
@@ -130,9 +137,7 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
               placeholder="Rechercher..."
               className="w-full border-0 px-3 py-2 text-sm outline-none"
             />
-            <button type="submit" className="bg-fuel px-4 text-xs font-semibold text-white">
-              Go
-            </button>
+            <button type="submit" className="bg-fuel px-4 text-xs font-semibold text-white">OK</button>
           </form>
         </div>
       </div>
@@ -192,7 +197,7 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
                 <Link
                   href="/s?q=samsung"
                   onClick={closeMenu}
-                  className="block rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-900"
+                  className="block rounded-xl border border-cyan-600 bg-cyan-100 px-3 py-2 text-sm font-semibold text-cyan-950"
                 >
                   Tout le catalogue
                 </Link>
@@ -263,6 +268,13 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
             <div className="border-t border-slate-200 bg-white px-3 py-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Liens rapides</p>
               <div className="grid gap-1.5">
+                <Link
+                  href="/s"
+                  onClick={closeMenu}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  Rechercher
+                </Link>
                 <Link
                   href="/compare"
                   onClick={closeMenu}

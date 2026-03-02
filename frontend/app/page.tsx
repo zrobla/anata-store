@@ -22,7 +22,7 @@ export default async function HomePage() {
         <HomeHero products={products} />
         <section>
           <div className="mb-4 flex items-end justify-between">
-            <h2 className="font-display text-2xl">Best Sellers</h2>
+            <h2 className="font-display text-2xl">Meilleures ventes</h2>
             <p className="text-sm text-slate-600">Selection premium smartphones</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

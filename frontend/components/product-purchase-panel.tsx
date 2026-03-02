@@ -5,11 +5,13 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { addToCart } from "@/lib/api";
+import { formatFcfa } from "@/lib/currency";
+import { availabilityLabel } from "@/lib/labels";
 import { readCompareItems, upsertCompareItem } from "@/lib/compare";
 import { Product } from "@/lib/types";
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 function summarizeAttributes(
@@ -104,7 +106,9 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
               type="button"
               onClick={() => setSelectedVariantId(variant.id)}
               className={`w-full rounded-xl border p-3 text-left transition ${
-                active ? "border-cyan-500 bg-cyan-50" : "border-slate-200 hover:border-slate-300"
+                active
+                  ? "border-cyan-700 bg-cyan-100 text-slate-900 ring-1 ring-cyan-300"
+                  : "border-slate-200 hover:border-slate-300"
               }`}
             >
               <p className="text-xs text-slate-500">SKU {variant.sku}</p>
@@ -113,7 +117,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
                 {attrs.storage ? `Stockage: ${attrs.storage}` : "Stockage standard"}{" "}
                 {attrs.color ? `- Couleur: ${attrs.color}` : ""} {attrs.ram ? `- RAM: ${attrs.ram}` : ""}
               </p>
-              <p className="mt-1 text-xs text-slate-500">{variant.availability.status.replaceAll("_", " ")}</p>
+              <p className="mt-1 text-xs text-slate-500">{availabilityLabel(variant.availability.status)}</p>
             </button>
           );
         })}

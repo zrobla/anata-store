@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { BackLink } from "@/components/back-link";
 import { fetchMyOrders, loginClient } from "@/lib/api";
+import { formatFcfa } from "@/lib/currency";
 import { Order } from "@/lib/types";
 
 const ACCESS_TOKEN_KEY = "client_access_token";
@@ -12,7 +13,7 @@ const REFRESH_TOKEN_KEY = "client_refresh_token";
 const CLIENT_EMAIL_KEY = "client_email";
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 export default function AccountOrdersPage() {

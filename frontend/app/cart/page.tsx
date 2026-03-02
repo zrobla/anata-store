@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 
 import { BackLink } from "@/components/back-link";
 import { fetchCart, removeCartItem, updateCartItemQty } from "@/lib/api";
+import { formatFcfa } from "@/lib/currency";
+import { availabilityLabel } from "@/lib/labels";
 import { Cart } from "@/lib/types";
 
 function fcfa(value: number) {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return formatFcfa(value);
 }
 
 function total(cart: Cart) {
@@ -119,7 +121,7 @@ export default function CartPage() {
                 <p className="text-sm font-semibold text-slate-900">{item.product_name || item.variant_sku}</p>
                 <p className="text-xs text-slate-500">SKU {item.variant_sku}</p>
                 {attrsLabel(item) && <p className="text-xs text-slate-600">{attrsLabel(item)}</p>}
-                <p className="text-xs text-slate-500">{item.availability.status.replaceAll("_", " ")}</p>
+                <p className="text-xs text-slate-500">{availabilityLabel(item.availability.status)}</p>
               </div>
               <p className="text-sm font-semibold text-fuel">{fcfa(item.qty * item.unit_price_amount)}</p>
             </div>
@@ -158,7 +160,7 @@ export default function CartPage() {
       <p className="text-right text-lg font-semibold">Total: {fcfa(total(cart))}</p>
       <div className="flex flex-wrap gap-3">
         <Link href="/checkout" className="inline-flex rounded-xl bg-fuel px-4 py-2 text-sm font-semibold text-white">
-          Passer au checkout COD
+          Passer a la commande COD
         </Link>
         <Link href="/s?q=samsung" className="inline-flex rounded-xl border border-slate-300 px-4 py-2 text-sm">
           Continuer les achats

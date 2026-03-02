@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { WhatsAppCta } from "@/components/whatsapp-cta";
 import { Providers } from "@/app/providers";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import "@/app/globals.css";
 
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
+const manrope = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-manrope" });
 const space = Space_Grotesk({ subsets: ["latin"], variable: "--font-space" });
 const siteUrl = getSiteUrl();
 
@@ -72,7 +73,7 @@ const websiteJsonLd = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`${manrope.variable} ${space.variable}`}>
-      <body className="font-body text-ink">
+      <body className="font-body font-medium text-ink">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main className="mx-auto min-h-[70vh] w-full max-w-6xl px-4 py-6">{children}</main>
           <Footer />
+          <WhatsAppCta />
         </Providers>
       </body>
     </html>
