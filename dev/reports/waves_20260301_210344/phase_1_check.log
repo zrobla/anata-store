@@ -1,0 +1,12 @@
+Creating test database for alias 'default'...
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 2.477s
+
+OK
+Destroying test database for alias 'default'...
+Found 9 test(s).
+System check identified no issues (0 silenced).
+40 objects imported automatically (use -v 2 for details).
+
+PHASE_1_CHECK_OK

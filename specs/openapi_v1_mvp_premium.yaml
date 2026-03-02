@@ -1,0 +1,1089 @@
+openapi: 3.0.3
+info:
+  title: Tech & Web Electronics E-commerce API
+  version: "1.0.0"
+  description: >
+    Mono-vendor electronics e-commerce (Côte d’Ivoire). COD-only in V1, no wishlist,
+    no marketplace/vendor exposure. Next.js storefront + Seller Studio use this API.
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: Public
+  - name: Catalog
+  - name: Cart
+  - name: Checkout
+  - name: Customer
+  - name: Seller
+  - name: Inventory
+  - name: Promotions
+  - name: Reviews
+  - name: QnA
+  - name: Content
+  - name: Audit
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: page_size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 24 }
+    QueryQ:
+      name: q
+      in: query
+      schema: { type: string }
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+        description: "Sort key. Examples: newest, price_asc, price_desc, promo, popularity"
+    CategorySlug:
+      name: category
+      in: query
+      schema: { type: string }
+    BrandSlug:
+      name: brand
+      in: query
+      schema: { type: string }
+    PriceMin:
+      name: price_min
+      in: query
+      schema: { type: integer, minimum: 0 }
+    PriceMax:
+      name: price_max
+      in: query
+      schema: { type: integer, minimum: 0 }
+    Availability:
+      name: availability
+      in: query
+      schema:
+        type: string
+        enum: [IN_STOCK, AVAILABLE_SOON, OUT_OF_STOCK]
+    AttributeFilter:
+      name: attrs
+      in: query
+      schema:
+        type: string
+        description: >
+          Attribute filters as a comma-separated list of key:value pairs.
+          Example: attrs=ram:8GB,storage:256GB,color:Black
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object, additionalProperties: true }
+      required: [code, message]
+
+    Money:
+      type: object
+      properties:
+        currency: { type: string, example: XOF }
+        amount: { type: integer, example: 199900 }
+      required: [currency, amount]
+
+    PaginationMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        page_size: { type: integer }
+        total: { type: integer }
+        total_pages: { type: integer }
+      required: [page, page_size, total, total_pages]
+
+    Brand:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        logo_url: { type: string }
+        is_active: { type: boolean }
+      required: [id, name, slug, is_active]
+
+    Category:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        parent_id: { type: string, nullable: true }
+        sort_order: { type: integer }
+        is_active: { type: boolean }
+      required: [id, name, slug, is_active]
+
+    Attribute:
+      type: object
+      properties:
+        id: { type: string }
+        key: { type: string, example: ram }
+        label: { type: string, example: RAM }
+        type: { type: string, enum: [TEXT, NUMBER, SELECT] }
+        is_filterable: { type: boolean }
+        sort_order: { type: integer }
+      required: [id, key, label, type, is_filterable]
+
+    AttributeValue:
+      type: object
+      properties:
+        attribute_key: { type: string }
+        label: { type: string }
+        value: { type: string }
+      required: [attribute_key, value]
+
+    MediaAsset:
+      type: object
+      properties:
+        id: { type: string }
+        url: { type: string }
+        alt: { type: string }
+        sort_order: { type: integer }
+        kind: { type: string, enum: [IMAGE, VIDEO] }
+      required: [id, url, kind]
+
+    AvailabilityInfo:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [IN_STOCK, AVAILABLE_SOON, OUT_OF_STOCK]
+        lead_time_days:
+          type: integer
+          nullable: true
+          description: "Only present when status=AVAILABLE_SOON"
+      required: [status]
+
+    ProductVariant:
+      type: object
+      properties:
+        id: { type: string }
+        sku: { type: string }
+        barcode: { type: string, nullable: true }
+        price: { $ref: "#/components/schemas/Money" }
+        promo_price: { $ref: "#/components/schemas/Money", nullable: true }
+        attributes:
+          type: array
+          items: { $ref: "#/components/schemas/AttributeValue" }
+        availability: { $ref: "#/components/schemas/AvailabilityInfo" }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaAsset" }
+      required: [id, sku, price, attributes, availability]
+
+    Product:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        short_description: { type: string }
+        description: { type: string }
+        category: { $ref: "#/components/schemas/Category" }
+        brand: { $ref: "#/components/schemas/Brand" }
+        is_active: { type: boolean }
+        is_featured: { type: boolean }
+        badges:
+          type: array
+          items: { type: string }
+          description: "Example: Original, Garantie 12 mois, Livraison 24/48h"
+        variants:
+          type: array
+          items: { $ref: "#/components/schemas/ProductVariant" }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaAsset" }
+      required: [id, name, slug, category, brand, is_active, variants]
+
+    ProductListItem:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        category_slug: { type: string }
+        brand_slug: { type: string }
+        thumbnail_url: { type: string }
+        min_price: { $ref: "#/components/schemas/Money" }
+        min_promo_price: { $ref: "#/components/schemas/Money", nullable: true }
+        availability: { $ref: "#/components/schemas/AvailabilityInfo" }
+        badges:
+          type: array
+          items: { type: string }
+      required: [id, name, slug, min_price, availability]
+
+    ProductListResponse:
+      type: object
+      properties:
+        meta: { $ref: "#/components/schemas/PaginationMeta" }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ProductListItem" }
+      required: [meta, items]
+
+    CartItem:
+      type: object
+      properties:
+        id: { type: string }
+        product_id: { type: string }
+        variant_id: { type: string }
+        name: { type: string }
+        sku: { type: string }
+        qty: { type: integer, minimum: 1 }
+        unit_price: { $ref: "#/components/schemas/Money" }
+        line_total: { $ref: "#/components/schemas/Money" }
+        thumbnail_url: { type: string }
+      required: [id, variant_id, qty, unit_price, line_total]
+
+    Cart:
+      type: object
+      properties:
+        id: { type: string }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CartItem" }
+        subtotal: { $ref: "#/components/schemas/Money" }
+        delivery_fee: { $ref: "#/components/schemas/Money" }
+        total: { $ref: "#/components/schemas/Money" }
+        currency: { type: string, example: XOF }
+      required: [id, items, subtotal, delivery_fee, total, currency]
+
+    AddressCI:
+      type: object
+      properties:
+        full_name: { type: string }
+        phone_whatsapp: { type: string, description: "E.164 or local. Store both raw + normalized." }
+        city: { type: string, example: Abidjan }
+        commune: { type: string, example: Cocody }
+        quartier: { type: string }
+        landmark: { type: string, description: "Repère / indication" }
+        notes: { type: string, nullable: true }
+      required: [full_name, phone_whatsapp, city, quartier, landmark]
+
+    DeliveryZone:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, example: Abidjan - Cocody }
+        fee: { $ref: "#/components/schemas/Money" }
+        eta_days_min: { type: integer }
+        eta_days_max: { type: integer }
+        is_active: { type: boolean }
+      required: [id, name, fee, eta_days_min, eta_days_max, is_active]
+
+    OrderItem:
+      type: object
+      properties:
+        id: { type: string }
+        product_id: { type: string }
+        variant_id: { type: string }
+        name: { type: string }
+        sku: { type: string }
+        qty: { type: integer }
+        unit_price: { $ref: "#/components/schemas/Money" }
+        line_total: { $ref: "#/components/schemas/Money" }
+      required: [id, variant_id, qty, unit_price, line_total]
+
+    Order:
+      type: object
+      properties:
+        id: { type: string }
+        order_number: { type: string }
+        status:
+          type: string
+          enum: [NEW, CONFIRMED, PACKING, OUT_FOR_DELIVERY, DELIVERED, CANCELLED]
+        payment_method:
+          type: string
+          enum: [COD]
+        address: { $ref: "#/components/schemas/AddressCI" }
+        delivery_zone: { $ref: "#/components/schemas/DeliveryZone" }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItem" }
+        subtotal: { $ref: "#/components/schemas/Money" }
+        delivery_fee: { $ref: "#/components/schemas/Money" }
+        total: { $ref: "#/components/schemas/Money" }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+      required: [id, order_number, status, payment_method, address, delivery_zone, items, subtotal, delivery_fee, total, created_at, updated_at]
+
+    CheckoutCODRequest:
+      type: object
+      properties:
+        cart_id: { type: string }
+        delivery_zone_id: { type: string }
+        address: { $ref: "#/components/schemas/AddressCI" }
+        coupon_code: { type: string, nullable: true }
+      required: [cart_id, delivery_zone_id, address]
+
+    CheckoutCODResponse:
+      type: object
+      properties:
+        order: { $ref: "#/components/schemas/Order" }
+      required: [order]
+
+    Deal:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        starts_at: { type: string, format: date-time }
+        ends_at: { type: string, format: date-time }
+        type: { type: string, enum: [PERCENT, AMOUNT] }
+        value: { type: integer, description: "percent (0-100) or amount in XOF" }
+        scope: { type: string, enum: [PRODUCT, CATEGORY, BRAND] }
+        scope_ref_id: { type: string }
+        is_active: { type: boolean }
+      required: [id, name, starts_at, ends_at, type, value, scope, is_active]
+
+    Coupon:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [PERCENT, AMOUNT] }
+        value: { type: integer }
+        min_cart_amount: { type: integer, nullable: true }
+        max_uses: { type: integer, nullable: true }
+        max_uses_per_user: { type: integer, nullable: true }
+        starts_at: { type: string, format: date-time, nullable: true }
+        ends_at: { type: string, format: date-time, nullable: true }
+        is_active: { type: boolean }
+      required: [id, code, type, value, is_active]
+
+    Bundle:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        primary_product_id: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              variant_id: { type: string }
+              qty: { type: integer, minimum: 1 }
+            required: [variant_id, qty]
+        savings_amount: { type: integer, nullable: true }
+        is_active: { type: boolean }
+      required: [id, name, primary_product_id, items, is_active]
+
+    Review:
+      type: object
+      properties:
+        id: { type: string }
+        product_id: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        title: { type: string, nullable: true }
+        body: { type: string, nullable: true }
+        status: { type: string, enum: [PENDING, APPROVED, REJECTED] }
+        created_at: { type: string, format: date-time }
+      required: [id, product_id, rating, status, created_at]
+
+    Question:
+      type: object
+      properties:
+        id: { type: string }
+        product_id: { type: string }
+        question: { type: string }
+        status: { type: string, enum: [PENDING, APPROVED, REJECTED] }
+        created_at: { type: string, format: date-time }
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              answer: { type: string }
+              created_at: { type: string, format: date-time }
+            required: [id, answer, created_at]
+      required: [id, product_id, question, status, created_at]
+
+    ContentPage:
+      type: object
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        title: { type: string }
+        body_html: { type: string }
+        is_published: { type: boolean }
+        updated_at: { type: string, format: date-time }
+      required: [id, slug, title, is_published, updated_at]
+
+    BlogPost:
+      type: object
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        title: { type: string }
+        excerpt: { type: string }
+        body_html: { type: string }
+        cover_image_url: { type: string, nullable: true }
+        is_published: { type: boolean }
+        published_at: { type: string, format: date-time, nullable: true }
+      required: [id, slug, title, is_published]
+
+    HomeSection:
+      type: object
+      properties:
+        id: { type: string }
+        key: { type: string, description: "Unique identifier for the section position/type" }
+        type:
+          type: string
+          enum: [HERO, BRANDS, DEALS, BEST_SELLERS, NEW_ARRIVALS, CATEGORY_GRID, BANNER, CUSTOM]
+        payload:
+          type: object
+          additionalProperties: true
+          description: "Section configuration JSON (no-code builder)"
+        is_active: { type: boolean }
+        sort_order: { type: integer }
+      required: [id, key, type, payload, is_active, sort_order]
+
+    AuditLog:
+      type: object
+      properties:
+        id: { type: string }
+        actor_user_id: { type: string }
+        action: { type: string }
+        resource: { type: string }
+        resource_id: { type: string }
+        before: { type: object, additionalProperties: true, nullable: true }
+        after: { type: object, additionalProperties: true, nullable: true }
+        created_at: { type: string, format: date-time }
+      required: [id, actor_user_id, action, resource, resource_id, created_at]
+
+security:
+  - BearerAuth: []
+
+paths:
+  /catalog/brands:
+    get:
+      tags: [Public, Catalog]
+      summary: List active brands
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Brand" }
+
+  /catalog/categories:
+    get:
+      tags: [Public, Catalog]
+      summary: List active categories
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Category" }
+
+  /catalog/attributes:
+    get:
+      tags: [Public, Catalog]
+      summary: List filterable attributes
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Attribute" }
+
+  /products:
+    get:
+      tags: [Public, Catalog]
+      summary: Search and list products
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/QueryQ"
+        - $ref: "#/components/parameters/Sort"
+        - $ref: "#/components/parameters/CategorySlug"
+        - $ref: "#/components/parameters/BrandSlug"
+        - $ref: "#/components/parameters/PriceMin"
+        - $ref: "#/components/parameters/PriceMax"
+        - $ref: "#/components/parameters/Availability"
+        - $ref: "#/components/parameters/AttributeFilter"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductListResponse" }
+
+  /products/{slug}:
+    get:
+      tags: [Public, Catalog]
+      summary: Get product by slug
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /search/suggest:
+    get:
+      tags: [Public, Catalog]
+      summary: Autosuggest for query
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/QueryQ"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        slug: { type: string }
+                      required: [name, slug]
+                  brands:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        slug: { type: string }
+                      required: [name, slug]
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        slug: { type: string }
+                      required: [name, slug]
+
+  /cart:
+    get:
+      tags: [Public, Cart]
+      summary: Get current cart
+      description: "Cart is session-based or tied to customer; implementation detail hidden."
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+
+  /cart/items:
+    post:
+      tags: [Public, Cart]
+      summary: Add item to cart
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variant_id: { type: string }
+                qty: { type: integer, minimum: 1, default: 1 }
+              required: [variant_id, qty]
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+
+  /cart/items/{id}:
+    patch:
+      tags: [Public, Cart]
+      summary: Update cart item quantity
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                qty: { type: integer, minimum: 1 }
+              required: [qty]
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+    delete:
+      tags: [Public, Cart]
+      summary: Remove cart item
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+
+  /delivery/zones:
+    get:
+      tags: [Public, Checkout]
+      summary: List delivery zones (CI)
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DeliveryZone" }
+
+  /checkout/cod:
+    post:
+      tags: [Public, Checkout]
+      summary: Place an order with Cash On Delivery (COD)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CheckoutCODRequest" }
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CheckoutCODResponse" }
+        "409":
+          description: Stock conflict / cannot reserve
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /me/orders:
+    get:
+      tags: [Customer]
+      summary: List my orders (customer)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta: { $ref: "#/components/schemas/PaginationMeta" }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Order" }
+                required: [meta, items]
+
+  /me/orders/{id}:
+    get:
+      tags: [Customer]
+      summary: Get my order details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /reviews:
+    post:
+      tags: [Public, Reviews]
+      summary: Submit a review (may require delivered order)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id: { type: string }
+                rating: { type: integer, minimum: 1, maximum: 5 }
+                title: { type: string, nullable: true }
+                body: { type: string, nullable: true }
+              required: [product_id, rating]
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Review" }
+
+  /questions:
+    post:
+      tags: [Public, QnA]
+      summary: Ask a product question
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id: { type: string }
+                question: { type: string }
+              required: [product_id, question]
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Question" }
+
+  /content/pages/{slug}:
+    get:
+      tags: [Public, Content]
+      summary: Get published content page by slug
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContentPage" }
+
+  /content/blog:
+    get:
+      tags: [Public, Content]
+      summary: List published blog posts
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta: { $ref: "#/components/schemas/PaginationMeta" }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/BlogPost" }
+                required: [meta, items]
+
+  /content/blog/{slug}:
+    get:
+      tags: [Public, Content]
+      summary: Get published blog post by slug
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BlogPost" }
+
+  /content/home:
+    get:
+      tags: [Public, Content]
+      summary: Get active home page sections
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/HomeSection" }
+
+  # -------------------------
+  # SELLER (protected)
+  # -------------------------
+  /seller/products:
+    get:
+      tags: [Seller, Catalog]
+      summary: Seller list products (including inactive)
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Catalog]
+      summary: Seller create product
+      responses:
+        "201": { description: Created }
+
+  /seller/products/{id}:
+    patch:
+      tags: [Seller, Catalog]
+      summary: Seller update product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Updated }
+    delete:
+      tags: [Seller, Catalog]
+      summary: Seller delete product (soft delete recommended)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Deleted }
+
+  /seller/variants:
+    get:
+      tags: [Seller, Catalog]
+      summary: Seller list variants
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Catalog]
+      summary: Seller create variant
+      responses:
+        "201": { description: Created }
+
+  /seller/inventory/sources:
+    get:
+      tags: [Seller, Inventory]
+      summary: List inventory sources
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Inventory]
+      summary: Create inventory source
+      responses:
+        "201": { description: Created }
+
+  /seller/inventory/items:
+    get:
+      tags: [Seller, Inventory]
+      summary: List inventory items (variant x source)
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Inventory]
+      summary: Upsert inventory item qty/lead time
+      responses:
+        "201": { description: Upserted }
+
+  /seller/deals:
+    get:
+      tags: [Seller, Promotions]
+      summary: List deals
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Promotions]
+      summary: Create deal
+      responses:
+        "201": { description: Created }
+
+  /seller/coupons:
+    get:
+      tags: [Seller, Promotions]
+      summary: List coupons
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Promotions]
+      summary: Create coupon
+      responses:
+        "201": { description: Created }
+
+  /seller/bundles:
+    get:
+      tags: [Seller, Promotions]
+      summary: List bundles
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Promotions]
+      summary: Create bundle
+      responses:
+        "201": { description: Created }
+
+  /seller/orders:
+    get:
+      tags: [Seller]
+      summary: List orders for fulfillment
+      responses:
+        "200": { description: OK }
+
+  /seller/orders/{id}/status:
+    patch:
+      tags: [Seller]
+      summary: Update order status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [NEW, CONFIRMED, PACKING, OUT_FOR_DELIVERY, DELIVERED, CANCELLED]
+              required: [status]
+      responses:
+        "200": { description: Updated }
+
+  /seller/cod/collections:
+    post:
+      tags: [Seller]
+      summary: Register a COD collection (cash received)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order_id: { type: string }
+                amount: { type: integer }
+                collected_by: { type: string, description: "Driver/staff identifier" }
+                proof_url: { type: string, nullable: true }
+                collected_at: { type: string, format: date-time }
+              required: [order_id, amount, collected_by, collected_at]
+      responses:
+        "201": { description: Created }
+
+  /seller/cod/reconciliation:
+    get:
+      tags: [Seller]
+      summary: COD reconciliation summary
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        "200": { description: OK }
+
+  /seller/content/pages:
+    get:
+      tags: [Seller, Content]
+      summary: List content pages (all)
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Content]
+      summary: Create/update content page
+      responses:
+        "201": { description: Upserted }
+
+  /seller/content/blog:
+    get:
+      tags: [Seller, Content]
+      summary: List blog posts (all)
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Content]
+      summary: Create/update blog post
+      responses:
+        "201": { description: Upserted }
+
+  /seller/content/home:
+    get:
+      tags: [Seller, Content]
+      summary: List home sections
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Seller, Content]
+      summary: Upsert home section(s)
+      responses:
+        "201": { description: Upserted }
+
+  /seller/audit-logs:
+    get:
+      tags: [Seller, Audit]
+      summary: List audit logs
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta: { $ref: "#/components/schemas/PaginationMeta" }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/AuditLog" }
+                required: [meta, items]

@@ -1,0 +1,132 @@
+version: 1
+context:
+  project: tech-web-smartphones-mvp
+  locale: CI
+  currency: XOF
+  constraints:
+    - COD_ONLY
+    - NO_WISHLIST
+    - NO_MARKETPLACE_EXPOSURE
+
+identity:
+  id_strategy:
+    preferred: UUIDv7
+    fallback: UUIDv4
+    expose_incremental_ids: false
+  required_unique_fields:
+    - product.slug
+    - brand.slug
+    - category.slug
+    - variant.sku
+    - coupon.code
+    - order.order_number
+
+authentication:
+  seller:
+    access_token_ttl_minutes: 15
+    refresh_token_ttl_days: 7
+    refresh_rotation: true
+    token_revocation: true
+    mfa_required_for_roles:
+      - OWNER_ADMIN
+  customer:
+    allow_session_auth: true
+    allow_jwt_auth: true
+    csrf_required_on_cookie_auth: true
+  password_policy:
+    min_length: 12
+    require_breach_check: true
+    hash_algorithm: argon2id
+
+authorization:
+  mode: deny_by_default
+  rbac_source: ../specs/enums_v1.yaml
+  audit_on_forbidden: true
+
+api_security:
+  validate_payload_schema: true
+  sanitize_rich_text:
+    enabled: true
+    allowlist_tags:
+      - p
+      - ul
+      - ol
+      - li
+      - strong
+      - em
+      - a
+  idempotency:
+    required_paths:
+      - POST /api/v1/checkout/cod
+  rate_limits:
+    - path: /api/v1/products
+      limit: 60
+      window: 1m
+      key: ip
+    - path: /api/v1/search/suggest
+      limit: 60
+      window: 1m
+      key: ip
+    - path: /api/v1/checkout/cod
+      limit: 10
+      window: 15m
+      key: session
+    - path: /api/v1/reviews
+      limit: 10
+      window: 1h
+      key: user
+    - path: /api/v1/questions
+      limit: 10
+      window: 1h
+      key: user
+  stock_consistency:
+    transactional_checkout: true
+    lock_strategy: select_for_update
+    conflict_status_code: 409
+
+http_security:
+  https_required: true
+  cors_allowlist_mode: strict
+  headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-Frame-Options: DENY
+    Referrer-Policy: strict-origin-when-cross-origin
+    Content-Security-Policy: "default-src 'self'; object-src 'none'; frame-ancestors 'none'"
+  cookies:
+    secure: true
+    httponly: true
+    samesite: Lax
+
+data_protection:
+  tls_min_version: "1.2"
+  encryption_at_rest: true
+  pii_log_masking: true
+  audit_retention_months: 12
+  app_log_retention_days: 90
+
+reliability:
+  backups:
+    full_backup_frequency: daily
+    pitr_enabled: true
+    restore_test_frequency: monthly
+  monitoring:
+    sentry_or_equivalent: true
+    metrics:
+      - api_latency
+      - api_4xx_rate
+      - api_5xx_rate
+      - checkout_success_rate
+      - stock_conflict_rate
+
+devsecops:
+  pull_request_gates:
+    - lint
+    - unit_tests
+    - integration_tests
+    - contract_tests
+    - sast
+    - dependency_scan
+    - secret_scan
+  block_production_on_high_or_critical_vulns: true
+

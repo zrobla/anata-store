@@ -1,0 +1,50 @@
+version: 1
+pipeline:
+  trigger:
+    - pull_request
+    - push_main
+  stages:
+    - name: static_checks
+      required: true
+      jobs:
+        - backend_lint
+        - frontend_lint
+        - format_check
+    - name: test
+      required: true
+      jobs:
+        - unit_tests_backend
+        - unit_tests_frontend
+        - integration_tests_api
+        - contract_tests_openapi
+    - name: security
+      required: true
+      jobs:
+        - sast_scan
+        - dependency_scan
+        - secret_scan
+    - name: migration_safety
+      required: true
+      jobs:
+        - migration_plan_check
+        - migration_apply_staging
+    - name: release_checks
+      required: true
+      jobs:
+        - smoke_checkout_cod
+        - smoke_order_status_update
+        - smoke_content_publish
+
+no_break_policy:
+  block_on_openapi_breaking_change: true
+  block_on_failed_migrations: true
+  block_on_security_high_critical: true
+  require_staging_green_before_prod: true
+
+critical_tests:
+  - variant_availability_logic
+  - cod_stock_reservation_conflict_409
+  - coupon_deal_price_calculation
+  - rbac_forbidden_actions_403
+  - audit_log_on_seller_mutation
+

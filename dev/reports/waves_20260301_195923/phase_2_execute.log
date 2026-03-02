@@ -1,0 +1,5 @@
+Operations to perform:
+  Apply all migrations: accounts, admin, audit, auth, catalog, content, contenttypes, inventory, orders, promotions, sessions, token_blacklist, trust
+Running migrations:
+  No migrations to apply.
+Seed OK: 29 produits, 160 variantes (volume=29, clear_existing=True, download_images=True).

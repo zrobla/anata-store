@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.venv/
+.anata/
+.anata.bak_*/
+.pytest_cache/
+
+# Node / Next
+node_modules/
+.next/
+dist/
+
+# Env
+.env
+.env.local
+
+# OS
+.DS_Store

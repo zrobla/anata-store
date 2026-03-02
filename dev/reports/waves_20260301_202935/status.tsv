@@ -1,0 +1,7 @@
+step	status	log
+phase_1_execute	OK	/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium/dev/reports/waves_20260301_202935/phase_1_execute.log
+phase_1_check	OK	/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium/dev/reports/waves_20260301_202935/phase_1_check.log
+phase_2_execute	OK	/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium/dev/reports/waves_20260301_202935/phase_2_execute.log
+phase_2_check	OK	/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium/dev/reports/waves_20260301_202935/phase_2_check.log
+phase_3_execute	OK	/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium/dev/reports/waves_20260301_202935/phase_3_execute.log
+phase_3_check	OK	/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium/dev/reports/waves_20260301_202935/phase_3_check.log

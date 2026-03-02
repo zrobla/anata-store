@@ -1,0 +1,14 @@
+Creating test database for alias 'default'...
+...
+----------------------------------------------------------------------
+Ran 3 tests in 2.502s
+
+OK
+Destroying test database for alias 'default'...
+Found 3 test(s).
+System check identified no issues (0 silenced).
+Bad Request: /api/v1/reviews
+Bad Request: /api/v1/questions
+40 objects imported automatically (use -v 2 for details).
+
+PHASE_2_CHECK_OK

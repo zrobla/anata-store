@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at 85% 5%, rgba(6, 182, 212, 0.14), transparent 24%),
+    radial-gradient(circle at 10% 20%, rgba(249, 115, 22, 0.14), transparent 22%),
+    #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@keyframes heroGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes heroFloatSlow {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes heroFloatFast {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroCtaPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(249, 115, 22, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+}
+
+@keyframes heroCardIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-gradient-shift {
+  background: linear-gradient(120deg, #0f172a, #111827, #083344);
+  background-size: 170% 170%;
+  animation: heroGradientShift 12s ease-in-out infinite;
+}
+
+.hero-float-slow {
+  animation: heroFloatSlow 6s ease-in-out infinite;
+}
+
+.hero-float-fast {
+  animation: heroFloatFast 4.5s ease-in-out infinite;
+}
+
+.hero-fade-up {
+  animation: heroFadeUp 0.55s ease-out both;
+}
+
+.hero-cta-pulse {
+  animation: heroCtaPulse 2.8s ease-out infinite;
+}
+
+.hero-card-in {
+  animation: heroCardIn 0.5s ease-out both;
+}

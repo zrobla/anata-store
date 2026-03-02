@@ -1,0 +1,5 @@
+Operations to perform:
+  Apply all migrations: accounts, admin, audit, auth, catalog, content, contenttypes, inventory, orders, promotions, sessions, token_blacklist, trust
+Running migrations:
+  No migrations to apply.
+RBAC seeded.

@@ -1,0 +1,30 @@
+# Frontend MVP Premium (Next.js App Router)
+
+## Lancer en local
+
+```bash
+cp .env.example .env.local
+pnpm install
+pnpm dev
+```
+
+## Parcours P0 inclus
+
+- Home, PLP categorie/marque/recherche, PDP
+- Panier et checkout COD
+- Suivi commandes client
+- Pages contenu et blog
+- Seller Studio P0 (dashboard, produits, inventory, orders, contenu, audit)
+
+## Securite frontend
+
+- Headers de securite dans `next.config.ts`
+- Pas de wishlist
+- API base URL configurable via env
+
+## SEO MVP
+
+- `NEXT_PUBLIC_SITE_URL` pour canonical/sitemap/robots
+- Metadata dynamique sur Home, PDP, categorie, marque
+- `robots.txt` et `sitemap.xml` generes via App Router
+- JSON-LD `Organization`, `WebSite`, `Product`, `BreadcrumbList`
