@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from html import escape
 from pathlib import Path
+import subprocess
+from urllib.parse import urlparse
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
@@ -27,6 +29,7 @@ from orders.models import DeliveryZone
 
 class Command(BaseCommand):
     help = "Seed Samsung catalog from WhatsApp-style list (supports --volume and optional image download)"
+    MAX_DERIVED_GALLERY_IMAGES = 4
 
     BASE_PRODUCTS = [
         {"name": "Sam-Fold4", "category": "smartphones", "storages": ["256GB", "512GB"], "colors": ["Vert", "Blanc", "Noir"]},
@@ -243,12 +246,58 @@ class Command(BaseCommand):
                 return f"{base_url}/media/seed/{jpg_file.name}"
         except (URLError, OSError):
             pass
+        try:
+            if download_images and source_url:
+                result = subprocess.run(
+                    ["curl", "-L", "--fail", "-o", str(jpg_file), source_url],
+                    check=False,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=30,
+                )
+                if result.returncode == 0 and jpg_file.exists():
+                    return f"{base_url}/media/seed/{jpg_file.name}"
+        except (OSError, subprocess.SubprocessError):
+            pass
 
         if not allow_svg_fallback:
             return None
         if not svg_file.exists():
             svg_file.write_text(self._build_local_seed_svg(product_name), encoding="utf-8")
         return f"{base_url}/media/seed/{svg_file.name}"
+
+    def _derived_gallery_urls_from_primary(self, primary_url: str) -> list[str]:
+        parsed = urlparse(primary_url)
+        filename = Path(parsed.path).name
+        if not filename.lower().endswith(".jpg"):
+            return []
+        if "/vv/bigpic/" not in parsed.path:
+            return []
+        stem = filename[:-4]
+        return [
+            f"https://fdn2.gsmarena.com/vv/pics/samsung/{stem}-{index}.jpg"
+            for index in range(1, self.MAX_DERIVED_GALLERY_IMAGES + 1)
+        ]
+
+    def _candidate_gallery_source_urls(self, model_key: str) -> list[str]:
+        primary_url = self.MODEL_IMAGE_URLS.get(model_key)
+        explicit_gallery = self.MODEL_GALLERY_IMAGE_URLS.get(model_key, [])
+        seen: set[str] = set()
+        ordered_urls: list[str] = []
+
+        def push(url: str | None) -> None:
+            if not url or url in seen:
+                return
+            seen.add(url)
+            ordered_urls.append(url)
+
+        push(primary_url)
+        for url in explicit_gallery:
+            push(url)
+        if primary_url:
+            for url in self._derived_gallery_urls_from_primary(primary_url):
+                push(url)
+        return ordered_urls
 
     def _product_image_urls(
         self,
@@ -259,10 +308,10 @@ class Command(BaseCommand):
         download_images: bool,
         media_base_url: str,
     ) -> list[str]:
-        gallery_urls = self.MODEL_GALLERY_IMAGE_URLS.get(model_key, [])
-        if gallery_urls:
+        source_urls = self._candidate_gallery_source_urls(model_key)
+        if source_urls:
             image_urls: list[str] = []
-            for index, source_url in enumerate(gallery_urls, start=1):
+            for index, source_url in enumerate(source_urls, start=1):
                 image_url = self._seed_image_from_source(
                     source_url=source_url,
                     file_stem=f"{product_slug}-{index}",
