@@ -67,6 +67,15 @@ Option manuelle:
 - Seller: `/api/v1/seller/*`
 - OpenAPI: `/api/v1/schema/`, `/api/v1/docs/`
 
+## Acces Seller Studio (frontend)
+
+- URL locale Seller: `http://127.0.0.1:3000/seller`
+- Le storefront public n'expose pas de lien Seller dans son header.
+- Le backend protege tous les endpoints seller via JWT + RBAC.
+- Endpoints auth utilises par le front seller:
+  - `POST /api/v1/auth/token/`
+  - `POST /api/v1/auth/token/refresh/`
+
 ## Securite incluse
 
 - UUID sur entites metier

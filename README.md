@@ -35,3 +35,10 @@ Option si le reseau npm est instable:
 ```bash
 SKIP_FRONT_INSTALL=1 ./dev-up.sh
 ```
+
+## Acces Seller Studio
+
+- URL locale: `http://127.0.0.1:3000/seller`
+- Le lien Seller n'est pas expose dans le header public du storefront.
+- Acces uniquement via URL directe + authentification JWT/RBAC backend.
+- En local, utiliser un compte seller avec droits `catalog.*`, `inventory.*`, `orders.*` (ou superuser).

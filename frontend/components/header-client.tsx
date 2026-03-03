@@ -54,9 +54,6 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
             <Link href="/account/orders" className="hover:text-white">
               Mes commandes
             </Link>
-            <Link href="/seller" className="hover:text-white">
-              Seller Studio
-            </Link>
           </div>
         </div>
       </div>
