@@ -108,17 +108,21 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
               onClick={() => setSelectedVariantId(variant.id)}
               className={`w-full rounded-xl border p-3 text-left transition ${
                 active
-                  ? "border-cyan-700 bg-cyan-100 text-slate-900 ring-1 ring-cyan-300"
+                  ? "border-cyan-500 bg-gradient-to-br from-[#0f172a] to-[#1f2937] text-fuel ring-1 ring-cyan-300/70 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)]"
                   : "border-slate-200 hover:border-slate-300"
               }`}
             >
-              <p className="text-xs text-slate-500">SKU {variant.sku}</p>
-              <p className="font-semibold text-fuel">{fcfa(variant.promo_price_amount ?? variant.price_amount)}</p>
-              <p className="text-xs text-slate-600">
+              <p className={`text-xs ${active ? "text-fuel/85" : "text-slate-500"}`}>SKU {variant.sku}</p>
+              <p className={`font-semibold ${active ? "text-white" : "text-fuel"}`}>
+                {fcfa(variant.promo_price_amount ?? variant.price_amount)}
+              </p>
+              <p className={`text-xs ${active ? "text-fuel/90" : "text-slate-600"}`}>
                 {attrs.storage ? `Stockage: ${attrs.storage}` : "Stockage standard"}{" "}
                 {attrs.color ? `- Couleur: ${attrs.color}` : ""} {attrs.ram ? `- RAM: ${attrs.ram}` : ""}
               </p>
-              <p className="mt-1 text-xs text-slate-500">{availabilityLabel(variant.availability.status)}</p>
+              <p className={`mt-1 text-xs ${active ? "text-fuel" : "text-slate-500"}`}>
+                {availabilityLabel(variant.availability.status)}
+              </p>
             </button>
           );
         })}
