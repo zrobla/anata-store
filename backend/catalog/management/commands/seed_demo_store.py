@@ -142,6 +142,15 @@ class Command(BaseCommand):
         "sam-watch-8": "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-watch8.jpg",
     }
 
+    MODEL_GALLERY_IMAGE_URLS = {
+        "sam-s25-u": [
+            "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s25-ultra-sm-s938.jpg",
+            "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-1.jpg",
+            "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-2.jpg",
+            "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-3.jpg",
+        ],
+    }
+
     def add_arguments(self, parser):
         parser.add_argument(
             "--volume",
@@ -194,21 +203,21 @@ class Command(BaseCommand):
             return "12GB"
         return "8GB"
 
-    def _product_image_url(
+    def _seed_image_from_source(
         self,
         *,
-        model_key: str,
-        product_slug: str,
+        source_url: str | None,
+        file_stem: str,
         product_name: str,
         download_images: bool,
         media_base_url: str,
-    ) -> str:
+        allow_svg_fallback: bool,
+    ) -> str | None:
         media_root = getattr(settings, "MEDIA_ROOT", Path(settings.BASE_DIR) / "media")
         media_dir = Path(media_root) / "seed"
         media_dir.mkdir(parents=True, exist_ok=True)
-        source_url = self.MODEL_IMAGE_URLS.get(model_key)
-        jpg_file = media_dir / f"{product_slug}.jpg"
-        svg_file = media_dir / f"{product_slug}.svg"
+        jpg_file = media_dir / f"{file_stem}.jpg"
+        svg_file = media_dir / f"{file_stem}.svg"
         base_url = media_base_url.rstrip("/")
 
         if jpg_file.exists():
@@ -235,9 +244,47 @@ class Command(BaseCommand):
         except (URLError, OSError):
             pass
 
+        if not allow_svg_fallback:
+            return None
         if not svg_file.exists():
             svg_file.write_text(self._build_local_seed_svg(product_name), encoding="utf-8")
         return f"{base_url}/media/seed/{svg_file.name}"
+
+    def _product_image_urls(
+        self,
+        *,
+        model_key: str,
+        product_slug: str,
+        product_name: str,
+        download_images: bool,
+        media_base_url: str,
+    ) -> list[str]:
+        gallery_urls = self.MODEL_GALLERY_IMAGE_URLS.get(model_key, [])
+        if gallery_urls:
+            image_urls: list[str] = []
+            for index, source_url in enumerate(gallery_urls, start=1):
+                image_url = self._seed_image_from_source(
+                    source_url=source_url,
+                    file_stem=f"{product_slug}-{index}",
+                    product_name=product_name,
+                    download_images=download_images,
+                    media_base_url=media_base_url,
+                    allow_svg_fallback=index == 1,
+                )
+                if image_url:
+                    image_urls.append(image_url)
+            if image_urls:
+                return image_urls
+
+        image_url = self._seed_image_from_source(
+            source_url=self.MODEL_IMAGE_URLS.get(model_key),
+            file_stem=product_slug,
+            product_name=product_name,
+            download_images=download_images,
+            media_base_url=media_base_url,
+            allow_svg_fallback=True,
+        )
+        return [image_url] if image_url else []
 
     @staticmethod
     def _build_local_seed_svg(product_name: str) -> str:
@@ -427,21 +474,37 @@ class Command(BaseCommand):
             )
             product_count += 1
 
-            image_url = self._product_image_url(
+            image_urls = self._product_image_urls(
                 model_key=row["model_key"],
                 product_slug=row["slug"],
                 product_name=row["name"],
                 download_images=download_images,
                 media_base_url=media_base_url,
             )
-            media_asset, _ = MediaAsset.objects.get_or_create(
-                url=image_url,
-                defaults={"alt": row["name"], "kind": MediaAsset.IMAGE, "sort_order": 1},
-            )
-            ProductMedia.objects.filter(product=product).exclude(media_asset=media_asset).delete()
-            ProductMedia.objects.update_or_create(
-                product=product, media_asset=media_asset, defaults={"sort_order": 1}
-            )
+            media_assets: list[MediaAsset] = []
+            for sort_order, image_url in enumerate(image_urls, start=1):
+                media_asset, _ = MediaAsset.objects.update_or_create(
+                    url=image_url,
+                    defaults={
+                        "alt": f"{row['name']} - Vue {sort_order}",
+                        "kind": MediaAsset.IMAGE,
+                        "sort_order": sort_order,
+                    },
+                )
+                ProductMedia.objects.update_or_create(
+                    product=product,
+                    media_asset=media_asset,
+                    defaults={"sort_order": sort_order},
+                )
+                media_assets.append(media_asset)
+
+            if media_assets:
+                ProductMedia.objects.filter(product=product).exclude(
+                    media_asset_id__in=[asset.id for asset in media_assets]
+                ).delete()
+                primary_media_asset = media_assets[0]
+            else:
+                primary_media_asset = None
 
             for variant_row in row["variants"]:
                 variant, _ = ProductVariant.objects.update_or_create(
@@ -477,12 +540,15 @@ class Command(BaseCommand):
                     defaults={"value": variant_row["color"], "label": variant_row["color"]},
                 )
 
-                VariantMedia.objects.filter(variant=variant).exclude(media_asset=media_asset).delete()
-                VariantMedia.objects.update_or_create(
-                    variant=variant,
-                    media_asset=media_asset,
-                    defaults={"sort_order": 1},
-                )
+                if primary_media_asset:
+                    VariantMedia.objects.filter(variant=variant).exclude(
+                        media_asset=primary_media_asset
+                    ).delete()
+                    VariantMedia.objects.update_or_create(
+                        variant=variant,
+                        media_asset=primary_media_asset,
+                        defaults={"sort_order": 1},
+                    )
 
                 InventoryItem.objects.update_or_create(
                     variant=variant,

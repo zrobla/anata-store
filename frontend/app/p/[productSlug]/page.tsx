@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 
 import { BackLink } from "@/components/back-link"
 import { CatalogShell } from "@/components/catalog-shell"
+import { ProductMediaGallery } from "@/components/product-media-gallery"
 import { ProductPurchasePanel } from "@/components/product-purchase-panel"
 import { fetchProductBySlug } from "@/lib/api"
 import { absoluteUrl } from "@/lib/seo"
@@ -143,23 +143,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
         <BackLink fallbackHref="/s?q=samsung" label="Retour au catalogue" />
         <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-          <section className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              {gallery.map((m) => (
-                <div key={m.id} className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
-                  <Image
-                    src={m.url}
-                    alt={m.alt || product.name}
-                    fill
-                    unoptimized
-                    referrerPolicy="no-referrer"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-contain p-4"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
+          <div className="xl:sticky xl:top-24 xl:self-start">
+            <ProductMediaGallery productName={product.name} media={gallery} />
+          </div>
           <ProductPurchasePanel product={product} />
         </div>
       </article>
