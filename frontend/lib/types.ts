@@ -227,3 +227,32 @@ export type SellerAuditLog = {
   ip_address: string | null;
   created_at: string;
 };
+
+export type SellerProductImportError = {
+  row: number;
+  error: string;
+  product_slug?: string;
+  variant_sku?: string;
+};
+
+export type SellerProductImportReport = {
+  required_columns: string[];
+  total_rows: number;
+  processed_rows: number;
+  skipped_empty_rows: number;
+  created: {
+    products: number;
+    variants: number;
+    inventory_sources: number;
+    inventory_items: number;
+    media_assets: number;
+    media_links: number;
+  };
+  updated: {
+    products: number;
+    variants: number;
+    inventory_sources: number;
+    inventory_items: number;
+  };
+  errors: SellerProductImportError[];
+};

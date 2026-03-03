@@ -1,13 +1,20 @@
 from __future__ import annotations
 
 from django.db.models import Q
+from django.http import HttpResponse
 from rest_framework import permissions, viewsets
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.permissions import HasPermissionKey
 from audit.services import log_action
 from catalog.models import Attribute, Brand, Category, Product, ProductVariant
+from catalog.product_import import (
+    MAX_IMPORT_FILE_SIZE,
+    generate_product_import_template,
+    import_products_from_excel,
+)
 from catalog.serializers import (
     AttributeSerializer,
     BrandSerializer,
@@ -275,3 +282,47 @@ class SellerVariantViewSet(viewsets.ModelViewSet):
             request_id=getattr(request, "request_id", ""),
         )
         return Response(status=204)
+
+
+class SellerProductImportTemplateView(APIView):
+    permission_classes = [permissions.IsAuthenticated, HasPermissionKey]
+    required_permission = "catalog.write"
+
+    def get(self, request):
+        content = generate_product_import_template()
+        response = HttpResponse(
+            content,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="anata_product_import_template.xlsx"'
+        response["Cache-Control"] = "no-store"
+        return response
+
+
+class SellerProductImportExcelView(APIView):
+    permission_classes = [permissions.IsAuthenticated, HasPermissionKey]
+    parser_classes = [MultiPartParser, FormParser]
+    required_permission = "catalog.write"
+
+    def post(self, request):
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response({"detail": "Fichier Excel manquant. Utilisez le champ 'file'."}, status=400)
+
+        if not uploaded_file.name.lower().endswith(".xlsx"):
+            return Response({"detail": "Format invalide. Envoyez un fichier .xlsx"}, status=400)
+
+        if uploaded_file.size > MAX_IMPORT_FILE_SIZE:
+            max_mb = MAX_IMPORT_FILE_SIZE // (1024 * 1024)
+            return Response({"detail": f"Fichier trop volumineux. Max autorise: {max_mb}MB."}, status=400)
+
+        try:
+            report = import_products_from_excel(
+                uploaded_file,
+                actor_user=request.user,
+                request_id=getattr(request, "request_id", ""),
+            )
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=400)
+
+        return Response(report)

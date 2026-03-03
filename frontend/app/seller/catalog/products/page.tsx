@@ -9,14 +9,22 @@ import {
   createSellerVariant,
   deleteSellerProduct,
   deleteSellerVariant,
+  downloadSellerProductImportTemplate,
   fetchSellerBrands,
   fetchSellerCategories,
   fetchSellerProducts,
   fetchSellerVariants,
+  importSellerProductsExcel,
   updateSellerProduct,
   updateSellerVariant
 } from "@/lib/seller-api";
-import { SellerBrand, SellerCategory, SellerProduct, SellerVariant } from "@/lib/types";
+import {
+  SellerBrand,
+  SellerCategory,
+  SellerProduct,
+  SellerProductImportReport,
+  SellerVariant
+} from "@/lib/types";
 
 type ProductForm = {
   name: string;
@@ -88,6 +96,10 @@ export default function SellerProductsPage() {
   const [variantCreateForm, setVariantCreateForm] = useState<VariantForm>(EMPTY_VARIANT_FORM);
   const [editVariantId, setEditVariantId] = useState("");
   const [variantEditForm, setVariantEditForm] = useState<VariantForm>(EMPTY_VARIANT_FORM);
+  const [downloadTemplateLoading, setDownloadTemplateLoading] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importReport, setImportReport] = useState<SellerProductImportReport | null>(null);
 
   async function loadData() {
     try {
@@ -187,6 +199,59 @@ export default function SellerProductsPage() {
     });
     setError("");
     setNotice("");
+  }
+
+  async function onDownloadTemplate() {
+    try {
+      setDownloadTemplateLoading(true);
+      setError("");
+      setNotice("");
+      const blob = await downloadSellerProductImportTemplate(token);
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = "anata_product_import_template.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(objectUrl);
+      setNotice("Modele Excel telecharge.");
+    } catch (downloadError) {
+      const message =
+        downloadError instanceof Error ? downloadError.message : "Telechargement du modele impossible.";
+      setError(message);
+    } finally {
+      setDownloadTemplateLoading(false);
+    }
+  }
+
+  async function onImportExcel(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!importFile) {
+      setError("Selectionnez un fichier .xlsx avant import.");
+      return;
+    }
+
+    try {
+      setImportLoading(true);
+      setError("");
+      setNotice("");
+      const report = await importSellerProductsExcel(token, importFile);
+      setImportReport(report);
+      if (report.errors.length > 0) {
+        setNotice(
+          `Import termine avec ${report.errors.length} erreur(s). ${report.processed_rows} ligne(s) traitee(s).`
+        );
+      } else {
+        setNotice(`Import termine. ${report.processed_rows} ligne(s) traitee(s) sans erreur.`);
+      }
+      await loadData();
+    } catch (importError) {
+      const message = importError instanceof Error ? importError.message : "Import Excel impossible.";
+      setError(message);
+    } finally {
+      setImportLoading(false);
+    }
   }
 
   async function onCreateProduct(event: FormEvent<HTMLFormElement>) {
@@ -370,6 +435,73 @@ export default function SellerProductsPage() {
 
       {!loading && (
         <div className="space-y-4">
+          <section className="rounded-xl border border-slate-200 bg-white p-4">
+            <h2 className="font-display text-xl">Import Excel produits</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Colonnes obligatoires: <code>product_name</code>, <code>brand_slug</code>,{" "}
+              <code>category_slug</code>, <code>variant_sku</code>, <code>price_amount</code>.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={onDownloadTemplate}
+                disabled={downloadTemplateLoading || importLoading}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:opacity-60"
+              >
+                {downloadTemplateLoading ? "Telechargement..." : "Telecharger modele Excel"}
+              </button>
+              <form onSubmit={onImportExcel} className="flex flex-wrap items-center gap-2">
+                <input
+                  type="file"
+                  accept=".xlsx"
+                  onChange={(event) => setImportFile(event.target.files?.[0] || null)}
+                  className="max-w-xs rounded-lg border px-3 py-2 text-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={importLoading || !importFile}
+                  className="rounded-lg bg-ink px-4 py-2 text-sm text-white disabled:opacity-60"
+                >
+                  {importLoading ? "Import en cours..." : "Importer le fichier"}
+                </button>
+              </form>
+            </div>
+
+            {importReport && (
+              <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
+                <p className="font-semibold text-slate-900">Rapport d'import</p>
+                <p className="mt-1">
+                  Lignes detectees: {importReport.total_rows} | Lignes traitees: {importReport.processed_rows} |
+                  Lignes vides ignorees: {importReport.skipped_empty_rows}
+                </p>
+                <p className="mt-1">
+                  Crees: produits {importReport.created.products}, variantes {importReport.created.variants}, sources{" "}
+                  {importReport.created.inventory_sources}, stocks {importReport.created.inventory_items}, medias{" "}
+                  {importReport.created.media_assets}, liens medias {importReport.created.media_links}
+                </p>
+                <p className="mt-1">
+                  Maj: produits {importReport.updated.products}, variantes {importReport.updated.variants}, sources{" "}
+                  {importReport.updated.inventory_sources}, stocks {importReport.updated.inventory_items}
+                </p>
+                {importReport.errors.length > 0 && (
+                  <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
+                    <p className="font-semibold">
+                      Erreurs ({importReport.errors.length}) - corrigez le fichier puis reimportez
+                    </p>
+                    <ul className="mt-2 max-h-40 list-disc space-y-1 overflow-auto pl-5 text-xs">
+                      {importReport.errors.map((item, index) => (
+                        <li key={`${item.row}-${index}`}>
+                          Ligne {item.row}: {item.error}
+                          {item.variant_sku ? ` (SKU ${item.variant_sku})` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
           <section className="rounded-xl border border-slate-200 bg-white p-4">
             <h2 className="font-display text-xl">Creer un produit</h2>
             <form onSubmit={onCreateProduct} className="mt-3 grid gap-3 md:grid-cols-2">

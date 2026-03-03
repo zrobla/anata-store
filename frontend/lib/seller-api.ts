@@ -8,6 +8,7 @@ import {
   SellerOrder,
   SellerOrderStatus,
   SellerProduct,
+  SellerProductImportReport,
   SellerVariant
 } from "@/lib/types";
 
@@ -165,6 +166,37 @@ export async function fetchSellerBrands(): Promise<SellerBrand[]> {
 export async function fetchSellerCategories(): Promise<SellerCategory[]> {
   const payload = await sellerGet<ListPayload<SellerCategory>>("/catalog/categories/");
   return normalizeList(payload);
+}
+
+export async function downloadSellerProductImportTemplate(token: string): Promise<Blob> {
+  const path = "/seller/products/import/template";
+  const response = await fetch(`${API_BASE}${path}`, {
+    cache: "no-store",
+    headers: authHeaders(token)
+  });
+  if (!response.ok) {
+    await parseApiError(response, path);
+  }
+  return response.blob();
+}
+
+export async function importSellerProductsExcel(
+  token: string,
+  file: File
+): Promise<SellerProductImportReport> {
+  const path = "/seller/products/import/excel";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: formData
+  });
+  if (!response.ok) {
+    await parseApiError(response, path);
+  }
+  return (await response.json()) as SellerProductImportReport;
 }
 
 export async function createSellerProduct(token: string, payload: SellerProductCreateInput): Promise<SellerProduct> {

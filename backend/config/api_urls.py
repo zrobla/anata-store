@@ -8,6 +8,8 @@ from catalog.views import (
     CategoryViewSet,
     ProductViewSet,
     SearchSuggestView,
+    SellerProductImportExcelView,
+    SellerProductImportTemplateView,
     SellerProductViewSet,
     SellerVariantViewSet,
 )
@@ -60,6 +62,16 @@ router.register(r"seller/audit-logs", SellerAuditLogViewSet, basename="seller-au
 urlpatterns = [
     path("", include(router.urls)),
     path("search/suggest", SearchSuggestView.as_view(), name="search-suggest"),
+    path(
+        "seller/products/import/template",
+        SellerProductImportTemplateView.as_view(),
+        name="seller-product-import-template",
+    ),
+    path(
+        "seller/products/import/excel",
+        SellerProductImportExcelView.as_view(),
+        name="seller-product-import-excel",
+    ),
     path("reviews", ReviewCreateView.as_view(), name="review-create"),
     path("questions", QuestionCreateView.as_view(), name="question-create"),
     path("cart", CartView.as_view(), name="cart-detail"),
