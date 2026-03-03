@@ -13,11 +13,118 @@ import {
 } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+const SELLER_ACCESS_TOKEN_KEY = "seller_access_token";
+const SELLER_REFRESH_TOKEN_KEY = "seller_refresh_token";
+const SELLER_EMAIL_KEY = "seller_email";
 
 function authHeaders(token: string) {
   return {
     Authorization: `Bearer ${token}`
   };
+}
+
+function getStoredValue(key: string) {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  return window.localStorage.getItem(key) || "";
+}
+
+function setStoredValue(key: string, value: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.setItem(key, value);
+}
+
+function clearStoredSellerAuth() {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.removeItem(SELLER_ACCESS_TOKEN_KEY);
+  window.localStorage.removeItem(SELLER_REFRESH_TOKEN_KEY);
+  window.localStorage.removeItem(SELLER_EMAIL_KEY);
+  window.dispatchEvent(new CustomEvent("seller-logout"));
+}
+
+function resolveAccessToken(passedToken?: string) {
+  const storedAccess = getStoredValue(SELLER_ACCESS_TOKEN_KEY);
+  if (storedAccess) {
+    return storedAccess;
+  }
+  return passedToken || "";
+}
+
+async function refreshSellerAccessToken() {
+  const refresh = getStoredValue(SELLER_REFRESH_TOKEN_KEY);
+  if (!refresh) {
+    return "";
+  }
+
+  const response = await fetch(`${API_BASE}/auth/token/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh })
+  });
+  if (!response.ok) {
+    clearStoredSellerAuth();
+    return "";
+  }
+
+  const payload = (await response.json()) as { access?: string; refresh?: string };
+  if (!payload.access) {
+    clearStoredSellerAuth();
+    return "";
+  }
+
+  setStoredValue(SELLER_ACCESS_TOKEN_KEY, payload.access);
+  if (payload.refresh) {
+    setStoredValue(SELLER_REFRESH_TOKEN_KEY, payload.refresh);
+  }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("seller-token-updated", { detail: { access: payload.access } }));
+  }
+  return payload.access;
+}
+
+type SellerRequestOptions = {
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  token?: string;
+  useAuth?: boolean;
+  body?: BodyInit;
+  headers?: Record<string, string>;
+  cache?: RequestCache;
+};
+
+async function requestSeller(path: string, options: SellerRequestOptions = {}) {
+  const { method = "GET", token, useAuth = false, body, headers = {}, cache = "no-store" } = options;
+  const endpoint = `${API_BASE}${path}`;
+
+  async function sendRequest(accessToken?: string) {
+    return fetch(endpoint, {
+      method,
+      cache,
+      headers: {
+        ...headers,
+        ...(useAuth && accessToken ? authHeaders(accessToken) : {})
+      },
+      body
+    });
+  }
+
+  let accessToken = useAuth ? resolveAccessToken(token) : "";
+  let response = await sendRequest(accessToken);
+  if (response.status !== 401 || !useAuth) {
+    return response;
+  }
+
+  const refreshedAccessToken = await refreshSellerAccessToken();
+  if (!refreshedAccessToken) {
+    return response;
+  }
+  accessToken = refreshedAccessToken;
+  response = await sendRequest(accessToken);
+  return response;
 }
 
 type ListPayload<T> = T[] | { items?: T[]; results?: T[] };
@@ -95,9 +202,11 @@ async function parseApiError(response: Response, path: string) {
 }
 
 async function sellerGet<T>(path: string, token?: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    cache: "no-store",
-    headers: token ? authHeaders(token) : undefined
+  const response = await requestSeller(path, {
+    method: "GET",
+    token,
+    useAuth: token !== undefined,
+    cache: "no-store"
   });
   if (!response.ok) {
     await parseApiError(response, path);
@@ -106,12 +215,11 @@ async function sellerGet<T>(path: string, token?: string): Promise<T> {
 }
 
 async function sellerMutation<T>(path: string, method: "POST" | "PATCH" | "DELETE", token: string, body?: unknown) {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await requestSeller(path, {
     method,
-    headers: {
-      ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-      ...authHeaders(token)
-    },
+    token,
+    useAuth: true,
+    headers: body !== undefined ? { "Content-Type": "application/json" } : {},
     body: body !== undefined ? JSON.stringify(body) : undefined
   });
   if (!response.ok) {
@@ -170,9 +278,11 @@ export async function fetchSellerCategories(): Promise<SellerCategory[]> {
 
 export async function downloadSellerProductImportTemplate(token: string): Promise<Blob> {
   const path = "/seller/products/import/template";
-  const response = await fetch(`${API_BASE}${path}`, {
-    cache: "no-store",
-    headers: authHeaders(token)
+  const response = await requestSeller(path, {
+    method: "GET",
+    token,
+    useAuth: true,
+    cache: "no-store"
   });
   if (!response.ok) {
     await parseApiError(response, path);
@@ -188,9 +298,10 @@ export async function importSellerProductsExcel(
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await requestSeller(path, {
     method: "POST",
-    headers: authHeaders(token),
+    token,
+    useAuth: true,
     body: formData
   });
   if (!response.ok) {
@@ -270,16 +381,16 @@ export async function updateSellerOrderStatus(
   orderId: string,
   status: SellerOrderStatus
 ): Promise<{ id: string; status: SellerOrderStatus }> {
-  const response = await fetch(`${API_BASE}/seller/orders/${orderId}/status`, {
+  const path = `/seller/orders/${orderId}/status`;
+  const response = await requestSeller(path, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(token)
-    },
+    token,
+    useAuth: true,
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
   });
   if (!response.ok) {
-    throw new Error(`API error ${response.status} on /seller/orders/${orderId}/status`);
+    await parseApiError(response, path);
   }
   return (await response.json()) as { id: string; status: SellerOrderStatus };
 }

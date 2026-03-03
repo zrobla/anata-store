@@ -237,6 +237,7 @@ export type SellerProductImportError = {
 
 export type SellerProductImportReport = {
   required_columns: string[];
+  required_columns_template?: string[];
   total_rows: number;
   processed_rows: number;
   skipped_empty_rows: number;

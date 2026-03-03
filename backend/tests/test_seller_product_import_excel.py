@@ -35,9 +35,9 @@ class SellerProductImportExcelTests(TestCase):
             response["Content-Type"],
         )
         headers = [str(value or "") for value in read_xlsx_rows(response.content)[0]]
-        self.assertIn("product_name", headers)
-        self.assertIn("variant_sku", headers)
-        self.assertIn("price_amount", headers)
+        self.assertIn("nom_produit", headers)
+        self.assertIn("sku_variante", headers)
+        self.assertIn("prix_fcfa", headers)
 
     def test_excel_import_creates_product_variant_media_and_stock(self):
         payload_rows = [

@@ -31,6 +31,26 @@ export function SellerAuthProvider({ children }: { children: React.ReactNode }) 
     setReady(true);
   }, []);
 
+  useEffect(() => {
+    function onTokenUpdated(event: Event) {
+      const detail = (event as CustomEvent<{ access?: string }>).detail;
+      const nextToken = detail?.access || window.localStorage.getItem(SELLER_ACCESS_TOKEN_KEY) || "";
+      setToken(nextToken);
+    }
+
+    function onLogout() {
+      setToken("");
+      setEmail("");
+    }
+
+    window.addEventListener("seller-token-updated", onTokenUpdated as EventListener);
+    window.addEventListener("seller-logout", onLogout);
+    return () => {
+      window.removeEventListener("seller-token-updated", onTokenUpdated as EventListener);
+      window.removeEventListener("seller-logout", onLogout);
+    };
+  }, []);
+
   async function login(nextEmail: string, password: string) {
     const tokens = await sellerLogin(nextEmail, password);
     window.localStorage.setItem(SELLER_ACCESS_TOKEN_KEY, tokens.access);

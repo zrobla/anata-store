@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import unicodedata
 from io import BytesIO
 from typing import Any
 from xml.etree import ElementTree as ET
@@ -180,9 +181,62 @@ IMPORT_COLUMNS = [
     },
 ]
 
+IMPORT_HEADER_FR = {
+    "product_name": "nom_produit",
+    "product_slug": "slug_produit",
+    "brand_slug": "slug_marque",
+    "category_slug": "slug_categorie",
+    "short_description": "description_courte",
+    "description": "description_longue",
+    "is_active": "produit_actif",
+    "is_featured": "produit_mis_en_avant",
+    "badges": "badges",
+    "seo_title": "seo_titre",
+    "seo_description": "seo_description",
+    "variant_sku": "sku_variante",
+    "variant_barcode": "code_barres_variante",
+    "price_amount": "prix_fcfa",
+    "promo_price_amount": "prix_promo_fcfa",
+    "variant_is_active": "variante_active",
+    "color": "couleur",
+    "storage": "stockage",
+    "ram": "ram",
+    "image_url": "url_image",
+    "stock_source_name": "nom_source_stock",
+    "stock_source_type": "type_source_stock",
+    "stock_qty": "quantite_stock",
+    "stock_low_threshold": "seuil_stock_bas",
+    "stock_lead_time_days": "delai_stock_jours",
+}
+
 REQUIRED_IMPORT_COLUMNS = [column["name"] for column in IMPORT_COLUMNS if column["required"]]
+REQUIRED_IMPORT_HEADERS_FR = [IMPORT_HEADER_FR.get(column, column) for column in REQUIRED_IMPORT_COLUMNS]
 ATTRIBUTE_COLUMNS = ("color", "storage", "ram")
 VALID_SOURCE_TYPES = {choice[0] for choice in InventorySource.TYPE_CHOICES}
+
+
+def _normalize_header_token(value: Any) -> str:
+    if value is None:
+        return ""
+    cleaned = str(value).strip().lower().replace("-", "_")
+    normalized = unicodedata.normalize("NFKD", cleaned)
+    ascii_only = normalized.encode("ascii", "ignore").decode("ascii")
+    return "".join(char if char.isalnum() else "_" for char in ascii_only).strip("_")
+
+
+def _build_import_header_map() -> dict[str, str]:
+    alias_map: dict[str, str] = {}
+    for column in IMPORT_COLUMNS:
+        canonical = column["name"]
+        french = IMPORT_HEADER_FR.get(canonical, canonical)
+        for alias in (canonical, canonical.replace("_", " "), french, french.replace("_", " ")):
+            normalized_alias = _normalize_header_token(alias)
+            if normalized_alias and normalized_alias not in alias_map:
+                alias_map[normalized_alias] = canonical
+    return alias_map
+
+
+IMPORT_HEADER_TO_CANONICAL = _build_import_header_map()
 
 
 def _xlsx_qname(namespace: str, tag: str) -> str:
@@ -463,11 +517,19 @@ def read_xlsx_rows(file_obj) -> list[tuple[Any, ...]]:
     return rows
 
 
-def build_product_import_workbook(rows: list[dict[str, Any]]) -> bytes:
-    headers = [column["name"] for column in IMPORT_COLUMNS]
+def build_product_import_workbook(
+    rows: list[dict[str, Any]],
+    *,
+    use_french_headers: bool = False,
+) -> bytes:
+    headers = [
+        IMPORT_HEADER_FR.get(column["name"], column["name"]) if use_french_headers else column["name"]
+        for column in IMPORT_COLUMNS
+    ]
+    canonical_headers = [column["name"] for column in IMPORT_COLUMNS]
     sheet_rows: list[list[Any]] = [headers]
     for row in rows:
-        sheet_rows.append([row.get(header) for header in headers])
+        sheet_rows.append([row.get(header) for header in canonical_headers])
     return _build_xlsx_bytes(sheet_rows)
 
 
@@ -561,12 +623,16 @@ def _is_blank_row(payload: dict[str, Any]) -> bool:
 def _validate_headers(headers: tuple[Any, ...]) -> dict[str, int]:
     header_index: dict[str, int] = {}
     for idx, value in enumerate(headers):
-        key = _clean_text(value).lower()
-        if key:
-            header_index[key] = idx
+        normalized = _normalize_header_token(value)
+        if not normalized:
+            continue
+        canonical_name = IMPORT_HEADER_TO_CANONICAL.get(normalized)
+        if canonical_name and canonical_name not in header_index:
+            header_index[canonical_name] = idx
     missing = [column for column in REQUIRED_IMPORT_COLUMNS if column not in header_index]
     if missing:
-        raise ValueError(f"Colonnes obligatoires manquantes: {', '.join(missing)}")
+        missing_display = [f"{IMPORT_HEADER_FR.get(column, column)} ({column})" for column in missing]
+        raise ValueError(f"Colonnes obligatoires manquantes: {', '.join(missing_display)}")
     return header_index
 
 
@@ -746,7 +812,7 @@ def _import_one_row(payload: dict[str, Any], counters: dict[str, dict[str, int]]
 
 def generate_product_import_template() -> bytes:
     sample = {column["name"]: column["example"] for column in IMPORT_COLUMNS}
-    return build_product_import_workbook([sample])
+    return build_product_import_workbook([sample], use_french_headers=True)
 
 
 def import_products_from_excel(uploaded_file, *, actor_user, request_id: str = "") -> dict[str, Any]:
@@ -760,6 +826,7 @@ def import_products_from_excel(uploaded_file, *, actor_user, request_id: str = "
 
     report: dict[str, Any] = {
         "required_columns": REQUIRED_IMPORT_COLUMNS,
+        "required_columns_template": REQUIRED_IMPORT_HEADERS_FR,
         "total_rows": 0,
         "processed_rows": 0,
         "skipped_empty_rows": 0,

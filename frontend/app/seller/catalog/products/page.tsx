@@ -438,8 +438,8 @@ export default function SellerProductsPage() {
           <section className="rounded-xl border border-slate-200 bg-white p-4">
             <h2 className="font-display text-xl">Import Excel produits</h2>
             <p className="mt-1 text-xs text-slate-500">
-              Colonnes obligatoires: <code>product_name</code>, <code>brand_slug</code>,{" "}
-              <code>category_slug</code>, <code>variant_sku</code>, <code>price_amount</code>.
+              Modele en francais. Colonnes obligatoires: <code>nom_produit</code>, <code>slug_marque</code>,{" "}
+              <code>slug_categorie</code>, <code>sku_variante</code>, <code>prix_fcfa</code>.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <button
