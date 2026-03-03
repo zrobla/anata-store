@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { BackLink } from "@/components/back-link";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { fetchCart, removeCartItem, updateCartItemQty } from "@/lib/api";
 import { formatFcfa } from "@/lib/currency";
 import { availabilityLabel } from "@/lib/labels";
@@ -131,26 +132,33 @@ export default function CartPage() {
                 type="button"
                 onClick={() => changeQty(item.id, item.qty - 1)}
                 disabled={busyItemId === item.id || item.qty <= 1}
-                className="rounded-md border border-slate-300 px-2 py-1 text-sm disabled:opacity-50"
+                className="inline-flex min-w-7 items-center justify-center rounded-md border border-slate-300 px-2 py-1 text-sm disabled:opacity-50"
               >
-                -
+                {busyItemId === item.id ? <LoadingSpinner className="text-slate-600" /> : "-"}
               </button>
               <span className="min-w-6 text-center text-sm">{item.qty}</span>
               <button
                 type="button"
                 onClick={() => changeQty(item.id, item.qty + 1)}
                 disabled={busyItemId === item.id}
-                className="rounded-md border border-slate-300 px-2 py-1 text-sm disabled:opacity-50"
+                className="inline-flex min-w-7 items-center justify-center rounded-md border border-slate-300 px-2 py-1 text-sm disabled:opacity-50"
               >
-                +
+                {busyItemId === item.id ? <LoadingSpinner className="text-slate-600" /> : "+"}
               </button>
               <button
                 type="button"
                 onClick={() => removeItem(item.id)}
                 disabled={busyItemId === item.id}
-                className="ml-2 rounded-md border border-red-200 px-2.5 py-1 text-xs text-red-700 disabled:opacity-50"
+                className="ml-2 inline-flex items-center gap-1.5 rounded-md border border-red-200 px-2.5 py-1 text-xs text-red-700 disabled:opacity-50"
               >
-                Retirer
+                {busyItemId === item.id ? (
+                  <>
+                    <LoadingSpinner className="text-red-700" />
+                    Retrait...
+                  </>
+                ) : (
+                  "Retirer"
+                )}
               </button>
             </div>
           </div>

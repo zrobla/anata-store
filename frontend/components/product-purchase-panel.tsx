@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { addToCart } from "@/lib/api";
 import { formatFcfa } from "@/lib/currency";
 import { availabilityLabel } from "@/lib/labels";
@@ -134,25 +135,46 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           type="button"
           onClick={() => pushToCart(false)}
           disabled={!selectedVariant || busy !== ""}
-          className="rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {busy === "cart" ? "Ajout..." : "Ajouter au panier"}
+          {busy === "cart" ? (
+            <>
+              <LoadingSpinner className="text-white" />
+              Ajout...
+            </>
+          ) : (
+            "Ajouter au panier"
+          )}
         </button>
         <button
           type="button"
           onClick={() => pushToCart(true)}
           disabled={!selectedVariant || busy !== ""}
-          className="rounded-xl bg-fuel px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl bg-fuel px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {busy === "buy" ? "Preparation..." : "Acheter maintenant"}
+          {busy === "buy" ? (
+            <>
+              <LoadingSpinner className="text-white" />
+              Preparation...
+            </>
+          ) : (
+            "Acheter maintenant"
+          )}
         </button>
         <button
           type="button"
           onClick={addToCompare}
           disabled={!selectedVariant || busy !== ""}
-          className="rounded-xl border border-slate-300 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {busy === "compare" ? "Ajout..." : `Comparer (${compareCount})`}
+          {busy === "compare" ? (
+            <>
+              <LoadingSpinner className="text-slate-700" />
+              Ajout...
+            </>
+          ) : (
+            `Comparer (${compareCount})`
+          )}
         </button>
         <Link href="/cart" className="rounded-xl border border-slate-300 px-4 py-2 text-sm">
           Aller au panier

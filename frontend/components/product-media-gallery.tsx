@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type MediaItem = {
   id: string;
@@ -36,11 +36,17 @@ export function ProductMediaGallery({ productName, media }: ProductMediaGalleryP
   }, [media, productName]);
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [mainLoading, setMainLoading] = useState(true);
   const active = images[activeIndex] || images[0];
+
+  useEffect(() => {
+    setMainLoading(true);
+  }, [active?.id]);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-100">
+        {mainLoading && <div className="skeleton-shimmer absolute inset-0" />}
         <Image
           src={active?.url || placeholder(productName)}
           alt={active?.alt || productName}
@@ -48,7 +54,9 @@ export function ProductMediaGallery({ productName, media }: ProductMediaGalleryP
           unoptimized
           referrerPolicy="no-referrer"
           sizes="(max-width: 1280px) 100vw, 52vw"
-          className="object-contain p-4"
+          onLoadingComplete={() => setMainLoading(false)}
+          onError={() => setMainLoading(false)}
+          className={`object-contain p-4 transition-opacity duration-200 ${mainLoading ? "opacity-0" : "opacity-100"}`}
         />
       </div>
 

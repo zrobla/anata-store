@@ -165,6 +165,15 @@ body {
   }
 }
 
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
 .hero-gradient-shift {
   background: linear-gradient(120deg, #0f172a, #111827, #083344);
   background-size: 170% 170%;
@@ -227,6 +236,18 @@ body {
   animation: whatsappGradient 9s ease-in-out infinite;
 }
 
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #e2e8f0 18%, #f8fafc 46%, #e2e8f0 76%);
+  background-size: 220% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+
+@media (max-width: 639px) {
+  .mobile-product-card-copy {
+    text-align: center;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-featured-track {
     animation: none;
@@ -239,7 +260,8 @@ body {
   .whatsapp-hint,
   .whatsapp-float,
   .whatsapp-ring,
-  .whatsapp-button {
+  .whatsapp-button,
+  .skeleton-shimmer {
     animation: none;
   }
 }

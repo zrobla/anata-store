@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { BackLink } from "@/components/back-link";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { addToCart, fetchProductBySlug } from "@/lib/api";
 import { formatFcfa } from "@/lib/currency";
 import { availabilityLabel } from "@/lib/labels";
@@ -157,9 +158,16 @@ export default function ComparePage() {
                   type="button"
                   onClick={() => handleAddToCart(compare)}
                   disabled={addingVariantId === compare.variantId}
-                  className="rounded-lg bg-ink px-3 py-1.5 text-xs text-white disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs text-white disabled:opacity-60"
                 >
-                  {addingVariantId === compare.variantId ? "Ajout..." : "Ajouter au panier"}
+                  {addingVariantId === compare.variantId ? (
+                    <>
+                      <LoadingSpinner className="text-white" />
+                      Ajout...
+                    </>
+                  ) : (
+                    "Ajouter au panier"
+                  )}
                 </button>
                 <button
                   type="button"

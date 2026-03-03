@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { TopProgressBar } from "@/components/top-progress-bar";
 import { WhatsAppCta } from "@/components/whatsapp-cta";
 import { Providers } from "@/app/providers";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
@@ -156,6 +157,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
         />
         <Providers>
+          <TopProgressBar />
           <Header />
           <main className="mx-auto min-h-[70vh] w-full max-w-6xl px-4 py-6">{children}</main>
           <Footer />

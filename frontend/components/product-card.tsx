@@ -1,6 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { formatFcfa } from "@/lib/currency";
 import { availabilityLabel } from "@/lib/labels";
 import { ProductListItem } from "@/lib/types";
@@ -10,6 +14,7 @@ function fcfa(value: number) {
 }
 
 export function ProductCard({ product }: { product: ProductListItem }) {
+  const [opening, setOpening] = useState(false);
   const imageUrl =
     product.thumbnail_url || `https://placehold.co/900x900/png?text=${encodeURIComponent(product.name)}`;
 
@@ -26,15 +31,42 @@ export function ProductCard({ product }: { product: ProductListItem }) {
           className="object-contain p-3 transition duration-300 group-hover:scale-[1.03]"
         />
       </div>
-      <p className="line-clamp-1 text-xs uppercase text-slate-500">{product.brand_slug}</p>
-      <h3 className="mt-1 min-h-[3rem] line-clamp-2 font-display text-lg leading-6 text-ink">{product.name}</h3>
-      <p className="mt-1 text-sm font-semibold text-fuel">{fcfa(product.min_promo_price ?? product.min_price)}</p>
-      <p className="text-xs text-slate-500">{availabilityLabel(product.availability.status)}</p>
+      <p className="mobile-product-card-copy text-center text-xs uppercase text-slate-500 sm:line-clamp-1 sm:text-left">
+        {product.brand_slug}
+      </p>
+      <h3 className="mobile-product-card-copy mt-1 min-h-[3rem] text-center font-display text-lg leading-6 text-ink sm:line-clamp-2 sm:text-left">
+        {product.name}
+      </h3>
+      <p className="mobile-product-card-copy mt-1 text-center text-sm font-semibold text-fuel sm:text-left">
+        {fcfa(product.min_promo_price ?? product.min_price)}
+      </p>
+      <p className="mobile-product-card-copy text-center text-xs text-slate-500 sm:text-left">
+        {availabilityLabel(product.availability.status)}
+      </p>
       <Link
         href={`/p/${product.slug}`}
-        className="mt-auto pt-3 inline-flex rounded-lg bg-ink px-3 py-2 text-sm text-white transition group-hover:bg-fuel"
+        onClick={(event) => {
+          if (event.button !== 0) {
+            return;
+          }
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+          }
+          setOpening(true);
+        }}
+        aria-busy={opening}
+        className="mt-auto flex justify-center pt-3 text-sm text-white transition"
       >
-        Voir le produit
+        <span className="inline-flex items-center justify-center rounded-lg bg-ink px-3 py-2 text-center transition group-hover:bg-fuel">
+          {opening ? (
+            <span className="inline-flex items-center gap-2">
+              <LoadingSpinner className="text-white" />
+              Ouverture...
+            </span>
+          ) : (
+            <span className="mobile-product-card-copy">Voir le produit</span>
+          )}
+        </span>
       </Link>
     </article>
   );
