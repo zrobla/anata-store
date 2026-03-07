@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import HttpResponse
 from rest_framework import permissions, viewsets
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -32,7 +32,13 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
     throttle_scope = "catalog"
 
     def get_queryset(self):
-        return Brand.objects.filter(is_active=True)
+        queryset = Brand.objects.filter(is_active=True).annotate(
+            active_products=Count("products", filter=Q(products__is_active=True))
+        )
+        include_empty = (self.request.query_params.get("include_empty") or "").lower()
+        if include_empty not in {"1", "true", "yes"}:
+            queryset = queryset.filter(active_products__gt=0)
+        return queryset
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -294,7 +300,7 @@ class SellerProductImportTemplateView(APIView):
             content,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = 'attachment; filename="anata_product_import_template.xlsx"'
+        response["Content-Disposition"] = 'attachment; filename="anata_modele_import_produits_fr.xlsx"'
         response["Cache-Control"] = "no-store"
         return response
 

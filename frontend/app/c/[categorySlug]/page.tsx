@@ -82,7 +82,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <div className="space-y-3 rounded-xl bg-white p-4 text-sm text-slate-600">
               <p>Aucun produit actif dans cette categorie.</p>
               <Link
-                href="/s?q=samsung"
+                href="/s"
                 className="inline-flex rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-700"
               >
                 Voir tout le catalogue

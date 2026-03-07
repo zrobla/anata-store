@@ -195,7 +195,7 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
             {mobileTab === "categories" && (
               <div className="space-y-1.5 px-3 py-3">
                 <Link
-                  href="/s?q=samsung"
+                  href="/s"
                   onClick={closeMenu}
                   className="block rounded-xl border border-cyan-600 bg-cyan-100 px-3 py-2 text-sm font-semibold text-cyan-950"
                 >

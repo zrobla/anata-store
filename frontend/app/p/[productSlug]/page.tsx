@@ -141,7 +141,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <article className="space-y-4">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-        <BackLink fallbackHref="/s?q=samsung" label="Retour au catalogue" />
+        <BackLink fallbackHref="/s" label="Retour au catalogue" />
         <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="xl:sticky xl:top-24 xl:self-start">
             <ProductMediaGallery productName={product.name} media={gallery} />

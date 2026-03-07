@@ -27,6 +27,9 @@ class SellerProductImportExcelTests(TestCase):
     def _build_xlsx_bytes(self, rows: list[dict]) -> bytes:
         return build_product_import_workbook(rows)
 
+    def _build_xlsx_bytes_fr(self, rows: list[dict]) -> bytes:
+        return build_product_import_workbook(rows, use_french_headers=True)
+
     def test_template_download_endpoint_returns_valid_xlsx(self):
         response = self.client.get("/api/v1/seller/products/import/template")
         self.assertEqual(response.status_code, 200)
@@ -100,6 +103,32 @@ class SellerProductImportExcelTests(TestCase):
                 qty_on_hand=6,
             ).exists()
         )
+
+    def test_excel_import_with_french_headers_works(self):
+        payload_rows = [
+            {
+                "product_name": "Sam-Tab S11",
+                "product_slug": "sam-tab-s11",
+                "brand_slug": "samsung",
+                "category_slug": "smartphones",
+                "variant_sku": "SAM-TABS11-128-BLK",
+                "price_amount": 675860,
+            }
+        ]
+        upload = SimpleUploadedFile(
+            "products-import-fr.xlsx",
+            self._build_xlsx_bytes_fr(payload_rows),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        response = self.client.post("/api/v1/seller/products/import/excel", {"file": upload}, format="multipart")
+        self.assertEqual(response.status_code, 200, response.content)
+        report = response.json()
+        self.assertEqual(report["total_rows"], 1)
+        self.assertEqual(report["processed_rows"], 1)
+        self.assertEqual(len(report["errors"]), 0)
+        self.assertTrue(Product.objects.filter(slug="sam-tab-s11").exists())
+        self.assertTrue(ProductVariant.objects.filter(sku="SAM-TABS11-128-BLK").exists())
 
     def test_excel_import_reports_error_but_continues_other_rows(self):
         payload_rows = [

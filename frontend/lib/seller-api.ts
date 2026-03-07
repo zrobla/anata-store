@@ -267,7 +267,7 @@ export async function fetchSellerVariants(token: string): Promise<SellerVariant[
 }
 
 export async function fetchSellerBrands(): Promise<SellerBrand[]> {
-  const payload = await sellerGet<ListPayload<SellerBrand>>("/catalog/brands/");
+  const payload = await sellerGet<ListPayload<SellerBrand>>("/catalog/brands/?include_empty=1");
   return normalizeList(payload);
 }
 

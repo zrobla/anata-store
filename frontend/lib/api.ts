@@ -1,7 +1,7 @@
 import { Brand, Cart, Category, DeliveryZone, Order, Product, ProductListItem, PublicContentPage } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
-type ProductFilters = { q?: string; category?: string; brand?: string };
+type ProductFilters = { q?: string; category?: string; brand?: string; pageSize?: number };
 
 async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
@@ -27,9 +27,57 @@ function buildProductsQuery(filters: ProductFilters = {}): string {
   if (filters.brand) {
     params.set("brand", filters.brand);
   }
+  if (filters.pageSize && Number.isFinite(filters.pageSize) && filters.pageSize > 0) {
+    params.set("page_size", String(Math.trunc(filters.pageSize)));
+  }
 
   const query = params.toString();
   return query ? `?${query}` : "";
+}
+
+function diversifyHomeProducts(items: ProductListItem[], maxItems = 12): ProductListItem[] {
+  const selected: ProductListItem[] = [];
+  const selectedIds = new Set<string>();
+  const usedCategories = new Set<string>();
+  const usedBrands = new Set<string>();
+
+  for (const item of items) {
+    if (selected.length >= maxItems) {
+      break;
+    }
+    if (usedCategories.has(item.category_slug)) {
+      continue;
+    }
+    selected.push(item);
+    selectedIds.add(item.id);
+    usedCategories.add(item.category_slug);
+    usedBrands.add(item.brand_slug);
+  }
+
+  for (const item of items) {
+    if (selected.length >= maxItems) {
+      break;
+    }
+    if (selectedIds.has(item.id) || usedBrands.has(item.brand_slug)) {
+      continue;
+    }
+    selected.push(item);
+    selectedIds.add(item.id);
+    usedBrands.add(item.brand_slug);
+  }
+
+  for (const item of items) {
+    if (selected.length >= maxItems) {
+      break;
+    }
+    if (selectedIds.has(item.id)) {
+      continue;
+    }
+    selected.push(item);
+    selectedIds.add(item.id);
+  }
+
+  return selected;
 }
 
 function withCartSession(path: string, session?: string): string {
@@ -41,8 +89,9 @@ function withCartSession(path: string, session?: string): string {
 }
 
 export async function fetchHomeProducts(): Promise<ProductListItem[]> {
-  const payload = await apiGet<ProductListItem[] | { items: ProductListItem[] }>("/products?page_size=8");
-  return normalizeProductPayload(payload);
+  const payload = await apiGet<ProductListItem[] | { items: ProductListItem[] }>("/products?page_size=80");
+  const items = normalizeProductPayload(payload);
+  return diversifyHomeProducts(items, 12);
 }
 
 export async function fetchProducts(filters: ProductFilters = {}): Promise<ProductListItem[]> {

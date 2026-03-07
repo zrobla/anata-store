@@ -109,7 +109,7 @@ export default function CartPage() {
         {cart.items.length === 0 && (
           <div className="space-y-3">
             <p className="text-sm text-slate-600">Votre panier est vide.</p>
-            <Link href="/s?q=samsung" className="inline-flex rounded-lg bg-ink px-3 py-2 text-sm text-white">
+            <Link href="/s" className="inline-flex rounded-lg bg-ink px-3 py-2 text-sm text-white">
               Parcourir les produits
             </Link>
           </div>
@@ -170,7 +170,7 @@ export default function CartPage() {
         <Link href="/checkout" className="inline-flex rounded-xl bg-fuel px-4 py-2 text-sm font-semibold text-white">
           Passer a la commande COD
         </Link>
-        <Link href="/s?q=samsung" className="inline-flex rounded-xl border border-slate-300 px-4 py-2 text-sm">
+        <Link href="/s" className="inline-flex rounded-xl border border-slate-300 px-4 py-2 text-sm">
           Continuer les achats
         </Link>
       </div>

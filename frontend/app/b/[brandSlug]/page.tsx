@@ -83,7 +83,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
             <div className="space-y-3 rounded-xl bg-white p-4 text-sm text-slate-600">
               <p>Aucun produit actif pour cette marque.</p>
               <Link
-                href="/s?q=samsung"
+                href="/s"
                 className="inline-flex rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-700"
               >
                 Voir tout le catalogue

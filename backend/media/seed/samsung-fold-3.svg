@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-label="Samsung FOLD 3">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="60%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#f97316" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#bg)" />
+  <circle cx="980" cy="180" r="220" fill="#ffffff" opacity="0.12" />
+  <circle cx="160" cy="1030" r="260" fill="#ffffff" opacity="0.08" />
+  <rect x="180" y="220" width="840" height="760" rx="48" fill="#ffffff" opacity="0.08" />
+  <text x="600" y="500" text-anchor="middle" fill="#e2e8f0" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700">ANATA STORE</text>
+  <text x="600" y="585" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Samsung FOLD 3</text>
+  <text x="600" y="670" text-anchor="middle" fill="#cbd5e1" font-family="Arial, Helvetica, sans-serif" font-size="30">Visuel catalogue premium</text>
+</svg>

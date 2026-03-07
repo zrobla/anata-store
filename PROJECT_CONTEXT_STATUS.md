@@ -1,10 +1,10 @@
 # Contexte Projet - Anata Store MVP Premium
 
-Derniere mise a jour: 2026-03-02
+Derniere mise a jour: 2026-03-05
 
-## 1) Perimetre produit
+## 1) Perimetre MVP (rappel)
 
-Anata Store est un MVP e-commerce mono-vendeur oriente smartphones et derives (tablettes, montres, ecouteurs, ordinateurs), avec positionnement premium.
+Anata Store est un MVP e-commerce mono-vendeur oriente smartphones et derives.
 
 Contraintes MVP non negociables:
 - Paiement: COD uniquement.
@@ -12,124 +12,97 @@ Contraintes MVP non negociables:
 - Pas de vocabulaire marketplace expose au public.
 - Langue principale: francais (CI), devise XOF/FCFA.
 
-## 2) Architecture technique
+## 2) Stack et execution
 
 - Backend: Django + DRF (`backend/`)
 - Frontend: Next.js App Router (`frontend/`)
-- Donnees: SQLite locale en dev (`backend/db.sqlite3`)
-- Auth seller/customer: JWT (SimpleJWT) + RBAC
+- DB dev: SQLite (`backend/db.sqlite3`)
+- Auth: JWT (SimpleJWT) + RBAC
 - IDs metier: UUID
+- Venv backend: `backend/.anata`
 
-## 3) Etat d'implementation (niveau actuel)
-
-Evaluation pratique du MVP (au 2026-03-02):
-
-| Domaine | Niveau | Statut |
-|---|---:|---|
-| Core backend (catalog, stock, cart, checkout COD, orders) | 85% | Fonctionnel |
-| Storefront frontend (home, listing, PDP, cart, checkout, compare) | 80% | Fonctionnel avec polish recent |
-| Seller Studio (catalog, inventory, orders, content, audit) | 70% | Fonctionnel P0/P1 partiel |
-| CMS public (pages slug + blog + home content) | 75% | Fonctionnel, contact renforce |
-| Securite MVP premium | 80% | En place, durcissement possible |
-| SEO technique de base | 75% | En place |
-| Paiements en ligne hors COD (mobile money, carte) | 0% | Hors scope MVP actuel |
-
-## 4) Features deja integrees
-
-Storefront:
-- Home, categories, marques, recherche (`/s`), PDP, compare, panier, checkout COD, confirmation commande.
-- Suivi commandes client (`/account/orders`).
-- Navigation mobile avec menu lateral.
-- CTA WhatsApp flottant (mobile icon-only).
-- Footer premium et branding "Boutique en ligne + boutique physique".
-
-CMS / pages publiques:
-- Pages CMS dynamiques via `/pages/[slug]` -> `/api/v1/content/pages/{slug}/`.
-- Route dediee `contact` ajoutee: `/pages/contact`.
-- Formulaire de contact multi-objets avec champs conditionnels.
-- Endpoint frontend de soumission MVP: `POST /api/contact` (ticket ID retourne).
-
-Backoffice seller:
-- Dashboard seller, produits, inventory items, commandes, contenu pages, audit.
-- RBAC applique cote backend seller API.
-
-Catalogue et seed:
-- Seed Samsung multi-produits via `seed_demo_store`.
-- Option `--download-images` disponible.
-- Option `--clear-existing` pour reinitialiser le catalogue.
-
-Branding:
-- Logo Anata Store integre.
-- Favicon base sur `favicon.jpg` (version zoomee pour meilleure visibilite).
-
-## 5) Securite actuellement en place
-
-Backend:
-- Middleware `RequestId` + headers securite.
-- JWT access/refresh avec rotation et blacklist.
-- RBAC deny-by-default sur endpoints seller.
-- Rate limiting DRF (`catalog`, `checkout`, `interaction`).
-- Checkout COD transactionnel avec gestion conflit stock (409).
-
-Frontend:
-- Security headers via `next.config.ts` (CSP, frame, referrer, nosniff).
-- Metadata/SEO + JSON-LD (`Organization`, `WebSite`, `Store`).
-- Pages non publiques sensibles exclues du robots.
-
-Notes:
-- En dev, CSP est assouplie pour Next HMR (`unsafe-inline`, `unsafe-eval`).
-- En prod, verifier politique CSP stricte finale.
-
-## 6) Verifications et execution par vagues
-
-Pipeline scripts:
-- `scripts/execute_integration_waves.sh`
-- checks bloquants par phase (`phase_1_check`, `phase_2_check`, `phase_3_check`)
-
-Dernier rapport vert connu:
-- `dev/reports/waves_20260301_221911/final_execution_report.md` -> SUCCESS
-
-## 7) Etat Git de reference
-
-Dernier commit pousse sur `main`:
-- `4f9264f feat: polish premium storefront branding and product card layout`
-
-Etat local courant:
-- Des changements non pousses existent (contact dedie, formulaire, endpoint contact, favicon zoom et ajustements associes).
-
-## 8) Mode de reprise rapide
-
-Depuis la racine projet:
+Demarrage local:
 
 ```bash
 cd "/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium"
 ./dev-up.sh
 ```
 
-Notes d'environnement:
-- Le venv backend actif est `backend/.anata` (activation manuelle: `source backend/.anata/bin/activate`).
-- `dev-up.sh` gere migrations, seed RBAC et seed catalogue (par defaut avec telechargement images si active).
+Important:
+- `dev-up.sh` ne reseed plus le catalogue par defaut.
+- Variables par defaut: `SEED_DEMO_STORE=0`, `SEED_DOWNLOAD_IMAGES=0`, `SEED_CLEAR_EXISTING=0`.
+- Pour reseed volontaire: `SEED_DEMO_STORE=1 ./dev-up.sh`.
 
-URLs locales:
-- Frontend: `http://127.0.0.1:3000`
-- Backend API: `http://127.0.0.1:8000/api/v1`
-- Admin Django: `http://127.0.0.1:8000/admin`
+## 3) Checkpoint fonctionnel courant
 
-## 9) Limites MVP encore ouvertes
+### Storefront / core
+- Catalogue public, recherche, PDP, compare, panier, checkout COD: fonctionnels.
+- Seller Studio: operationnel (catalog/inventory/orders/content).
+- Contact: page publique + formulaire present.
 
-- Paiements en ligne hors COD non integres (mobile money, carte, passerelles).
-- Formulaire contact actuellement en mode MVP local (endpoint frontend), pas encore relie a un CRM/email provider ou stockage backend dedie.
-- Quelques elements UX peuvent encore etre ajustes (micro-interactions, coherence responsive fine, tests e2e front complets).
+### Correctifs recents majeurs
+- Marque Apple restauree dans le public (retour dans la sidebar marques).
+- Nettoyage des anciens produits Apple non coherents (`... Serie X`) du flux actif.
+- Import TXT durci pour la section Apple:
+  - detection Apple/iPhone/MacBook,
+  - parsing des formats prix WhatsApp (`mille`, `850.000f`, fleches),
+  - reactivation marque/categorie inactives au besoin.
+- Media API durcie:
+  - reecriture des URLs media locales vers l'hote reel de la requete (evite images cassees en acces LAN).
+- Images Apple:
+  - photos officielles `.jpg` modele par modele pour les iPhone actifs,
+  - galeries multi-images ajoutees quand disponibles.
 
-## 10) Priorites recommandees pour la prochaine reprise
+## 4) Etat donnees (BDD locale actuelle)
 
-1. Finaliser et pousser les changements locaux non commits (contact + favicon).
-2. Brancher le formulaire contact sur un canal operationnel (email support/CRM/ticket DB).
-3. Ajouter tests e2e frontend parcours critique (home -> PDP -> cart -> checkout -> success).
-4. Consolider CSP production (sans casser Next runtime).
-5. Cloturer backlog MVP restant avant phase paiement online V2.
+Mesure relevee le 2026-03-05:
+- Produits total: `358` (singletons, sans variantes)
+- Produits actifs: `230`
+- Variantes total: `646`
+- Variantes actives: `419`
+- Variantes actives avec prix a 0: `11`
+- Produits actifs sans media: `0`
 
-## 11) Documents de reference internes
+Apple:
+- Produits Apple actifs: `14`
+- Produits Apple actifs avec `Serie` dans le nom: `0`
+- Produits Apple visibles en public: `14`
+- Produits Apple en galerie multi-images: `14/14`
+
+## 5) Fichiers clefs modifies recemment
+
+- `backend/catalog/management/commands/import_products_txt.py`
+- `backend/catalog/serializers.py`
+- `dev-up.sh`
+- `backend/media/seed/apple-iphone-*.jpg` (+ vues secondaires `-2`, `-3`, etc.)
+
+## 6) Verification rapide apres reprise
+
+Depuis `backend/`:
+
+```bash
+./.anata/bin/python manage.py check
+./.anata/bin/python manage.py shell -c "from catalog.models import Product, ProductVariant; print(Product.objects.filter(is_active=True).count(), ProductVariant.objects.filter(is_active=True).count())"
+```
+
+Checks API utiles:
+- `GET /api/v1/catalog/brands/` -> `apple` present
+- `GET /api/v1/products/?brand=apple` -> items > 0
+- `GET /api/v1/products/apple-iphone-15-pro/` -> media count > 1
+
+## 7) Points ouverts a traiter en priorite
+
+1. Qualite catalogue: corriger les `11` variantes actives avec prix `0`.
+2. Qualite media hors Apple: controle coherence image vs produit sur toutes marques.
+3. Finaliser et pousser les changements locaux non commits.
+4. Consolidation production: CSP finale stricte + tests e2e parcours achat.
+
+## 8) Limites MVP assumees
+
+- Paiement en ligne hors COD (mobile money, carte): hors scope MVP courant.
+- Integrations CRM/support avancees: a finaliser en etape suivante.
+
+## 9) References projet
 
 - `README.md`
 - `MVP_PREMIUM_ALIGNMENT.md`

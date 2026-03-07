@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import urlparse, urlunparse
+
 from rest_framework import serializers
 
 from catalog.models import (
@@ -12,11 +14,38 @@ from catalog.models import (
     VariantAttributeValue,
 )
 
+LOCAL_MEDIA_HOSTS = {"127.0.0.1", "localhost"}
+
+
+def _public_media_url(raw_url: str, request) -> str:
+    if not raw_url:
+        return ""
+    if request is None:
+        return raw_url
+    if raw_url.startswith("/"):
+        return request.build_absolute_uri(raw_url)
+
+    parsed = urlparse(raw_url)
+    if parsed.scheme in {"http", "https"} and parsed.hostname in LOCAL_MEDIA_HOSTS:
+        return urlunparse(
+            (
+                request.scheme,
+                request.get_host(),
+                parsed.path,
+                parsed.params,
+                parsed.query,
+                parsed.fragment,
+            )
+        )
+    return raw_url
+
 
 class BrandSerializer(serializers.ModelSerializer):
+    active_products = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Brand
-        fields = ["id", "name", "slug", "description", "logo_url", "is_active"]
+        fields = ["id", "name", "slug", "description", "logo_url", "is_active", "active_products"]
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,9 +61,15 @@ class AttributeSerializer(serializers.ModelSerializer):
 
 
 class MediaAssetSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
     class Meta:
         model = MediaAsset
         fields = ["id", "url", "alt", "kind", "sort_order"]
+
+    def get_url(self, obj: MediaAsset) -> str:
+        request = self.context.get("request")
+        return _public_media_url(obj.url, request)
 
 
 class VariantAttributeValueSerializer(serializers.ModelSerializer):
@@ -89,7 +124,9 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_media(self, obj: Product) -> list[dict]:
         links = obj.media_links.select_related("media_asset").order_by("sort_order")
-        return MediaAssetSerializer([link.media_asset for link in links], many=True).data
+        return MediaAssetSerializer(
+            [link.media_asset for link in links], many=True, context=self.context
+        ).data
 
 
 class ProductListItemSerializer(serializers.ModelSerializer):
@@ -117,7 +154,8 @@ class ProductListItemSerializer(serializers.ModelSerializer):
 
     def get_thumbnail_url(self, obj: Product) -> str:
         media_link = obj.media_links.select_related("media_asset").order_by("sort_order").first()
-        return media_link.media_asset.url if media_link else ""
+        request = self.context.get("request")
+        return _public_media_url(media_link.media_asset.url, request) if media_link else ""
 
     def get_min_price(self, obj: Product) -> int | None:
         variant = obj.variants.filter(is_active=True).order_by("price_amount").first()

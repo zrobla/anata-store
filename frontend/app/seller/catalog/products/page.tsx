@@ -210,7 +210,7 @@ export default function SellerProductsPage() {
       const objectUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
-      link.download = "anata_product_import_template.xlsx";
+      link.download = "anata_modele_import_produits_fr.xlsx";
       document.body.appendChild(link);
       link.click();
       link.remove();

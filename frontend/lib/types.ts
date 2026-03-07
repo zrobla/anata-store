@@ -68,6 +68,7 @@ export type Brand = {
   description: string;
   logo_url: string;
   is_active: boolean;
+  active_products?: number;
 };
 
 export type DeliveryZone = {

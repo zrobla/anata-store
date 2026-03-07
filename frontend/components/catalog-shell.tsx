@@ -28,7 +28,7 @@ export async function CatalogShell({ children, activeCategorySlug, categories }:
             </div>
             <nav className="grid gap-1.5 p-3">
               <Link
-                href="/s?q=samsung"
+                href="/s"
                 className={`group flex items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition ${
                   allCatalogActive
                     ? "border-cyan-600 bg-cyan-100 text-cyan-950 shadow-sm"

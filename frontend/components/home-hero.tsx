@@ -54,7 +54,7 @@ export function HomeHero({ products }: HomeHeroProps) {
 
           <div className="hero-fade-up flex flex-wrap gap-3 xl:mt-auto">
             <Link
-              href="/s?q=samsung"
+              href="/s"
               className="hero-cta-pulse rounded-xl bg-fuel px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-fuel/30"
             >
               Je veux un smartphone maintenant

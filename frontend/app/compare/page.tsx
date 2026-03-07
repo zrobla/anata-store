@@ -108,7 +108,7 @@ export default function ComparePage() {
 
   return (
     <section className="space-y-4">
-      <BackLink fallbackHref="/s?q=samsung" label="Retour catalogue" />
+      <BackLink fallbackHref="/s" label="Retour catalogue" />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Comparateur</h1>
@@ -126,7 +126,7 @@ export default function ComparePage() {
       {items.length === 0 && (
         <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
           <p>Aucune variante comparee. Ajoute des produits depuis une fiche produit.</p>
-          <Link href="/s?q=samsung" className="mt-3 inline-flex rounded-lg bg-ink px-3 py-2 text-xs text-white">
+          <Link href="/s" className="mt-3 inline-flex rounded-lg bg-ink px-3 py-2 text-xs text-white">
             Aller au catalogue
           </Link>
         </div>
