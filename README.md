@@ -36,6 +36,23 @@ Option si le reseau npm est instable:
 SKIP_FRONT_INSTALL=1 ./dev-up.sh
 ```
 
+## Codespaces (1 clic)
+
+- Le projet inclut un devcontainer: [.devcontainer/devcontainer.json](/home/kayz/Documents/M. BAH-TREICHVILLE/mvp-premium/.devcontainer/devcontainer.json)
+- En ouvrant le repo dans GitHub Codespaces:
+  - `postCreate` installe backend + frontend et initialise la base.
+  - `postStart` lance automatiquement Django (`8000`) et Next.js (`3000`).
+- Les URLs publiques Codespaces sont calculees automatiquement pour:
+  - `NEXT_PUBLIC_API_BASE_URL`
+  - `NEXT_PUBLIC_SITE_URL`
+
+Scripts utiles:
+
+```bash
+bash .devcontainer/post-start.sh
+bash .devcontainer/stop-services.sh
+```
+
 ## Acces Seller Studio
 
 - URL locale: `http://127.0.0.1:3000/seller`
