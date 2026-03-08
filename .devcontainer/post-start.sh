@@ -48,12 +48,22 @@ ensure_backend_env() {
 
   python manage.py migrate >/dev/null
   python manage.py seed_rbac >/dev/null
+
+  local catalog_state
+  catalog_state="$(python manage.py shell -c 'from catalog.models import Category, Product; print(f"{Category.objects.count()} {Product.objects.filter(is_active=True).count()}")' 2>/dev/null || echo "0 0")"
+  local categories_count
+  local products_count
+  categories_count="$(printf "%s" "$catalog_state" | awk '{print $1}')"
+  products_count="$(printf "%s" "$catalog_state" | awk '{print $2}')"
+  if [[ "${categories_count:-0}" -eq 0 || "${products_count:-0}" -eq 0 ]]; then
+    python manage.py seed_demo_store >/dev/null
+  fi
 }
 
 write_frontend_env() {
   local env_file="$FRONTEND_DIR/.env.local"
   cat >"$env_file" <<EOF
-NEXT_PUBLIC_API_BASE_URL=${FRONTEND_PUBLIC_URL}/api/v1
+NEXT_PUBLIC_API_BASE_URL=/api/v1
 NEXT_PUBLIC_SITE_URL=${FRONTEND_PUBLIC_URL}
 INTERNAL_API_ORIGIN=http://127.0.0.1:${BACKEND_PORT}
 NEXT_PUBLIC_WHATSAPP_NUMBER=2250700000000

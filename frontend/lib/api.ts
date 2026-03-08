@@ -1,6 +1,7 @@
 import { Brand, Cart, Category, DeliveryZone, Order, Product, ProductListItem, PublicContentPage } from "@/lib/types";
+import { getApiBaseUrl } from "@/lib/api-base";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+const API_BASE = getApiBaseUrl();
 type ProductFilters = { q?: string; category?: string; brand?: string; pageSize?: number };
 
 async function apiGet<T>(path: string): Promise<T> {

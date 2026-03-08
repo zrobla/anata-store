@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 
 import { BackLink } from "@/components/back-link";
 import { fetchDeliveryZones } from "@/lib/api";
+import { getApiBaseUrl } from "@/lib/api-base";
 import { formatFcfa } from "@/lib/currency";
 import { STORE_ADDRESS_SHORT, STORE_MAP_URL } from "@/lib/store-info";
 import { DeliveryZone } from "@/lib/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+const API_BASE = getApiBaseUrl();
 
 function parseCheckoutError(payload: unknown): string {
   if (!payload || typeof payload !== "object") {

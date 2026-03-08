@@ -11,8 +11,9 @@ import {
   SellerProductImportReport,
   SellerVariant
 } from "@/lib/types";
+import { getApiBaseUrl } from "@/lib/api-base";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+const API_BASE = getApiBaseUrl();
 const SELLER_ACCESS_TOKEN_KEY = "seller_access_token";
 const SELLER_REFRESH_TOKEN_KEY = "seller_refresh_token";
 const SELLER_EMAIL_KEY = "seller_email";
