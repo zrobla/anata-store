@@ -42,7 +42,8 @@ SKIP_FRONT_INSTALL=1 ./dev-up.sh
 - En ouvrant le repo dans GitHub Codespaces:
   - `postCreate` installe backend + frontend et initialise la base.
   - `postStart` lance automatiquement Django (`8000`) et Next.js (`3000`).
-- Les URLs publiques Codespaces sont calculees automatiquement pour:
+- Le frontend appelle l'API via proxy sur le port `3000` (meme domaine), pour eviter les blocages de port backend public.
+- Les URLs Codespaces sont calculees automatiquement pour:
   - `NEXT_PUBLIC_API_BASE_URL`
   - `NEXT_PUBLIC_SITE_URL`
 

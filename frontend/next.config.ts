@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
+const internalApiOrigin = process.env.INTERNAL_API_ORIGIN || "http://127.0.0.1:8000";
 
 const connectSrc = isDev
   ? [
@@ -34,6 +35,18 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "localhost", port: "8000" },
       { protocol: "http", hostname: "127.0.0.1", port: "8000" }
     ]
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${internalApiOrigin}/api/v1/:path*`
+      },
+      {
+        source: "/media/:path*",
+        destination: `${internalApiOrigin}/media/:path*`
+      }
+    ];
   },
   async headers() {
     const csp = [

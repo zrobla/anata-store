@@ -11,7 +11,7 @@
     "8000": {
       "label": "Anata Backend API",
       "onAutoForward": "silent",
-      "visibility": "public"
+      "visibility": "private"
     }
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",

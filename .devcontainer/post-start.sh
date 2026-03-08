@@ -53,8 +53,9 @@ ensure_backend_env() {
 write_frontend_env() {
   local env_file="$FRONTEND_DIR/.env.local"
   cat >"$env_file" <<EOF
-NEXT_PUBLIC_API_BASE_URL=${BACKEND_PUBLIC_URL}/api/v1
+NEXT_PUBLIC_API_BASE_URL=${FRONTEND_PUBLIC_URL}/api/v1
 NEXT_PUBLIC_SITE_URL=${FRONTEND_PUBLIC_URL}
+INTERNAL_API_ORIGIN=http://127.0.0.1:${BACKEND_PORT}
 NEXT_PUBLIC_WHATSAPP_NUMBER=2250700000000
 NEXT_PUBLIC_WHATSAPP_PREFILL=Bonjour Anata Store, je veux des conseils pour choisir mon smartphone selon mon budget.
 EOF
@@ -121,6 +122,7 @@ start_frontend
 cat <<EOF
 [codespaces] Services ready
 - Frontend: ${FRONTEND_PUBLIC_URL}
-- Backend API: ${BACKEND_PUBLIC_URL}/api/v1
+- Backend API proxy: ${FRONTEND_PUBLIC_URL}/api/v1
+- Backend direct: ${BACKEND_PUBLIC_URL}/api/v1
 - Logs: ${LOG_DIR}
 EOF
