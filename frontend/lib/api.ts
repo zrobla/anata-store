@@ -89,28 +89,30 @@ function withCartSession(path: string, session?: string): string {
 }
 
 export async function fetchHomeProducts(): Promise<ProductListItem[]> {
-  const payload = await apiGet<ProductListItem[] | { items: ProductListItem[] }>("/products?page_size=80");
+  const payload = await apiGet<ProductListItem[] | { items: ProductListItem[] }>("/products/?page_size=80");
   const items = normalizeProductPayload(payload);
   return diversifyHomeProducts(items, 12);
 }
 
 export async function fetchProducts(filters: ProductFilters = {}): Promise<ProductListItem[]> {
+  const query = buildProductsQuery(filters);
+  const path = query ? `/products/${query}` : "/products/";
   const payload = await apiGet<ProductListItem[] | { items: ProductListItem[] }>(
-    `/products${buildProductsQuery(filters)}`
+    path
   );
   return normalizeProductPayload(payload);
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product> {
-  return apiGet<Product>(`/products/${slug}`);
+  return apiGet<Product>(`/products/${slug}/`);
 }
 
 export async function fetchCategories(): Promise<Category[]> {
-  return apiGet<Category[]>("/catalog/categories");
+  return apiGet<Category[]>("/catalog/categories/");
 }
 
 export async function fetchBrands(): Promise<Brand[]> {
-  return apiGet<Brand[]>("/catalog/brands");
+  return apiGet<Brand[]>("/catalog/brands/");
 }
 
 export async function fetchPublicContentPage(slug: string): Promise<PublicContentPage | null> {

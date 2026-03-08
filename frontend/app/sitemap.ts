@@ -38,9 +38,9 @@ async function fetchList<T>(path: string): Promise<T[]> {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
   const [products, categories, brands] = await Promise.all([
-    fetchList<ProductListItem>("/products?page_size=100"),
-    fetchList<Category>("/catalog/categories"),
-    fetchList<Brand>("/catalog/brands")
+    fetchList<ProductListItem>("/products/?page_size=100"),
+    fetchList<Category>("/catalog/categories/"),
+    fetchList<Brand>("/catalog/brands/")
   ])
 
   const coreRoutes: MetadataRoute.Sitemap = [
