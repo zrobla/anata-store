@@ -175,6 +175,14 @@ class Command(BaseCommand):
 
     def _detect_brand(self, name: str, current_brand: str | None) -> str:
         upper = name.upper()
+        # Les references Samsung doivent gagner sur tout contexte precedent.
+        if upper.startswith("SAM ") or upper.startswith("SAMSUNG ") or upper.startswith("SAMSUNG,"):
+            return "samsung"
+        if "GALAXY" in upper:
+            return "samsung"
+        if upper.startswith("APPLE ") and re.search(r"\b(FOLD|FLIP|GALAXY|NOTE|A\d{2}|TAB\s|S\d{1,2}\+?)\b", upper):
+            return "samsung"
+
         if (
             upper.startswith("APPLE ")
             or upper.startswith("IPHONE ")
@@ -188,8 +196,6 @@ class Command(BaseCommand):
             return "redmi"
         if upper.startswith("PIXEL "):
             return "google"
-        if upper.startswith("SAM ") or upper.startswith("SAMSUNG ") or upper.startswith("SAMSUNG,"):
-            return "samsung"
         if "SAMSUNG" in upper and len(upper.split()) <= 4:
             return "samsung"
         if upper.startswith("HP "):
