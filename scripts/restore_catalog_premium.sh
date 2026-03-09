@@ -40,6 +40,13 @@ print('products_active', Product.objects.filter(is_active=True).count())
 print('variants_active', ProductVariant.objects.filter(is_active=True).count())
 "
 
+echo "[restore-catalog] Reparation images Samsung Watch..."
+"$PYTHON_BIN" "$BACKEND_DIR/manage.py" repair_product_media \
+  --only-brand samsung \
+  --name-contains watch \
+  --refresh-all \
+  --media-base-url "http://127.0.0.1:8000" >/dev/null
+
 echo "[restore-catalog] Verification qualite..."
 "$PYTHON_BIN" "$BACKEND_DIR/manage.py" shell -c "
 import re
@@ -57,4 +64,3 @@ print('active_without_media', active_without_media)
 "
 
 echo "[restore-catalog] Termine."
-
