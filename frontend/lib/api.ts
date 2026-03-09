@@ -204,7 +204,7 @@ export async function removeCartItem(itemId: string, session?: string): Promise<
 }
 
 export async function fetchDeliveryZones(): Promise<DeliveryZone[]> {
-  return apiGet<DeliveryZone[]>("/delivery/zones");
+  return apiGet<DeliveryZone[]>("/delivery/zones/");
 }
 
 export async function fetchMyOrders(token: string): Promise<Order[]> {
