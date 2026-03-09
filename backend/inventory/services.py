@@ -49,7 +49,14 @@ def compute_variant_availability(variant) -> dict[str, str | int | None]:
 
 
 @transaction.atomic
-def reserve_internal_stock(*, variant, qty: int, actor_user=None, reason: str = "COD checkout"):
+def reserve_internal_stock(
+    *,
+    variant,
+    qty: int,
+    actor_user=None,
+    reason: str = "COD checkout",
+    allow_partial: bool = False,
+) -> int:
     items = (
         InventoryItem.objects.select_for_update()
         .filter(
@@ -63,10 +70,11 @@ def reserve_internal_stock(*, variant, qty: int, actor_user=None, reason: str = 
     )
 
     total_available = sum(item.qty_on_hand for item in items)
-    if total_available < qty:
+    if total_available < qty and not allow_partial:
         raise StockConflictError(f"Insufficient internal stock for variant={variant.id}")
 
-    remaining = qty
+    target_qty = min(qty, total_available) if allow_partial else qty
+    remaining = target_qty
     for item in items:
         if remaining <= 0:
             break
@@ -83,4 +91,4 @@ def reserve_internal_stock(*, variant, qty: int, actor_user=None, reason: str = 
             actor_user=actor_user,
         )
 
-    return True
+    return target_qty

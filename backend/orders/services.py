@@ -77,7 +77,12 @@ def checkout_cod(*, cart: Cart, address: dict, delivery_zone_id, customer_user=N
     subtotal = 0
 
     for item in cart_items:
-        reserve_internal_stock(variant=item.variant, qty=item.qty, actor_user=actor_user)
+        qty_reserved = reserve_internal_stock(
+            variant=item.variant,
+            qty=item.qty,
+            actor_user=actor_user,
+            allow_partial=True,
+        )
         line_total = item.unit_price_amount * item.qty
         subtotal += line_total
         OrderItem.objects.create(
@@ -97,7 +102,7 @@ def checkout_cod(*, cart: Cart, address: dict, delivery_zone_id, customer_user=N
         StockReservation.objects.create(
             order=order,
             variant=item.variant,
-            qty_reserved=item.qty,
+            qty_reserved=qty_reserved,
             status=StockReservation.COMMITTED,
         )
 

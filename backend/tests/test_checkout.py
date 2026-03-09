@@ -3,8 +3,7 @@ from django.test import TestCase
 
 from catalog.models import Brand, Category, Product, ProductVariant
 from inventory.models import InventoryItem, InventorySource
-from inventory.services import StockConflictError
-from orders.models import Cart, CartItem, DeliveryZone
+from orders.models import Cart, CartItem, DeliveryZone, StockReservation
 from orders.services import checkout_cod
 
 
@@ -44,20 +43,25 @@ class CheckoutCodTests(TestCase):
         self.assertEqual(result.order.items.count(), 1)
         self.assertEqual(result.order.total_amount, 1003000)
 
-    def test_checkout_raises_409_conflict_equivalent_on_shortage(self):
+    def test_checkout_allows_order_when_internal_stock_is_insufficient(self):
         cart = Cart.objects.create(owner_user=self.user)
         CartItem.objects.create(cart=cart, variant=self.variant, qty=99, unit_price_amount=500000)
 
-        with self.assertRaises(StockConflictError):
-            checkout_cod(
-                cart=cart,
-                address={
-                    "full_name": "Client Test",
-                    "phone": "0700000000",
-                    "city": "Abidjan",
-                    "commune": "Cocody",
-                    "quartier": "Riviera",
-                },
-                delivery_zone_id=self.zone.id,
-                customer_user=self.user,
-            )
+        result = checkout_cod(
+            cart=cart,
+            address={
+                "full_name": "Client Test",
+                "phone": "0700000000",
+                "city": "Abidjan",
+                "commune": "Cocody",
+                "quartier": "Riviera",
+            },
+            delivery_zone_id=self.zone.id,
+            customer_user=self.user,
+        )
+
+        self.stock.refresh_from_db()
+        self.assertEqual(self.stock.qty_on_hand, 0)
+        reservation = StockReservation.objects.get(order=result.order, variant=self.variant)
+        self.assertEqual(reservation.qty_reserved, 10)
+        self.assertEqual(result.order.items.count(), 1)
