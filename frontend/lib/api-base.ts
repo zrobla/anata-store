@@ -1,4 +1,4 @@
-const FALLBACK_PUBLIC_API_BASE = "http://127.0.0.1:8000/api/v1";
+const FALLBACK_PUBLIC_API_BASE = "/api/v1";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
