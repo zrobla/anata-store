@@ -1,5 +1,6 @@
 import { Brand, Cart, Category, DeliveryZone, Order, Product, ProductListItem, PublicContentPage } from "@/lib/types";
 import { getApiBaseUrl } from "@/lib/api-base";
+import { normalizeMediaUrl } from "@/lib/media-url";
 
 const API_BASE = getApiBaseUrl();
 type ProductFilters = { q?: string; category?: string; brand?: string; pageSize?: number };
@@ -13,7 +14,21 @@ async function apiGet<T>(path: string): Promise<T> {
 }
 
 function normalizeProductPayload(payload: ProductListItem[] | { items?: ProductListItem[] }): ProductListItem[] {
-  return Array.isArray(payload) ? payload : payload.items || [];
+  const items = Array.isArray(payload) ? payload : payload.items || [];
+  return items.map((item) => ({
+    ...item,
+    thumbnail_url: normalizeMediaUrl(item.thumbnail_url)
+  }));
+}
+
+function normalizeProduct(product: Product): Product {
+  return {
+    ...product,
+    media: product.media.map((item) => ({
+      ...item,
+      url: normalizeMediaUrl(item.url)
+    }))
+  };
 }
 
 function buildProductsQuery(filters: ProductFilters = {}): string {
@@ -105,7 +120,8 @@ export async function fetchProducts(filters: ProductFilters = {}): Promise<Produ
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product> {
-  return apiGet<Product>(`/products/${slug}/`);
+  const product = await apiGet<Product>(`/products/${slug}/`);
+  return normalizeProduct(product);
 }
 
 export async function fetchCategories(): Promise<Category[]> {
