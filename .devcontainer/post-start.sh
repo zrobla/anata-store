@@ -49,13 +49,7 @@ ensure_backend_env() {
   python manage.py migrate >/dev/null
   python manage.py seed_rbac >/dev/null
 
-  local catalog_state
-  catalog_state="$(python manage.py shell -c 'from catalog.models import Category, Product; print(f"{Category.objects.count()} {Product.objects.filter(is_active=True).count()}")' 2>/dev/null || echo "0 0")"
-  local categories_count
-  local products_count
-  categories_count="$(printf "%s" "$catalog_state" | awk '{print $1}')"
-  products_count="$(printf "%s" "$catalog_state" | awk '{print $2}')"
-  if [[ "${categories_count:-0}" -eq 0 || "${products_count:-0}" -eq 0 ]]; then
+  if ! python manage.py shell -c 'from catalog.models import Category, Product; import sys; sys.exit(0 if Category.objects.exists() and Product.objects.filter(is_active=True).exists() else 1)' >/dev/null 2>&1; then
     python manage.py seed_demo_store >/dev/null
   fi
 }
