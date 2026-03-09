@@ -59,7 +59,10 @@ router.register(r"seller/content/blog", SellerBlogPostViewSet, basename="seller-
 router.register(r"seller/content/home", SellerHomeSectionViewSet, basename="seller-content-home")
 router.register(r"seller/audit-logs", SellerAuditLogViewSet, basename="seller-audit-logs")
 
+delivery_zone_list_no_slash = DeliveryZoneViewSet.as_view({"get": "list"})
+
 urlpatterns = [
+    path("delivery/zones", delivery_zone_list_no_slash, name="delivery-zone-list-no-slash"),
     path("", include(router.urls)),
     path("search/suggest", SearchSuggestView.as_view(), name="search-suggest"),
     path(
