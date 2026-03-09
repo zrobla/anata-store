@@ -52,6 +52,13 @@ ensure_backend_env() {
   if ! python manage.py shell -c 'from catalog.models import Category, Product; import sys; sys.exit(0 if Category.objects.exists() and Product.objects.filter(is_active=True).exists() else 1)' >/dev/null 2>&1; then
     python manage.py seed_demo_store >/dev/null
   fi
+
+  local multibrand_seed_file="$BACKEND_DIR/catalog/data/produits.txt"
+  if [[ -f "$multibrand_seed_file" ]]; then
+    if ! python manage.py shell -c 'from catalog.models import Brand; import sys; sys.exit(0 if Brand.objects.filter(is_active=True).exclude(slug="samsung").exists() else 1)' >/dev/null 2>&1; then
+      python manage.py import_products_txt --file "$multibrand_seed_file" --media-base-url "http://127.0.0.1:${BACKEND_PORT}" >/dev/null
+    fi
+  fi
 }
 
 write_frontend_env() {

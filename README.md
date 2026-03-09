@@ -52,7 +52,10 @@ Scripts utiles:
 ```bash
 bash .devcontainer/post-start.sh
 bash .devcontainer/stop-services.sh
+bash scripts/import_multibrand_catalog.sh
 ```
+
+Le seed de base est Samsung-centric. Le script `scripts/import_multibrand_catalog.sh` injecte le catalogue multi-marques depuis `backend/catalog/data/produits.txt` (Apple, Google, Xiaomi, HP, Dell, Lenovo, etc.).
 
 ## Acces Seller Studio
 

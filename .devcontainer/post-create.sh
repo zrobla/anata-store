@@ -20,6 +20,9 @@ fi
 python manage.py migrate
 python manage.py seed_rbac
 python manage.py seed_demo_store
+if [[ -f "catalog/data/produits.txt" ]]; then
+  python manage.py import_products_txt --file "catalog/data/produits.txt" --media-base-url "http://127.0.0.1:8000"
+fi
 
 echo "[codespaces] post-create: setup frontend"
 cd "$FRONTEND_DIR"
