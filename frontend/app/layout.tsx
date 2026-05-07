@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { Suspense } from "react";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -157,7 +158,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
         />
         <Providers>
-          <TopProgressBar />
+          <Suspense fallback={null}>
+            <TopProgressBar />
+          </Suspense>
           <Header />
           <main className="mx-auto min-h-[70vh] w-full max-w-6xl px-4 py-6">{children}</main>
           <Footer />

@@ -90,8 +90,12 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
     router.push("/compare");
   }
 
+  const activePrice = selectedVariant
+    ? selectedVariant.promo_price_amount ?? selectedVariant.price_amount
+    : null;
+
   return (
-    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 pb-24 lg:pb-6">
       <div>
         <h1 className="font-display text-3xl">{product.name}</h1>
         <p className="mt-2 text-sm text-slate-600">{product.short_description}</p>
@@ -187,6 +191,53 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {message && <p className="text-sm text-emerald-700">{message}</p>}
+
+      <div
+        role="region"
+        aria-label="Actions d'achat rapide"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pr-20 pt-3 shadow-[0_-12px_24px_-18px_rgba(15,23,42,0.55)] backdrop-blur-md lg:hidden"
+      >
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[11px] uppercase tracking-wide text-slate-500">
+              {selectedVariant ? `SKU ${selectedVariant.sku}` : "Selectionnez une variante"}
+            </p>
+            <p className="truncate text-base font-semibold text-fuel">
+              {activePrice !== null ? fcfa(activePrice) : "-"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => pushToCart(false)}
+            disabled={!selectedVariant || busy !== ""}
+            aria-label="Ajouter au panier"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {busy === "cart" ? (
+              <LoadingSpinner className="text-white" />
+            ) : (
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => pushToCart(true)}
+            disabled={!selectedVariant || busy !== ""}
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-fuel px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {busy === "buy" ? (
+              <span className="inline-flex items-center gap-2">
+                <LoadingSpinner className="text-white" />
+                ...
+              </span>
+            ) : (
+              "Acheter"
+            )}
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

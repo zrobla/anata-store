@@ -26,12 +26,17 @@ const scriptSrc = isDev
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "cdn.shopify.com" },
       { protocol: "https", hostname: "api.samsungmobilepress.com" },
       { protocol: "https", hostname: "placehold.co" },
+      { protocol: "https", hostname: "fdn2.gsmarena.com" },
+      { protocol: "https", hostname: "fdn.gsmarena.com" },
       { protocol: "http", hostname: "localhost", port: "8000" },
       { protocol: "http", hostname: "127.0.0.1", port: "8000" }
     ]

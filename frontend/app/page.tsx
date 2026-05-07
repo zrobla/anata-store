@@ -26,8 +26,7 @@ export default async function HomePage() {
     "tablettes",
     "ordinateurs",
     "montres-connectees",
-    "ecouteurs",
-    "imprimantes"
+    "ecouteurs"
   ];
   const priorityCategories = prioritySlugs
     .map((slug) => categories.find((category) => category.slug === slug))
@@ -75,8 +74,8 @@ export default async function HomePage() {
             <p className="text-sm text-slate-600">Produits vedettes sur plusieurs marques et univers</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.map((product, index) => (
+              <ProductCard key={product.id} product={product} priority={index < 4} />
             ))}
             {products.length === 0 && (
               <p className="rounded-xl bg-white p-4 text-sm text-slate-600">Catalogue vide ou API indisponible.</p>

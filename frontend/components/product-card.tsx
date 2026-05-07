@@ -13,7 +13,13 @@ function fcfa(value: number) {
   return formatFcfa(value);
 }
 
-export function ProductCard({ product }: { product: ProductListItem }) {
+export function ProductCard({
+  product,
+  priority = false
+}: {
+  product: ProductListItem;
+  priority?: boolean;
+}) {
   const [opening, setOpening] = useState(false);
   const imageUrl =
     product.thumbnail_url || `https://placehold.co/900x900/png?text=${encodeURIComponent(product.name)}`;
@@ -25,7 +31,8 @@ export function ProductCard({ product }: { product: ProductListItem }) {
           src={imageUrl}
           alt={product.name}
           fill
-          unoptimized
+          priority={priority}
+          loading={priority ? undefined : "lazy"}
           referrerPolicy="no-referrer"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-contain p-3 transition duration-300 group-hover:scale-[1.03]"
