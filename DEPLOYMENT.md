@@ -32,10 +32,11 @@ DB_NAME=db.sqlite3
 ### Frontend (`frontend/.env.local`)
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.anata-store.ci/api/v1
+# URL relative recommandee (s'adapte HTTP/HTTPS automatiquement)
+NEXT_PUBLIC_API_BASE_URL=/api/v1
 INTERNAL_API_ORIGIN=http://127.0.0.1:8000
-NEXT_PUBLIC_SITE_URL=https://anata-store.ci
-NEXT_PUBLIC_WHATSAPP_NUMBER=2250700000000
+NEXT_PUBLIC_SITE_URL=https://anatastore.ci
+NEXT_PUBLIC_WHATSAPP_NUMBER=2250173067196
 NEXT_PUBLIC_WHATSAPP_PREFILL=Bonjour Anata Store, je veux des conseils...
 ```
 
