@@ -22,3 +22,4 @@ dist/
 # Build artefacts (regenerables)
 backend/staticfiles/
 backups/
+frontend/tsconfig.tsbuildinfo
