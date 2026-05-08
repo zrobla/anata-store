@@ -80,14 +80,13 @@ class Command(BaseCommand):
                 size = path.stat().st_size if (path and path.exists()) else 0
                 sizes.append((size, link))
 
-            sizes.sort(key=lambda item: (-item[0],))
+            current_primary_link = links[0]
+            current_primary_size = sizes[0][0]
 
-            current_primary_size = next(
-                (size for size, link in [(s, l) for s, l in sizes] if l == links[0]), 0
-            )
+            sizes.sort(key=lambda item: -item[0])
             top_size, top_link = sizes[0]
 
-            if top_link == links[0]:
+            if top_link == current_primary_link:
                 skipped_optimal += 1
                 continue
 
