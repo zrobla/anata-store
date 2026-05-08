@@ -58,7 +58,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         router.push("/checkout");
         return;
       }
-      setMessage("Variante ajoutee au panier.");
+      setMessage("Variante ajoutée au panier.");
     } catch {
       setError("Impossible d'ajouter la variante au panier.");
     } finally {
@@ -134,7 +134,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
       {selectedVariant && (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-          Variante selectionnee: <span className="font-semibold">{selectedVariant.sku}</span>
+          Variante sélectionnée : <span className="font-semibold">{selectedVariant.sku}</span>
         </div>
       )}
 
@@ -163,7 +163,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           {busy === "buy" ? (
             <>
               <LoadingSpinner className="text-white" />
-              Preparation...
+              Préparation...
             </>
           ) : (
             "Acheter maintenant"
@@ -200,7 +200,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] uppercase tracking-wide text-slate-500">
-              {selectedVariant ? `SKU ${selectedVariant.sku}` : "Selectionnez une variante"}
+              {selectedVariant ? `SKU ${selectedVariant.sku}` : "Sélectionnez une variante"}
             </p>
             <p className="truncate text-base font-semibold text-fuel">
               {activePrice !== null ? fcfa(activePrice) : "-"}

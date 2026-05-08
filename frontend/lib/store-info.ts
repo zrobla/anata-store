@@ -1,7 +1,7 @@
 export const STORE_NAME = "Anata Store";
-export const STORE_SLOGAN = "La boutique en ligne des smartphones qui font la difference";
-export const STORE_ADDRESS_SHORT = "Marche Samsung, Treichville";
-export const STORE_ADDRESS_FULL = "Marche Samsung, Treichville, Abidjan, Cote d'Ivoire";
+export const STORE_SLOGAN = "La boutique en ligne des smartphones qui font la différence";
+export const STORE_ADDRESS_SHORT = "Marché Samsung, Treichville";
+export const STORE_ADDRESS_FULL = "Marché Samsung, Treichville, Abidjan, Côte d'Ivoire";
 export const STORE_CITY = "Abidjan";
 export const STORE_REGION = "Abidjan";
 export const STORE_COUNTRY = "CI";

@@ -1,9 +1,9 @@
 export function TrustStrip() {
   const items = [
     "Livraison rapide 24h-72h",
-    "Paiement COD securise",
+    "Paiement COD sécurisé",
     "Garantie & support Anata",
-    "Produits 100% verifies"
+    "Produits 100% vérifiés"
   ];
 
   return (

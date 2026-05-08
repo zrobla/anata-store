@@ -24,9 +24,9 @@ export function HomeHero({ products }: HomeHeroProps) {
   const sideCards = products.slice(1, 3);
   const trustBadges = [
     "Livraison rapide 24h-72h",
-    "Paiement COD securise",
+    "Paiement COD sécurisé",
     "Garantie & support Anata",
-    "Produits 100% verifies"
+    "Produits 100% vérifiés"
   ];
 
   return (
@@ -43,11 +43,11 @@ export function HomeHero({ products }: HomeHeroProps) {
 
             <h1 className="hero-fade-up max-w-2xl font-display text-2xl leading-tight md:text-3xl">
               Choisis ton smartphone en confiance.
-              <span className="block text-cyan-200">Ressens la difference des le premier jour.</span>
+              <span className="block text-cyan-200">Ressens la différence dès le premier jour.</span>
             </h1>
 
             <p className="hero-fade-up max-w-2xl text-sm text-slate-200">
-              Notre boutique en ligne est orientee performance reelle, autonomie et fiabilite. Tu compares vite, tu decides
+              Notre boutique en ligne est orientée performance réelle, autonomie et fiabilité. Tu compares vite, tu décides
               mieux, tu commandes sans stress.
             </p>
           </div>
@@ -81,7 +81,7 @@ export function HomeHero({ products }: HomeHeroProps) {
                             href={`/p/${product.slug}`}
                             className="inline-flex rounded-md border border-white/40 px-1.5 py-0.5 text-[9px]"
                           >
-                            Voir ce modele
+                            Voir ce modèle
                           </Link>
                         </div>
                       </div>
@@ -110,7 +110,7 @@ export function HomeHero({ products }: HomeHeroProps) {
             </div>
           ) : (
             <article className="rounded-2xl border border-white/25 bg-white/10 p-4 text-sm text-slate-100">
-              Catalogue en cours de chargement. Lance une recherche pour demarrer.
+              Catalogue en cours de chargement. Lance une recherche pour démarrer.
             </article>
           )}
 
@@ -140,7 +140,7 @@ export function HomeHero({ products }: HomeHeroProps) {
                         {fcfa(product.min_promo_price ?? product.min_price)}
                       </p>
                       <span className="mt-1 inline-flex rounded-md border border-white/40 px-2 py-0.5 text-[10px]">
-                        Voir ce modele
+                        Voir ce modèle
                       </span>
                     </div>
                   </div>

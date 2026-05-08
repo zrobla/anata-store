@@ -119,7 +119,7 @@ export default function CheckoutPage() {
       <BackLink fallbackHref="/cart" label="Retour panier" />
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <h1 className="font-display text-3xl">Checkout COD</h1>
-        <p className="mt-2 text-sm text-slate-600">Paiement a la livraison uniquement.</p>
+        <p className="mt-2 text-sm text-slate-600">Paiement à la livraison uniquement.</p>
         <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs text-emerald-900">
           <p className="font-semibold">Boutique physique disponible</p>
           <p className="mt-0.5">Assistance et retrait possible au {STORE_ADDRESS_SHORT}.</p>
@@ -134,12 +134,12 @@ export default function CheckoutPage() {
         </div>
         <form className="mt-6 grid gap-3" onSubmit={onSubmit}>
           <input required name="full_name" placeholder="Nom complet" className="rounded-lg border px-3 py-2" />
-          <input required name="phone" placeholder="Telephone" className="rounded-lg border px-3 py-2" />
+          <input required name="phone" placeholder="Téléphone" className="rounded-lg border px-3 py-2" />
           <input name="whatsapp" placeholder="WhatsApp" className="rounded-lg border px-3 py-2" />
           <input required name="city" placeholder="Ville" className="rounded-lg border px-3 py-2" />
           <input required name="commune" placeholder="Commune" className="rounded-lg border px-3 py-2" />
           <input required name="quartier" placeholder="Quartier" className="rounded-lg border px-3 py-2" />
-          <input name="landmark" placeholder="Repere" className="rounded-lg border px-3 py-2" />
+          <input name="landmark" placeholder="Repère / point de repère" className="rounded-lg border px-3 py-2" />
           <label className="grid gap-1 text-sm text-slate-700">
             Zone de livraison
             <select
@@ -159,7 +159,7 @@ export default function CheckoutPage() {
           </label>
           {selectedZone && (
             <p className="text-xs text-slate-600">
-              Frais livraison estimes: {formatFcfa(selectedZone.fee_amount)}.
+              Frais livraison estimés : {formatFcfa(selectedZone.fee_amount)}.
             </p>
           )}
           {error && <p className="text-sm text-red-600">{error}</p>}

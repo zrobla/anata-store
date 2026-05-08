@@ -26,7 +26,7 @@ const siteUrl = getSiteUrl();
 const SITE_NAME = STORE_NAME;
 const SITE_SLOGAN = STORE_SLOGAN;
 const SITE_DESCRIPTION =
-  `${STORE_NAME}, boutique en ligne premium et boutique physique au ${STORE_ADDRESS_SHORT}. Smartphones, tablettes, montres et accessoires avec livraison rapide en Cote d'Ivoire.`;
+  `${STORE_NAME}, boutique en ligne premium et boutique physique au ${STORE_ADDRESS_SHORT}. Smartphones, tablettes, montres et accessoires avec livraison rapide en Côte d'Ivoire.`;
 const SITE_TITLE = `${SITE_NAME} | ${SITE_SLOGAN}`;
 const STORE_PHONE = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "").replace(/\D+/g, "");
 

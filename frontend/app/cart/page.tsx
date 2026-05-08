@@ -64,7 +64,7 @@ export default function CartPage() {
         localStorage.setItem("cart_session", nextSession);
       }
     } catch {
-      setError("Impossible de charger le panier. Verifie que backend et frontend sont demarres.");
+      setError("Impossible de charger le panier. Vérifie que backend et frontend sont démarrés.");
       setCart({ id: "", currency: "XOF", items: [] });
     }
   }

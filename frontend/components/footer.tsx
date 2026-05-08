@@ -11,11 +11,11 @@ const links = [
 ];
 
 const trustPoints = [
-  "Produits 100% verifies",
-  "Paiement COD securise",
+  "Produits 100% vérifiés",
+  "Paiement COD sécurisé",
   "Livraison rapide CI",
-  "Support client reactif",
-  "Qualite produit controlee avant livraison"
+  "Support client réactif",
+  "Qualité produit contrôlée avant livraison"
 ];
 
 export function Footer() {

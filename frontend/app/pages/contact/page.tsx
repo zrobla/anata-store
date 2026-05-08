@@ -21,7 +21,7 @@ export default async function ContactPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Contact Anata Store</p>
         <h1 className="mt-2 font-display text-3xl text-ink">Parlons de ton besoin</h1>
         <p className="mt-2 text-sm text-slate-600">
-          Notre equipe te repond pour achat, suivi de commande, SAV, garantie ou livraison.
+          Notre équipe te répond pour achat, suivi de commande, SAV, garantie ou livraison.
         </p>
 
         <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -42,7 +42,7 @@ export default async function ContactPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Formulaire</p>
         <h2 className="mt-1 font-display text-2xl text-ink">Envoie ta demande</h2>
         <p className="mt-2 text-sm text-slate-600">
-          Choisis un objet et complete les champs. Le formulaire adapte les informations selon la demande.
+          Choisis un objet et complète les champs. Le formulaire adapte les informations selon la demande.
         </p>
         <div className="mt-4">
           <ContactForm />

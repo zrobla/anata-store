@@ -53,10 +53,10 @@ export function ContactForm() {
 
   const minMessageHint = useMemo(() => {
     if (form.subject === "PRODUCT_ADVICE") {
-      return "Decris ton usage, ton budget et ce que tu priorises (batterie, photo, stockage...).";
+      return "Décris ton usage, ton budget et ce que tu priorises (batterie, photo, stockage...).";
     }
     if (form.subject === "ORDER_TRACKING") {
-      return "Indique ton numero de commande et ton besoin precis.";
+      return "Indique ton numéro de commande et ton besoin précis.";
     }
     return "Explique ta demande en quelques lignes.";
   }, [form.subject]);
@@ -91,18 +91,18 @@ export function ContactForm() {
         | { message?: string; ticket_id?: string }
         | null;
       if (!response.ok) {
-        setError(payload?.message || "Echec d'envoi du formulaire. Reessaie.");
+        setError(payload?.message || "Échec d'envoi du formulaire. Réessaie.");
         return;
       }
 
       setSuccess(
         payload?.ticket_id
-          ? `Demande envoyee. Ticket ${payload.ticket_id}. Notre equipe te recontacte rapidement.`
-          : "Demande envoyee. Notre equipe te recontacte rapidement."
+          ? `Demande envoyée. Ticket ${payload.ticket_id}. Notre équipe te recontacte rapidement.`
+          : "Demande envoyée. Notre équipe te recontacte rapidement."
       );
       setForm(INITIAL_STATE);
     } catch {
-      setError("Echec d'envoi du formulaire. Verifie ta connexion puis reessaie.");
+      setError("Échec d'envoi du formulaire. Vérifie ta connexion puis réessaie.");
     } finally {
       setBusy(false);
     }
@@ -122,7 +122,7 @@ export function ContactForm() {
           />
         </label>
         <label className="grid gap-1 text-sm text-slate-700">
-          Telephone / WhatsApp
+          Téléphone / WhatsApp
           <input
             required
             value={form.phone}
@@ -162,7 +162,7 @@ export function ContactForm() {
 
       {needsOrderNumber && (
         <label className="grid gap-1 text-sm text-slate-700">
-          Numero de commande
+          Numéro de commande
           <input
             required
             value={form.order_number}
@@ -175,7 +175,7 @@ export function ContactForm() {
 
       {needsProductModel && (
         <label className="grid gap-1 text-sm text-slate-700">
-          Modele concerne
+          Modèle concerné
           <input
             required
             value={form.product_model}

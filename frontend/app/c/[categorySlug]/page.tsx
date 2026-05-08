@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
   const categoryName = categories.find((category) => category.slug === categorySlug)?.name || humanizeSlug(categorySlug)
   const title = `${categoryName} | Catalogue smartphones`
-  const description = `Decouvrez ${products.length} produits premium dans la categorie ${categoryName}.`
+  const description = `Découvrez ${products.length} produits premium dans la catégorie ${categoryName}.`
 
   return {
     title,
@@ -73,14 +73,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <section className="space-y-4">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
         <BackLink fallbackHref="/" label="Retour accueil" />
-        <h1 className="font-display text-3xl">Categorie: {categoryName}</h1>
+        <h1 className="font-display text-3xl">Catégorie : {categoryName}</h1>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
           {products.length === 0 && (
             <div className="space-y-3 rounded-xl bg-white p-4 text-sm text-slate-600">
-              <p>Aucun produit actif dans cette categorie.</p>
+              <p>Aucun produit actif dans cette catégorie.</p>
               <Link
                 href="/s"
                 className="inline-flex rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-700"

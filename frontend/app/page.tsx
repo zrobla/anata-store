@@ -70,7 +70,7 @@ export default async function HomePage() {
 
         <section>
           <div className="mb-4 flex items-end justify-between">
-            <h2 className="font-display text-2xl">Selection multi-categories</h2>
+            <h2 className="font-display text-2xl">Sélection multi-catégories</h2>
             <p className="text-sm text-slate-600">Produits vedettes sur plusieurs marques et univers</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -90,7 +90,7 @@ export default async function HomePage() {
               <div className="mb-4 flex items-end justify-between">
                 <h3 className="font-display text-xl">{section.category.name}</h3>
                 <Link href={`/c/${section.category.slug}`} className="text-sm text-cyan-700 hover:text-cyan-800">
-                  Voir cette categorie
+                  Voir cette catégorie
                 </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
 
   const brandName = brands.find((brand) => brand.slug === brandSlug)?.name || humanizeSlug(brandSlug)
   const title = `${brandName} | Smartphones et accessoires`
-  const description = `Decouvrez ${products.length} produits premium de la marque ${brandName}.`
+  const description = `Découvrez ${products.length} produits premium de la marque ${brandName}.`
 
   return {
     title,

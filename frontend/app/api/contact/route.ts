@@ -59,13 +59,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Objet de demande invalide." }, { status: 400 });
   }
   if (message.length < 12) {
-    return NextResponse.json({ message: "Le message doit contenir au moins 12 caracteres." }, { status: 400 });
+    return NextResponse.json({ message: "Le message doit contenir au moins 12 caractères." }, { status: 400 });
   }
   if (subject === "ORDER_TRACKING" && !orderNumber) {
-    return NextResponse.json({ message: "Le numero de commande est requis pour le suivi." }, { status: 400 });
+    return NextResponse.json({ message: "Le numéro de commande est requis pour le suivi." }, { status: 400 });
   }
   if ((subject === "PRODUCT_ADVICE" || subject === "AFTER_SALES") && !productModel) {
-    return NextResponse.json({ message: "Le modele concerne est requis pour cette demande." }, { status: 400 });
+    return NextResponse.json({ message: "Le modèle concerné est requis pour cette demande." }, { status: 400 });
   }
   if (subject === "PRODUCT_ADVICE" && !budget) {
     return NextResponse.json({ message: "Le budget est requis pour un conseil achat." }, { status: 400 });

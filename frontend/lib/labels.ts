@@ -1,6 +1,6 @@
 const AVAILABILITY_LABELS: Record<string, string> = {
   IN_STOCK: "En stock",
-  AVAILABLE_SOON: "Disponible bientot",
+  AVAILABLE_SOON: "Disponible bientôt",
   OUT_OF_STOCK: "Rupture de stock"
 };
 
