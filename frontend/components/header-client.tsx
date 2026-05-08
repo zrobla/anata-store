@@ -49,10 +49,7 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
           </p>
           <div className="flex items-center gap-4">
             <Link href="/pages/contact" className="hover:text-white">
-              Aide & Support
-            </Link>
-            <Link href="/account/orders" className="hover:text-white">
-              Mes commandes
+              Aide &amp; Support
             </Link>
           </div>
         </div>
@@ -115,7 +112,6 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
           </form>
 
           <nav className="hidden items-center gap-4 text-sm md:flex">
-            <Link href="/account/orders">Compte</Link>
             <Link href="/compare">Comparer</Link>
             <Link href="/cart" className="rounded-lg border border-slate-500 px-3 py-1.5">
               Panier
@@ -288,13 +284,6 @@ export function HeaderClient({ categories, brands }: HeaderClientProps) {
                   className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                 >
                   Panier
-                </Link>
-                <Link
-                  href="/account/orders"
-                  onClick={closeMenu}
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                >
-                  Mes commandes
                 </Link>
               </div>
               <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">

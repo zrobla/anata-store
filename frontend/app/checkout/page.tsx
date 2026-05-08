@@ -74,7 +74,6 @@ export default function CheckoutPage() {
 
     const data = new FormData(event.currentTarget);
     const session = localStorage.getItem("cart_session") || "";
-    const clientToken = localStorage.getItem("client_access_token") || "";
 
     const payload = {
       address: {
@@ -93,8 +92,7 @@ export default function CheckoutPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(session ? { "X-Cart-Session": session } : {}),
-        ...(clientToken ? { Authorization: `Bearer ${clientToken}` } : {})
+        ...(session ? { "X-Cart-Session": session } : {})
       },
       body: JSON.stringify(payload)
     });

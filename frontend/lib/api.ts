@@ -207,37 +207,3 @@ export async function fetchDeliveryZones(): Promise<DeliveryZone[]> {
   return apiGet<DeliveryZone[]>("/delivery/zones/");
 }
 
-export async function fetchMyOrders(token: string): Promise<Order[]> {
-  const response = await fetch(`${API_BASE}/me/orders`, {
-    cache: "no-store",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!response.ok) {
-    throw new Error(`API error ${response.status} on /me/orders`);
-  }
-  const payload = (await response.json()) as { items: Order[] };
-  return payload.items;
-}
-
-export async function fetchMyOrderDetail(token: string, orderId: string): Promise<Order> {
-  const response = await fetch(`${API_BASE}/me/orders/${orderId}`, {
-    cache: "no-store",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!response.ok) {
-    throw new Error(`API error ${response.status} on /me/orders/${orderId}`);
-  }
-  return (await response.json()) as Order;
-}
-
-export async function loginClient(email: string, password: string): Promise<{ access: string; refresh: string }> {
-  const response = await fetch(`${API_BASE}/auth/token/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-  if (!response.ok) {
-    throw new Error(`API error ${response.status} on /auth/token/`);
-  }
-  return (await response.json()) as { access: string; refresh: string };
-}
