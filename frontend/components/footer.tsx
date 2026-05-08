@@ -72,17 +72,25 @@ export function Footer() {
 
       <div className="relative border-t border-white/10 bg-slate-950/45 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3 text-xs text-slate-300 md:flex-row md:items-center md:justify-between">
-          <p>© 2026 {STORE_NAME}. Tous droits reserves.</p>
-          <p>
-            Concepteur du site web:{" "}
+          <p>© 2026 {STORE_NAME}. Tous droits réservés.</p>
+          <p
+            itemScope
+            itemType="https://schema.org/Organization"
+            itemProp="creator"
+          >
+            <span aria-hidden="true">Conception&nbsp;: </span>
             <a
               href="https://tech-and-web.com"
               target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-white hover:text-cyan-200"
+              rel="author noopener noreferrer external"
+              title="Site conçu et développé par Tech & Web — Agence web (https://tech-and-web.com)"
+              aria-label="Site conçu par Tech & Web — ouvre tech-and-web.com dans un nouvel onglet"
+              className="font-semibold uppercase tracking-wide text-white hover:text-cyan-200"
+              itemProp="url"
             >
-              Tech &amp; Web
+              <span itemProp="name">TECH &amp; WEB</span>
             </a>
+            <meta itemProp="description" content="Agence de conception et développement web — sites e-commerce, plateformes sur mesure, applications modernes." />
           </p>
         </div>
       </div>

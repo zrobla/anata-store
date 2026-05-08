@@ -77,25 +77,68 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true
+  },
+  authors: [{ name: "Tech & Web", url: "https://tech-and-web.com" }],
+  creator: "Tech & Web",
+  publisher: "Tech & Web",
+  other: {
+    "designer": "Tech & Web",
+    "generator": "Tech & Web — https://tech-and-web.com",
+    "copyright": `© 2026 ${SITE_NAME}. Site conçu par Tech & Web.`
+  }
+};
+
+const TECH_AND_WEB_ID = "https://tech-and-web.com/#organization";
+
+const techAndWebJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": TECH_AND_WEB_ID,
+  name: "Tech & Web",
+  alternateName: "TECH & WEB",
+  url: "https://tech-and-web.com",
+  description:
+    "Agence de conception et développement web. Création de sites e-commerce, plateformes sur mesure et applications modernes.",
+  knowsAbout: [
+    "Conception de sites web",
+    "Développement web",
+    "E-commerce",
+    "Next.js",
+    "Django",
+    "UX/UI design",
+    "Référencement SEO"
+  ],
+  areaServed: "Worldwide",
+  brand: {
+    "@type": "Brand",
+    name: "Tech & Web"
   }
 };
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": `${siteUrl}/#organization`,
   name: SITE_NAME,
   url: siteUrl,
   logo: absoluteUrl("/anata-store-logo-1.png"),
   description: SITE_DESCRIPTION,
-  slogan: SITE_SLOGAN
+  slogan: SITE_SLOGAN,
+  creator: { "@id": TECH_AND_WEB_ID },
+  publisher: { "@id": TECH_AND_WEB_ID }
 };
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${siteUrl}/#website`,
   name: SITE_NAME,
   description: SITE_DESCRIPTION,
   url: siteUrl,
+  inLanguage: "fr-CI",
+  publisher: { "@id": `${siteUrl}/#organization` },
+  creator: { "@id": TECH_AND_WEB_ID },
+  author: { "@id": TECH_AND_WEB_ID },
   potentialAction: {
     "@type": "SearchAction",
     target: `${siteUrl}/s?q={search_term_string}`,
@@ -145,6 +188,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${manrope.variable} ${space.variable}`}>
       <body className="font-body font-medium text-ink">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(techAndWebJsonLd) }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
