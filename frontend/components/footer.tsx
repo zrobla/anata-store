@@ -71,7 +71,7 @@ export function Footer() {
       </div>
 
       <div className="relative border-t border-white/10 bg-slate-950/45 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3 text-xs text-slate-300 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3 text-center text-xs text-slate-300 md:flex-row md:items-center md:justify-between md:text-left">
           <p>© 2026 {STORE_NAME}. Tous droits réservés.</p>
           <p
             itemScope
