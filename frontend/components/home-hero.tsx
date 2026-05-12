@@ -35,18 +35,18 @@ export function HomeHero({ products }: HomeHeroProps) {
       <div className="hero-float-fast absolute -bottom-20 left-10 h-56 w-56 rounded-full bg-accent/30 blur-3xl" />
 
       <div className="relative grid gap-3 xl:grid-cols-[1.05fr_0.95fr] xl:items-start">
-        <div className="space-y-2 xl:flex xl:min-h-[220px] xl:flex-col xl:space-y-0">
-          <div className="space-y-2">
-            <p className="hero-fade-up inline-flex rounded-full border border-fuel/40 bg-fuel/20 px-3 py-1 text-xs font-semibold tracking-wide text-fuel">
+        <div className="order-2 space-y-2 xl:order-none xl:flex xl:min-h-[220px] xl:flex-col xl:space-y-0">
+          <div className="space-y-1.5 xl:space-y-2">
+            <p className="hero-fade-up inline-flex rounded-full border border-fuel/40 bg-fuel/20 px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-fuel xl:px-3 xl:py-1 xl:text-xs">
               Offre de la semaine - fin ce soir 23:59
             </p>
 
-            <h1 className="hero-fade-up max-w-2xl font-display text-2xl leading-tight md:text-3xl">
+            <h1 className="hero-fade-up max-w-2xl font-display text-base leading-tight md:text-lg xl:text-3xl">
               Choisis ton smartphone en confiance.
               <span className="block text-cyan-200">Ressens la différence dès le premier jour.</span>
             </h1>
 
-            <p className="hero-fade-up max-w-2xl text-sm text-slate-200">
+            <p className="hero-fade-up max-w-2xl text-[11px] leading-snug text-slate-200 xl:text-sm xl:leading-normal">
               Notre boutique en ligne est orientée performance réelle, autonomie et fiabilité. Tu compares vite, tu décides
               mieux, tu commandes sans stress.
             </p>
@@ -55,45 +55,45 @@ export function HomeHero({ products }: HomeHeroProps) {
           <div className="hero-fade-up flex flex-wrap gap-3 xl:mt-auto">
             <Link
               href="/s"
-              className="hero-cta-pulse rounded-xl bg-fuel px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-fuel/30"
+              className="hero-cta-pulse rounded-lg bg-fuel px-3 py-1 text-xs font-semibold text-white shadow-lg shadow-fuel/30 xl:rounded-xl xl:px-4 xl:py-1.5 xl:text-sm"
             >
               Je veux un smartphone maintenant
             </Link>
           </div>
         </div>
 
-        <div className="grid gap-2.5 xl:-mt-1">
+        <div className="order-1 grid gap-2.5 xl:order-none xl:-mt-1">
           {featuredSlides.length > 0 ? (
-            <div className="relative h-[132px] overflow-hidden rounded-2xl">
+            <div className="relative h-[240px] overflow-hidden rounded-2xl xl:h-[132px]">
               <div className={`flex h-full ${featuredSlides.length > 1 ? "hero-featured-track" : ""}`}>
                 {featuredSlides.map((product, idx) => (
                   <article
                     key={`${product.id}-${idx}`}
-                    className="hero-card-in h-[132px] w-full shrink-0 rounded-2xl border border-white/25 bg-white/10 p-2 backdrop-blur"
+                    className="hero-card-in h-[240px] w-full shrink-0 rounded-2xl border border-white/25 bg-white/10 p-3 backdrop-blur xl:h-[132px] xl:p-2"
                   >
-                    <div className="grid h-full grid-cols-[1fr_auto] items-center gap-1.5">
+                    <div className="grid h-full grid-cols-[1fr_auto] items-center gap-3 xl:gap-1.5">
                       <div>
-                        <p className="text-[9px] uppercase tracking-wide text-cyan-100">Meilleur choix du moment</p>
-                        <p className="mt-0.5 line-clamp-1 font-display text-sm md:text-base">{product.name}</p>
-                        <div className="mt-1 flex items-center gap-2">
-                          <p className="text-[11px] font-semibold text-fuel">{fcfa(product.min_promo_price ?? product.min_price)}</p>
+                        <p className="text-[11px] uppercase tracking-wide text-cyan-100 xl:text-[9px]">Meilleur choix du moment</p>
+                        <p className="mt-1 line-clamp-2 font-display text-base leading-tight xl:mt-0.5 xl:line-clamp-1 xl:text-sm xl:leading-normal">{product.name}</p>
+                        <div className="mt-2 flex items-center gap-2 xl:mt-1">
+                          <p className="text-sm font-semibold text-fuel xl:text-[11px]">{fcfa(product.min_promo_price ?? product.min_price)}</p>
                           <Link
                             href={`/p/${product.slug}`}
-                            className="inline-flex rounded-md border border-white/40 px-1.5 py-0.5 text-[9px]"
+                            className="inline-flex rounded-md border border-white/40 px-2 py-1 text-[11px] xl:px-1.5 xl:py-0.5 xl:text-[9px]"
                           >
                             Voir ce modèle
                           </Link>
                         </div>
                       </div>
-                      <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-xl bg-white/95 sm:mx-0">
+                      <div className="relative mx-auto h-36 w-36 overflow-hidden rounded-2xl bg-white/95 sm:mx-0 xl:h-20 xl:w-20 xl:rounded-xl">
                         <Image
                           src={imageUrl(product)}
                           alt={product.name}
                           fill
                           unoptimized
                           referrerPolicy="no-referrer"
-                          sizes="128px"
-                          className="object-contain p-1"
+                          sizes="(max-width: 1280px) 192px, 128px"
+                          className="object-contain p-1.5 xl:p-1"
                         />
                       </div>
                     </div>
