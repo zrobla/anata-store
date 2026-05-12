@@ -119,6 +119,44 @@ cd backend
 # si une URL gsmarena est devenue obsolete. Toujours filtrer par --only-brand ou --name-contains.
 ```
 
+### Changer les 3 produits mis en avant dans le hero d'accueil
+
+Le carousel hero de la home n'est pas piloté par un flag en base — il pointe sur 3 slugs codés en dur dans `frontend/app/page.tsx`, constante `HERO_SLUGS`. C'est une operation editoriale rapide.
+
+```bash
+# 1) Verifier que les 3 nouveaux slugs existent et sont actifs en BD
+ssh deploy@anatastore.ci 'cd /opt/anata-store/backend && .anata/bin/python -c "
+import os, django
+os.environ.setdefault(\"DJANGO_SETTINGS_MODULE\",\"config.settings\")
+django.setup()
+from catalog.models import Product
+for slug in [\"samsung-s25ultra\", \"apple-iphone-16-pro-max\", \"google-pixel-10\"]:
+  p = Product.objects.filter(slug=slug, is_active=True).first()
+  print(f\"  {slug}: {\\\"OK\\\" if p else \\\"MISSING\\\"} {p.name if p else \\\"\\\"}\")
+"'
+
+# 2) En local: editer la constante HERO_SLUGS
+#   frontend/app/page.tsx -> const HERO_SLUGS = ["slug1", "slug2", "slug3"]
+#   L'ordre du tableau determine l'ordre de rotation du carousel.
+
+# 3) Type-check + commit + push
+cd frontend && pnpm exec tsc --noEmit
+cd .. && git add frontend/app/page.tsx && git commit -m "feat(hero): curate flagship slugs" && git push origin main
+
+# 4) Sur le serveur: pull + build + restart
+ssh deploy@anatastore.ci \
+  'cd /opt/anata-store && git pull --ff-only origin main && \
+   cd frontend && pnpm exec next build && sudo systemctl restart anata-next'
+
+# 5) Verifier que les 3 noms apparaissent bien dans le HTML public
+curl -s https://anatastore.ci/ | grep -oE 'Samsung S25ULTRA|iPhone 16 Pro Max|Google Pixel 10'
+```
+
+**Garde-fous:**
+- Le helper `fetchHeroSlides(slugs)` (frontend/lib/api.ts) tire la liste complete depuis l'API puis filtre/reordonne par slug. Si un slug est desactive ou renomme, il est silencieusement ignore.
+- Si les 3 slugs echouent simultanement, le hero retombe automatiquement sur la liste diversifiee (`fetchHomeProducts`) -> la section n'est jamais vide.
+- Garder **exactement 3 slugs** dans `HERO_SLUGS` (le carousel s'attend a 3 items pour la rotation et les side-cards desktop).
+
 ## 7) Recovery
 
 ### Restaurer la BDD a partir d'un backup

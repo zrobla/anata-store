@@ -119,6 +119,27 @@ sudo systemctl stop anata-django
 sudo systemctl start anata-django
 ```
 
+### Changer les 3 produits du hero d'accueil
+
+Le carousel hero est piloté côté front par la constante `HERO_SLUGS` dans `frontend/app/page.tsx`. Operation editoriale rapide, sans toucher la BD :
+
+```bash
+# 1) Editer en local frontend/app/page.tsx
+#    const HERO_SLUGS = ["slug1", "slug2", "slug3"]    // ordre = ordre de rotation
+
+# 2) Commit + push depuis le poste de dev
+git add frontend/app/page.tsx
+git commit -m "feat(hero): curate flagship slugs"
+git push origin main
+
+# 3) Sur le serveur prod : pull + build + restart
+ssh deploy@anatastore.ci \
+  'cd /opt/anata-store && git pull --ff-only origin main && \
+   cd frontend && pnpm exec next build && sudo systemctl restart anata-next'
+```
+
+Garde-fous : si un slug est désactivé ou renommé en BD, il est silencieusement ignoré. Si les 3 echouent en meme temps, le hero retombe sur la liste diversifiee par defaut. Toujours garder **exactement 3 slugs**.
+
 ## 7) Backups
 
 - Cron quotidien `02:30` -> `/var/backups/anata-store/db-YYYYMMDD-HHMMSS.sqlite3.gz`
