@@ -64,46 +64,63 @@ export function HomeHero({ products }: HomeHeroProps) {
 
         <div className="order-1 grid gap-2.5 xl:order-none xl:-mt-1">
           {featuredSlides.length > 0 ? (
-            <div className="relative h-[240px] overflow-hidden rounded-2xl xl:h-[132px]">
+            <div className="relative h-[260px] overflow-hidden rounded-3xl shadow-2xl shadow-slate-950/40 ring-1 ring-white/10 xl:h-[132px] xl:rounded-2xl xl:shadow-none xl:ring-0">
               <div className={`flex h-full ${featuredSlides.length > 1 ? "hero-featured-track" : ""}`}>
                 {featuredSlides.map((product, idx) => (
                   <article
                     key={`${product.id}-${idx}`}
-                    className="hero-card-in h-[240px] w-full shrink-0 rounded-2xl border border-white/25 bg-white/10 p-3 backdrop-blur xl:h-[132px] xl:p-2"
+                    className="hero-card-in relative h-[260px] w-full shrink-0 overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-br from-white/15 via-white/5 to-fuel/15 p-4 backdrop-blur-xl xl:h-[132px] xl:rounded-2xl xl:border-white/25 xl:bg-white/10 xl:p-2 xl:backdrop-blur"
                   >
-                    <div className="grid h-full grid-cols-[1fr_auto] items-center gap-3 xl:gap-1.5">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-wide text-cyan-100 xl:text-[9px]">Meilleur choix du moment</p>
-                        <p className="mt-1 line-clamp-2 font-display text-base leading-tight xl:mt-0.5 xl:line-clamp-1 xl:text-sm xl:leading-normal">{product.name}</p>
-                        <div className="mt-2 flex items-center gap-2 xl:mt-1">
-                          <p className="text-sm font-semibold text-fuel xl:text-[11px]">{fcfa(product.min_promo_price ?? product.min_price)}</p>
-                          <Link
-                            href={`/p/${product.slug}`}
-                            className="inline-flex rounded-md border border-white/40 px-2 py-1 text-[11px] xl:px-1.5 xl:py-0.5 xl:text-[9px]"
-                          >
-                            Voir ce modèle
-                          </Link>
+                    <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-fuel/30 blur-3xl xl:hidden" aria-hidden="true" />
+                    <div className="pointer-events-none absolute -left-10 -bottom-14 h-36 w-36 rounded-full bg-cyan-300/20 blur-3xl xl:hidden" aria-hidden="true" />
+
+                    <div className="relative grid h-full grid-cols-[1fr_auto] items-center gap-3 xl:gap-1.5">
+                      <div className="flex h-full flex-col justify-between xl:block">
+                        <div>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-fuel/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-fuel ring-1 ring-fuel/40 xl:gap-0 xl:bg-transparent xl:px-0 xl:py-0 xl:ring-0 xl:text-cyan-100 xl:tracking-wide">
+                            <svg aria-hidden="true" viewBox="0 0 20 20" className="h-2.5 w-2.5 fill-current xl:hidden">
+                              <path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.8L10 14.77l-5.2 2.74.99-5.8L1.58 7.62l5.82-.85L10 1.5z" />
+                            </svg>
+                            <span className="xl:text-[9px]">Meilleur choix</span>
+                          </span>
+                          <p className="mt-2 line-clamp-2 font-display text-lg font-semibold leading-tight text-white drop-shadow-sm xl:mt-0.5 xl:line-clamp-1 xl:text-sm xl:font-normal xl:drop-shadow-none">{product.name}</p>
+                        </div>
+                        <div className="mt-2 xl:mt-1">
+                          <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300 xl:hidden">À partir de</p>
+                          <div className="mt-0.5 flex items-center gap-2 xl:mt-1">
+                            <p className="text-xl font-extrabold text-fuel drop-shadow-sm xl:text-[11px] xl:font-semibold xl:drop-shadow-none">{fcfa(product.min_promo_price ?? product.min_price)}</p>
+                            <Link
+                              href={`/p/${product.slug}`}
+                              className="inline-flex items-center gap-1 rounded-lg bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-ink shadow-lg shadow-slate-950/25 transition active:scale-95 xl:rounded-md xl:border xl:border-white/40 xl:bg-transparent xl:px-1.5 xl:py-0.5 xl:text-[9px] xl:font-normal xl:text-white xl:shadow-none"
+                            >
+                              <span>Voir le modèle</span>
+                              <span aria-hidden="true" className="text-fuel xl:hidden">→</span>
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                      <div className="relative mx-auto h-36 w-36 overflow-hidden rounded-2xl bg-white/95 sm:mx-0 xl:h-20 xl:w-20 xl:rounded-xl">
-                        <Image
-                          src={imageUrl(product)}
-                          alt={product.name}
-                          fill
-                          unoptimized
-                          referrerPolicy="no-referrer"
-                          sizes="(max-width: 1280px) 192px, 128px"
-                          className="object-contain p-1.5 xl:p-1"
-                        />
+                      <div className="relative xl:contents">
+                        <div className="pointer-events-none absolute -bottom-3 left-1/2 h-3 w-32 -translate-x-1/2 rounded-full bg-slate-950/50 blur-xl xl:hidden" aria-hidden="true" />
+                        <div className="relative mx-auto h-40 w-40 overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-slate-100 shadow-2xl shadow-slate-950/40 ring-1 ring-white/40 sm:mx-0 xl:h-20 xl:w-20 xl:rounded-xl xl:bg-white/95 xl:shadow-none xl:ring-0">
+                          <Image
+                            src={imageUrl(product)}
+                            alt={product.name}
+                            fill
+                            unoptimized
+                            referrerPolicy="no-referrer"
+                            sizes="(max-width: 1280px) 208px, 128px"
+                            className="object-contain p-2 xl:p-1"
+                          />
+                        </div>
                       </div>
                     </div>
                   </article>
                 ))}
               </div>
               {featuredSlides.length > 1 && (
-                <div className="pointer-events-none absolute bottom-1.5 right-1.5 inline-flex gap-1">
+                <div className="pointer-events-none absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 gap-1.5 xl:bottom-1.5 xl:right-1.5 xl:left-auto xl:translate-x-0 xl:gap-1">
                   {featuredSlides.map((product, idx) => (
-                    <span key={`${product.id}-dot-${idx}`} className="h-1.5 w-1.5 rounded-full bg-white/70" />
+                    <span key={`${product.id}-dot-${idx}`} className={`h-1.5 rounded-full bg-white/90 shadow-md shadow-slate-950/40 transition-all xl:h-1.5 xl:bg-white/70 xl:shadow-none ${idx === 0 ? "w-6 bg-fuel xl:w-1.5 xl:bg-white/70" : "w-1.5"}`} />
                   ))}
                 </div>
               )}
@@ -149,13 +166,16 @@ export function HomeHero({ products }: HomeHeroProps) {
             </div>
           )}
 
-          <div className="overflow-hidden rounded-xl border border-white/20 bg-white/10 px-1.5 py-1">
+          <div className="relative overflow-hidden rounded-xl border border-white/15 bg-gradient-to-r from-slate-950/30 via-white/10 to-slate-950/30 px-1.5 py-1.5 shadow-md shadow-slate-950/30 ring-1 ring-white/10 xl:rounded-xl xl:border-white/20 xl:bg-white/10 xl:py-1 xl:shadow-none xl:ring-0">
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-slate-950/40 to-transparent xl:hidden" aria-hidden="true" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-slate-950/40 to-transparent xl:hidden" aria-hidden="true" />
             <div className="flex w-max min-w-full items-center gap-2 hero-badge-track">
               {[...trustBadges, ...trustBadges].map((badge, idx) => (
                 <span
                   key={`${badge}-${idx}`}
-                  className="whitespace-nowrap rounded-full border border-white/25 bg-slate-900/40 px-3 py-1 text-[10px] font-medium text-slate-100"
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 bg-slate-900/40 px-3 py-1 text-[10px] font-medium text-slate-100 backdrop-blur-sm xl:gap-0 xl:px-3 xl:py-1 xl:backdrop-blur-0"
                 >
+                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-fuel shadow-[0_0_6px_rgba(249,115,22,0.7)] xl:hidden" />
                   {badge}
                 </span>
               ))}
