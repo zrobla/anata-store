@@ -4,7 +4,13 @@ import Link from "next/link";
 import { CatalogShell } from "@/components/catalog-shell";
 import { HomeHero } from "@/components/home-hero";
 import { ProductCard } from "@/components/product-card";
-import { fetchCategories, fetchHomeProducts, fetchProducts } from "@/lib/api";
+import { fetchCategories, fetchHeroSlides, fetchHomeProducts, fetchProducts } from "@/lib/api";
+
+const HERO_SLUGS = [
+  "samsung-s25ultra",
+  "apple-iphone-16-pro-max",
+  "google-pixel-10"
+];
 
 export const metadata: Metadata = {
   title: "Accueil - Boutique en ligne smartphones et accessoires premium",
@@ -16,7 +22,8 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [products, categories] = await Promise.all([
+  const [heroProducts, products, categories] = await Promise.all([
+    fetchHeroSlides(HERO_SLUGS).catch(() => []),
     fetchHomeProducts().catch(() => []),
     fetchCategories().catch(() => [])
   ]);
@@ -46,7 +53,7 @@ export default async function HomePage() {
   return (
     <CatalogShell>
       <div className="space-y-8">
-        <HomeHero products={products} />
+        <HomeHero products={heroProducts.length > 0 ? heroProducts : products} />
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
           <div className="mb-3 flex items-center justify-between">

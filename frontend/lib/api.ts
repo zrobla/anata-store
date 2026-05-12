@@ -110,6 +110,16 @@ export async function fetchHomeProducts(): Promise<ProductListItem[]> {
   return diversifyHomeProducts(items, 12);
 }
 
+export async function fetchHeroSlides(slugs: string[]): Promise<ProductListItem[]> {
+  if (slugs.length === 0) return [];
+  const payload = await apiGet<ProductListItem[] | { items: ProductListItem[] }>("/products/?page_size=80");
+  const items = normalizeProductPayload(payload);
+  const bySlug = new Map(items.map((p) => [p.slug, p]));
+  return slugs
+    .map((slug) => bySlug.get(slug))
+    .filter((p): p is ProductListItem => Boolean(p));
+}
+
 export async function fetchProducts(filters: ProductFilters = {}): Promise<ProductListItem[]> {
   const query = buildProductsQuery(filters);
   const path = query ? `/products/${query}` : "/products/";
