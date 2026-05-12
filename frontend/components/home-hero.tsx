@@ -84,14 +84,20 @@ export function HomeHero({ products }: HomeHeroProps) {
                           </span>
                           <p className="mt-1.5 line-clamp-2 break-words font-display text-[15px] font-semibold leading-snug text-white drop-shadow-sm xl:mt-0.5 xl:line-clamp-1 xl:text-sm xl:font-normal xl:leading-normal xl:drop-shadow-none">{product.name}</p>
                         </div>
-                        <div className="space-y-1.5 xl:mt-1 xl:flex xl:items-center xl:gap-2 xl:space-y-0">
-                          <div className="min-w-0 xl:contents">
-                            <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300 xl:hidden">À partir de</p>
-                            <p className="truncate text-[15px] font-bold leading-none text-fuel drop-shadow-sm xl:text-[11px] xl:font-semibold xl:drop-shadow-none">{fcfa(product.min_promo_price ?? product.min_price)}</p>
-                          </div>
+
+                        <Link
+                          href={`/p/${product.slug}`}
+                          className="block w-full rounded-full bg-white/95 px-3 py-[5px] text-center text-[11px] font-semibold tracking-wide text-ink shadow-md shadow-slate-950/25 transition active:scale-95 xl:hidden"
+                        >
+                          Voir le modèle
+                        </Link>
+
+                        <div className="min-w-0 xl:mt-1 xl:flex xl:items-center xl:gap-2">
+                          <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300 xl:hidden">À partir de</p>
+                          <p className="truncate text-[15px] font-bold leading-none text-fuel drop-shadow-sm xl:text-[11px] xl:font-semibold xl:drop-shadow-none">{fcfa(product.min_promo_price ?? product.min_price)}</p>
                           <Link
                             href={`/p/${product.slug}`}
-                            className="block w-full rounded-full bg-white/95 px-3 py-[5px] text-center text-[11px] font-semibold tracking-wide text-ink shadow-md shadow-slate-950/25 transition active:scale-95 xl:inline-flex xl:w-auto xl:rounded-md xl:border xl:border-white/40 xl:bg-transparent xl:px-1.5 xl:py-0.5 xl:text-[9px] xl:font-normal xl:tracking-normal xl:text-white xl:shadow-none xl:active:scale-100"
+                            className="hidden xl:inline-flex xl:rounded-md xl:border xl:border-white/40 xl:px-1.5 xl:py-0.5 xl:text-[9px] xl:font-normal xl:text-white"
                           >
                             Voir le modèle
                           </Link>
