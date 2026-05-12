@@ -69,47 +69,45 @@ export function HomeHero({ products }: HomeHeroProps) {
                 {featuredSlides.map((product, idx) => (
                   <article
                     key={`${product.id}-${idx}`}
-                    className="hero-card-in relative h-[260px] w-full shrink-0 overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-br from-white/15 via-white/5 to-fuel/15 p-4 backdrop-blur-xl xl:h-[132px] xl:rounded-2xl xl:border-white/25 xl:bg-white/10 xl:p-2 xl:backdrop-blur"
+                    className="hero-card-in relative h-[260px] w-full shrink-0 overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-white/12 via-white/5 to-fuel/12 p-3.5 backdrop-blur-xl xl:h-[132px] xl:rounded-2xl xl:bg-white/10 xl:p-2 xl:backdrop-blur"
                   >
-                    <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-fuel/30 blur-3xl xl:hidden" aria-hidden="true" />
-                    <div className="pointer-events-none absolute -left-10 -bottom-14 h-36 w-36 rounded-full bg-cyan-300/20 blur-3xl xl:hidden" aria-hidden="true" />
+                    <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-fuel/25 blur-3xl xl:hidden" aria-hidden="true" />
 
-                    <div className="relative grid h-full grid-cols-[1fr_auto] items-center gap-3 xl:gap-1.5">
-                      <div className="flex h-full flex-col justify-between xl:block">
-                        <div>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-fuel/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-fuel ring-1 ring-fuel/40 xl:gap-0 xl:bg-transparent xl:px-0 xl:py-0 xl:ring-0 xl:text-cyan-100 xl:tracking-wide">
+                    <div className="relative grid h-full grid-cols-[1fr_auto] items-stretch gap-3 xl:items-center xl:gap-1.5">
+                      <div className="flex h-full min-w-0 flex-col justify-between xl:block">
+                        <div className="min-w-0">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-fuel/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-fuel ring-1 ring-fuel/40 xl:gap-0 xl:bg-transparent xl:px-0 xl:py-0 xl:ring-0 xl:text-cyan-100 xl:tracking-wide">
                             <svg aria-hidden="true" viewBox="0 0 20 20" className="h-2.5 w-2.5 fill-current xl:hidden">
                               <path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.8L10 14.77l-5.2 2.74.99-5.8L1.58 7.62l5.82-.85L10 1.5z" />
                             </svg>
                             <span className="xl:text-[9px]">Meilleur choix</span>
                           </span>
-                          <p className="mt-2 line-clamp-2 font-display text-lg font-semibold leading-tight text-white drop-shadow-sm xl:mt-0.5 xl:line-clamp-1 xl:text-sm xl:font-normal xl:drop-shadow-none">{product.name}</p>
+                          <p className="mt-1.5 line-clamp-2 break-words font-display text-[15px] font-semibold leading-snug text-white drop-shadow-sm xl:mt-0.5 xl:line-clamp-1 xl:text-sm xl:font-normal xl:leading-normal xl:drop-shadow-none">{product.name}</p>
                         </div>
-                        <div className="mt-2 xl:mt-1">
-                          <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300 xl:hidden">À partir de</p>
-                          <div className="mt-0.5 flex items-center gap-2 xl:mt-1">
-                            <p className="text-xl font-extrabold text-fuel drop-shadow-sm xl:text-[11px] xl:font-semibold xl:drop-shadow-none">{fcfa(product.min_promo_price ?? product.min_price)}</p>
-                            <Link
-                              href={`/p/${product.slug}`}
-                              className="inline-flex items-center gap-1 rounded-lg bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-ink shadow-lg shadow-slate-950/25 transition active:scale-95 xl:rounded-md xl:border xl:border-white/40 xl:bg-transparent xl:px-1.5 xl:py-0.5 xl:text-[9px] xl:font-normal xl:text-white xl:shadow-none"
-                            >
-                              <span>Voir le modèle</span>
-                              <span aria-hidden="true" className="text-fuel xl:hidden">→</span>
-                            </Link>
+                        <div className="space-y-1.5 xl:mt-1 xl:flex xl:items-center xl:gap-2 xl:space-y-0">
+                          <div className="min-w-0 xl:contents">
+                            <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300 xl:hidden">À partir de</p>
+                            <p className="truncate text-[15px] font-bold leading-none text-fuel drop-shadow-sm xl:text-[11px] xl:font-semibold xl:drop-shadow-none">{fcfa(product.min_promo_price ?? product.min_price)}</p>
                           </div>
+                          <Link
+                            href={`/p/${product.slug}`}
+                            className="block w-full rounded-full bg-white/95 px-3 py-[5px] text-center text-[11px] font-semibold tracking-wide text-ink shadow-md shadow-slate-950/25 transition active:scale-95 xl:inline-flex xl:w-auto xl:rounded-md xl:border xl:border-white/40 xl:bg-transparent xl:px-1.5 xl:py-0.5 xl:text-[9px] xl:font-normal xl:tracking-normal xl:text-white xl:shadow-none xl:active:scale-100"
+                          >
+                            Voir le modèle
+                          </Link>
                         </div>
                       </div>
-                      <div className="relative xl:contents">
-                        <div className="pointer-events-none absolute -bottom-3 left-1/2 h-3 w-32 -translate-x-1/2 rounded-full bg-slate-950/50 blur-xl xl:hidden" aria-hidden="true" />
-                        <div className="relative mx-auto h-40 w-40 overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-slate-100 shadow-2xl shadow-slate-950/40 ring-1 ring-white/40 sm:mx-0 xl:h-20 xl:w-20 xl:rounded-xl xl:bg-white/95 xl:shadow-none xl:ring-0">
+                      <div className="relative flex shrink-0 items-center justify-center xl:contents">
+                        <div className="pointer-events-none absolute -bottom-2 left-1/2 h-2.5 w-28 -translate-x-1/2 rounded-full bg-slate-950/45 blur-lg xl:hidden" aria-hidden="true" />
+                        <div className="relative h-[148px] w-[148px] overflow-hidden rounded-2xl bg-white shadow-xl shadow-slate-950/35 ring-1 ring-white/40 xl:h-20 xl:w-20 xl:rounded-xl xl:bg-white/95 xl:shadow-none xl:ring-0">
                           <Image
                             src={imageUrl(product)}
                             alt={product.name}
                             fill
                             unoptimized
                             referrerPolicy="no-referrer"
-                            sizes="(max-width: 1280px) 208px, 128px"
-                            className="object-contain p-2 xl:p-1"
+                            sizes="(max-width: 1280px) 160px, 128px"
+                            className="object-contain p-1 xl:p-1"
                           />
                         </div>
                       </div>
