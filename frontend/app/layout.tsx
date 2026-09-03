@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import { Suspense } from "react";
 
+import { ChromePublic, ConteneurPrincipal } from "@/components/chrome-public";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { TopProgressBar } from "@/components/top-progress-bar";
@@ -208,10 +209,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Suspense fallback={null}>
             <TopProgressBar />
           </Suspense>
-          <Header />
-          <main className="mx-auto min-h-[70vh] w-full max-w-6xl px-4 py-6">{children}</main>
-          <Footer />
-          <WhatsAppCta />
+          <ChromePublic>
+            <Header />
+          </ChromePublic>
+          <ConteneurPrincipal>{children}</ConteneurPrincipal>
+          <ChromePublic>
+            <Footer />
+            <WhatsAppCta />
+          </ChromePublic>
         </Providers>
       </body>
     </html>

@@ -258,3 +258,53 @@ export type SellerProductImportReport = {
   };
   errors: SellerProductImportError[];
 };
+
+/* --- Studio boutique: l'article tel que le gerant le manipule --- */
+
+export type ArticleDisponibilite = "EN_VENTE" | "STOCK_BAS" | "EPUISE" | "HORS_LIGNE";
+
+export type Article = {
+  id: string;
+  nom: string;
+  marque: string | null;
+  marque_nom: string;
+  categorie: string | null;
+  categorie_nom: string;
+  prix: number | null;
+  prix_promo: number | null;
+  quantite: number;
+  seuil_alerte: number | null;
+  description_courte: string;
+  description: string;
+  en_ligne: boolean;
+  mis_en_avant: boolean;
+  photo_url: string;
+  nombre_photos: number;
+  nombre_variantes: number;
+  disponibilite: ArticleDisponibilite;
+  adresse_web: string;
+};
+
+export type ArticlePhoto = {
+  id: string;
+  url: string;
+  alt: string;
+  sort_order: number;
+  is_primary: boolean;
+};
+
+export type ArticleCreateInput = {
+  nom: string;
+  marque: string;
+  categorie: string;
+  prix: number;
+  prix_promo?: number | null;
+  quantite?: number;
+  seuil_alerte?: number | null;
+  description_courte?: string;
+  description?: string;
+  en_ligne?: boolean;
+  mis_en_avant?: boolean;
+};
+
+export type ArticleUpdateInput = Partial<ArticleCreateInput>;

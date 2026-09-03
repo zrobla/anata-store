@@ -1,4 +1,8 @@
 import {
+  Article,
+  ArticleCreateInput,
+  ArticlePhoto,
+  ArticleUpdateInput,
   SellerAuditLog,
   SellerBrand,
   SellerCategory,
@@ -423,4 +427,142 @@ export async function deleteSellerContentPage(token: string, pageId: string): Pr
 export async function fetchSellerAuditLogs(token: string): Promise<SellerAuditLog[]> {
   const payload = await sellerGet<ListPayload<SellerAuditLog>>("/seller/audit-logs/", token);
   return normalizeList(payload);
+}
+
+/* ------------------------------------------------------------------
+   Studio boutique — articles, photos et messages d'erreur lisibles.
+   Le gerant ne doit jamais voir « API error 400 on /seller/... ».
+------------------------------------------------------------------- */
+
+async function friendlyError(response: Response, fallback: string): Promise<never> {
+  let detail = "";
+  try {
+    const payload = (await response.json()) as Record<string, unknown>;
+    if (typeof payload?.detail === "string") {
+      detail = payload.detail;
+    } else if (payload && typeof payload === "object") {
+      const first = Object.values(payload)[0];
+      if (Array.isArray(first) && first.length > 0) {
+        detail = String(first[0]);
+      } else if (typeof first === "string") {
+        detail = first;
+      }
+    }
+  } catch {
+    detail = "";
+  }
+
+  if (response.status === 401) {
+    throw new Error("Votre session a expiré. Reconnectez-vous.");
+  }
+  if (response.status === 403) {
+    throw new Error("Votre compte n'a pas le droit d'effectuer cette action.");
+  }
+  throw new Error(detail || fallback);
+}
+
+async function articleRequest<T>(
+  path: string,
+  method: "GET" | "POST" | "PATCH" | "DELETE",
+  token: string,
+  fallback: string,
+  body?: unknown
+): Promise<T> {
+  const response = await requestSeller(path, {
+    method,
+    token,
+    useAuth: true,
+    headers: body !== undefined ? { "Content-Type": "application/json" } : {},
+    body: body !== undefined ? JSON.stringify(body) : undefined
+  });
+  if (!response.ok) {
+    await friendlyError(response, fallback);
+  }
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  return (await response.json()) as T;
+}
+
+export async function fetchArticles(token: string, recherche = ""): Promise<Article[]> {
+  const query = recherche.trim() ? `?recherche=${encodeURIComponent(recherche.trim())}` : "";
+  const payload = await articleRequest<ListPayload<Article>>(
+    `/seller/articles/${query}`,
+    "GET",
+    token,
+    "Impossible de charger vos articles. Vérifiez votre connexion internet."
+  );
+  return normalizeList(payload);
+}
+
+export async function fetchArticle(token: string, id: string): Promise<Article> {
+  return articleRequest<Article>(`/seller/articles/${id}/`, "GET", token, "Cet article est introuvable.");
+}
+
+export async function createArticle(token: string, payload: ArticleCreateInput): Promise<Article> {
+  return articleRequest<Article>(
+    "/seller/articles/",
+    "POST",
+    token,
+    "L'article n'a pas pu être créé. Vérifiez les informations saisies.",
+    payload
+  );
+}
+
+export async function updateArticle(token: string, id: string, payload: ArticleUpdateInput): Promise<Article> {
+  return articleRequest<Article>(
+    `/seller/articles/${id}/`,
+    "PATCH",
+    token,
+    "Les modifications n'ont pas pu être enregistrées.",
+    payload
+  );
+}
+
+export async function retireArticle(token: string, id: string): Promise<void> {
+  await articleRequest<void>(
+    `/seller/articles/${id}/`,
+    "DELETE",
+    token,
+    "L'article n'a pas pu être retiré de la vente."
+  );
+}
+
+export async function fetchArticlePhotos(token: string, id: string): Promise<ArticlePhoto[]> {
+  return articleRequest<ArticlePhoto[]>(
+    `/seller/articles/${id}/photos/`,
+    "GET",
+    token,
+    "Impossible de charger les photos."
+  );
+}
+
+export async function uploadArticlePhoto(token: string, id: string, file: File): Promise<ArticlePhoto[]> {
+  const form = new FormData();
+  form.append("file", file);
+
+  const path = `/seller/articles/${id}/photos/`;
+  const response = await requestSeller(path, { method: "POST", token, useAuth: true, body: form });
+  if (!response.ok) {
+    await friendlyError(response, "La photo n'a pas pu être envoyée. Réessayez.");
+  }
+  return (await response.json()) as ArticlePhoto[];
+}
+
+export async function deleteArticlePhoto(token: string, id: string, photoId: string): Promise<ArticlePhoto[]> {
+  return articleRequest<ArticlePhoto[]>(
+    `/seller/articles/${id}/photos/${photoId}/`,
+    "DELETE",
+    token,
+    "La photo n'a pas pu être supprimée."
+  );
+}
+
+export async function setArticleMainPhoto(token: string, id: string, photoId: string): Promise<ArticlePhoto[]> {
+  return articleRequest<ArticlePhoto[]>(
+    `/seller/articles/${id}/photos/${photoId}/principale/`,
+    "POST",
+    token,
+    "Cette photo n'a pas pu être définie comme photo principale."
+  );
 }
