@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from audit.views import SellerAuditLogViewSet
+from catalog.article_views import SellerArticleViewSet
 from catalog.views import (
     AttributeViewSet,
     BrandViewSet,
@@ -46,6 +47,7 @@ router.register(r"content/pages", PublicContentPageViewSet, basename="content-pa
 router.register(r"content/blog", PublicBlogPostViewSet, basename="content-blog")
 router.register(r"content/home", PublicHomeSectionViewSet, basename="content-home")
 router.register(r"delivery/zones", DeliveryZoneViewSet, basename="delivery-zone")
+router.register(r"seller/articles", SellerArticleViewSet, basename="seller-article")
 router.register(r"seller/products", SellerProductViewSet, basename="seller-product")
 router.register(r"seller/variants", SellerVariantViewSet, basename="seller-variant")
 router.register(r"seller/inventory/sources", InventorySourceViewSet, basename="seller-inventory-source")

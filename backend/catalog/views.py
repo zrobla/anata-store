@@ -3,12 +3,19 @@ from __future__ import annotations
 from django.db.models import Count, Q
 from django.http import HttpResponse
 from rest_framework import permissions, viewsets
+from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.permissions import HasPermissionKey
 from audit.services import log_action
+from catalog.media_service import (
+    PhotoUploadError,
+    attach_photo_to_product,
+    detach_photo,
+    set_primary_photo,
+)
 from catalog.models import Attribute, Brand, Category, Product, ProductVariant
 from catalog.product_import import (
     MAX_IMPORT_FILE_SIZE,
@@ -21,6 +28,7 @@ from catalog.serializers import (
     CategorySerializer,
     ProductListItemSerializer,
     ProductSerializer,
+    SellerProductPhotoSerializer,
     SellerProductSerializer,
     SellerVariantSerializer,
 )
@@ -194,9 +202,71 @@ class SellerProductViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, HasPermissionKey]
 
     def get_required_permission(self):
-        if self.action in {"list", "retrieve"}:
+        if self.action in {"list", "retrieve"} or (self.action == "photos" and self.request.method == "GET"):
             return "catalog.read"
         return "catalog.write"
+
+    @action(detail=True, methods=["get", "post"], url_path="photos", parser_classes=[MultiPartParser, FormParser])
+    def photos(self, request, pk=None):
+        product = self.get_object()
+
+        if request.method == "GET":
+            return Response(self._serialize_photos(product))
+
+        try:
+            link = attach_photo_to_product(product, request.FILES.get("file"), alt=request.data.get("alt", ""))
+        except PhotoUploadError as error:
+            return Response({"detail": str(error)}, status=400)
+
+        log_action(
+            actor_user=request.user,
+            action="create",
+            resource="product_photo",
+            resource_id=str(link.id),
+            after={"product": str(product.id), "sort_order": link.sort_order},
+            request_id=getattr(request, "request_id", ""),
+        )
+        return Response(self._serialize_photos(product), status=201)
+
+    @action(detail=True, methods=["delete"], url_path=r"photos/(?P<link_id>[^/.]+)")
+    def delete_photo(self, request, pk=None, link_id=None):
+        product = self.get_object()
+        link = product.media_links.filter(pk=link_id).first()
+        if link is None:
+            return Response({"detail": "Cette photo n'existe plus."}, status=404)
+
+        detach_photo(link)
+        log_action(
+            actor_user=request.user,
+            action="delete",
+            resource="product_photo",
+            resource_id=str(link_id),
+            before={"product": str(product.id)},
+            request_id=getattr(request, "request_id", ""),
+        )
+        return Response(self._serialize_photos(product))
+
+    @action(detail=True, methods=["post"], url_path=r"photos/(?P<link_id>[^/.]+)/principale")
+    def set_photo_as_primary(self, request, pk=None, link_id=None):
+        product = self.get_object()
+        link = product.media_links.filter(pk=link_id).first()
+        if link is None:
+            return Response({"detail": "Cette photo n'existe plus."}, status=404)
+
+        set_primary_photo(product, link)
+        log_action(
+            actor_user=request.user,
+            action="update",
+            resource="product_photo",
+            resource_id=str(link_id),
+            after={"product": str(product.id), "is_primary": True},
+            request_id=getattr(request, "request_id", ""),
+        )
+        return Response(self._serialize_photos(product))
+
+    def _serialize_photos(self, product):
+        links = product.media_links.select_related("media_asset").order_by("sort_order", "created_at")
+        return SellerProductPhotoSerializer(links, many=True, context=self.get_serializer_context()).data
 
     def perform_create(self, serializer):
         product = serializer.save()

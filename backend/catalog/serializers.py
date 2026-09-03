@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from urllib.parse import urlparse, urlunparse
 
+from django.utils.text import slugify
 from rest_framework import serializers
 
 from catalog.models import (
@@ -10,6 +11,7 @@ from catalog.models import (
     Category,
     MediaAsset,
     Product,
+    ProductMedia,
     ProductVariant,
     VariantAttributeValue,
 )
@@ -69,7 +71,7 @@ class MediaAssetSerializer(serializers.ModelSerializer):
 
     def get_url(self, obj: MediaAsset) -> str:
         request = self.context.get("request")
-        return _public_media_url(obj.url, request)
+        return _public_media_url(obj.effective_url, request)
 
 
 class VariantAttributeValueSerializer(serializers.ModelSerializer):
@@ -155,7 +157,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
     def get_thumbnail_url(self, obj: Product) -> str:
         media_link = obj.media_links.select_related("media_asset").order_by("sort_order").first()
         request = self.context.get("request")
-        return _public_media_url(media_link.media_asset.url, request) if media_link else ""
+        return _public_media_url(media_link.media_asset.effective_url, request) if media_link else ""
 
     def get_min_price(self, obj: Product) -> int | None:
         variant = obj.variants.filter(is_active=True).order_by("price_amount").first()
@@ -187,7 +189,30 @@ class ProductListItemSerializer(serializers.ModelSerializer):
         return {"status": "OUT_OF_STOCK", "lead_time_days": None}
 
 
+class SellerProductPhotoSerializer(serializers.ModelSerializer):
+    """Une photo telle que rattachee a un article, vue depuis le studio."""
+
+    url = serializers.SerializerMethodField()
+    alt = serializers.CharField(source="media_asset.alt", read_only=True)
+    is_primary = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductMedia
+        fields = ["id", "url", "alt", "sort_order", "is_primary"]
+
+    def get_url(self, obj: ProductMedia) -> str:
+        return _public_media_url(obj.media_asset.effective_url, self.context.get("request"))
+
+    def get_is_primary(self, obj: ProductMedia) -> bool:
+        return obj.sort_order == 0
+
+
 class SellerProductSerializer(serializers.ModelSerializer):
+    # Le gerant saisit un nom, pas une adresse technique: on la fabrique pour lui.
+    slug = serializers.SlugField(required=False, allow_blank=True)
+    thumbnail_url = serializers.SerializerMethodField()
+    photos_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = [
@@ -203,9 +228,38 @@ class SellerProductSerializer(serializers.ModelSerializer):
             "badges",
             "seo_title",
             "seo_description",
+            "thumbnail_url",
+            "photos_count",
             "created_at",
             "updated_at",
         ]
+
+    def get_thumbnail_url(self, obj: Product) -> str:
+        link = obj.media_links.select_related("media_asset").order_by("sort_order").first()
+        return _public_media_url(link.media_asset.effective_url, self.context.get("request")) if link else ""
+
+    def get_photos_count(self, obj: Product) -> int:
+        return obj.media_links.count()
+
+    def validate(self, attrs):
+        # Slug absent a la creation: on le derive du nom en garantissant l'unicite.
+        if not attrs.get("slug"):
+            name = attrs.get("name") or getattr(self.instance, "name", "")
+            if name:
+                attrs["slug"] = self._unique_slug(slugify(name))
+        return attrs
+
+    def _unique_slug(self, base: str) -> str:
+        base = base or "article"
+        queryset = Product.objects.all()
+        if self.instance is not None:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        candidate = base
+        suffix = 2
+        while queryset.filter(slug=candidate).exists():
+            candidate = f"{base}-{suffix}"
+            suffix += 1
+        return candidate
 
 
 class SellerVariantSerializer(serializers.ModelSerializer):

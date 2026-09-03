@@ -120,10 +120,18 @@ class MediaAsset(BaseUUIDModel):
     VIDEO = "VIDEO"
     KIND_CHOICES = [(IMAGE, "Image"), (VIDEO, "Video")]
 
-    url = models.URLField()
+    url = models.URLField(blank=True)
+    image = models.ImageField(upload_to="products/%Y/%m", blank=True)
     alt = models.CharField(max_length=200, blank=True)
     kind = models.CharField(max_length=10, choices=KIND_CHOICES, default=IMAGE)
     sort_order = models.IntegerField(default=0)
+
+    @property
+    def effective_url(self) -> str:
+        """Image envoyee depuis le studio en priorite, sinon l'URL distante d'origine."""
+        if self.image:
+            return self.image.url
+        return self.url
 
 
 class ProductMedia(BaseUUIDModel):
