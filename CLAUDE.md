@@ -166,4 +166,8 @@ cd ../frontend && pnpm exec tsc --noEmit && pnpm exec next build    # 0 erreur T
   `MVP_PREMIUM_ALIGNMENT.md`, `SECURITY_POLICIES_PREMIUM.md`, `DEVELOPMENT_MODE_NO_BREAK.md`.
 - Specs : `specs/openapi_v1_mvp_premium.yaml`, `specs/data_model_v1.md`, `specs/ui_map_v1.md`, `dev/quality_gates.yaml`.
 - Prod & infra : `~/MY VPS/VPS-ADMINISTRATION-REFERENCE.md` (§3/§4/§6) + mémoire projet MY VPS (`anata-blocage-commercial`).
+- Comptes d'administration (gérant + dev) : `~/MY VPS/CREDENTIALS ANATA STORE PRODUCTION.md` —
+  **fichier local hors git**, ne jamais recopier identifiants ni mots de passe ici ni dans un commit.
+  À savoir : l'authentification passe par le champ *email* du modèle `User`, mais les comptes y portent
+  un identifiant court, pas une vraie adresse — d'où le libellé « Votre identifiant » sur `/seller`.
 - Portfolio : Anata Store a déjà une étude de cas Tech & Web (`portfolio/portfolio-anata-store.html`).

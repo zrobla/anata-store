@@ -8,7 +8,7 @@ import { useSellerAuth } from "@/components/seller-auth-provider";
 
 export function SellerStudioShell({ children }: { children: React.ReactNode }) {
   const { ready, token, email, login, logout } = useSellerAuth();
-  const [loginEmail, setLoginEmail] = useState(email);
+  const [loginIdentifiant, setLoginIdentifiant] = useState(email);
   const [password, setPassword] = useState("");
   const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ export function SellerStudioShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (email) {
-      setLoginEmail(email);
+      setLoginIdentifiant(email);
     }
   }, [email]);
 
@@ -25,10 +25,10 @@ export function SellerStudioShell({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       setError("");
-      await login(loginEmail, password);
+      await login(loginIdentifiant.trim(), password);
       setPassword("");
     } catch {
-      setError("Email ou mot de passe incorrect. Vérifiez votre saisie et réessayez.");
+      setError("Identifiant ou mot de passe incorrect. Vérifiez votre saisie et réessayez.");
     } finally {
       setLoading(false);
     }
@@ -47,14 +47,20 @@ export function SellerStudioShell({ children }: { children: React.ReactNode }) {
         </p>
 
         <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-          <Champ label="Votre email" requis>
+          {/* type="text" et non "email": les identifiants ne sont pas tous des adresses
+              (ex. "bah"), et le navigateur bloquait la saisie avant meme l'envoi.
+              autoCapitalize/spellCheck off: les claviers mobiles capitalisent la 1re lettre. */}
+          <Champ label="Votre identifiant" requis>
             <ChampTexte
               required
-              type="email"
+              type="text"
               autoComplete="username"
-              value={loginEmail}
-              onChange={(event) => setLoginEmail(event.target.value)}
-              placeholder="exemple@anatastore.ci"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={loginIdentifiant}
+              onChange={(event) => setLoginIdentifiant(event.target.value)}
+              placeholder="Ex. bah"
             />
           </Champ>
 
