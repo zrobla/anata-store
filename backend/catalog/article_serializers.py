@@ -24,6 +24,19 @@ class ArticleSerializer(serializers.Serializer):
     quantite = serializers.IntegerField(min_value=0, required=False, default=0)
     seuil_alerte = serializers.IntegerField(min_value=0, required=False, allow_null=True)
 
+    couleurs = serializers.ListField(
+        child=serializers.CharField(max_length=40),
+        required=False,
+        allow_empty=True,
+        help_text="Couleurs disponibles en boutique, affichees au client.",
+    )
+    capacites = serializers.ListField(
+        child=serializers.CharField(max_length=40),
+        required=False,
+        allow_empty=True,
+        help_text="Capacites de stockage disponibles, affichees au client.",
+    )
+
     description_courte = serializers.CharField(required=False, allow_blank=True, default="")
     description = serializers.CharField(required=False, allow_blank=True, default="")
     en_ligne = serializers.BooleanField(required=False, default=True)
@@ -83,6 +96,8 @@ class ArticleSerializer(serializers.Serializer):
             "prix_promo": snapshot["prix_promo"],
             "quantite": snapshot["quantite"],
             "seuil_alerte": snapshot["seuil_alerte"],
+            "couleurs": snapshot["couleurs"],
+            "capacites": snapshot["capacites"],
             "description_courte": obj.short_description,
             "description": obj.description,
             "en_ligne": obj.is_active,

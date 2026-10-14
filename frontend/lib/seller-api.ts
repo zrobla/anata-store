@@ -1,6 +1,7 @@
 import {
   Article,
   ArticleCreateInput,
+  ArticleOptions,
   ArticlePhoto,
   ArticleUpdateInput,
   SellerAuditLog,
@@ -493,6 +494,15 @@ export async function fetchArticles(token: string, recherche = ""): Promise<Arti
     "Impossible de charger vos articles. Vérifiez votre connexion internet."
   );
   return normalizeList(payload);
+}
+
+export async function fetchArticleOptions(token: string): Promise<ArticleOptions> {
+  return articleRequest<ArticleOptions>(
+    "/seller/articles/options/",
+    "GET",
+    token,
+    "Impossible de charger les couleurs et capacités."
+  );
 }
 
 export async function fetchArticle(token: string, id: string): Promise<Article> {

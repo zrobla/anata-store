@@ -26,6 +26,71 @@ function summarizeAttributes(
   };
 }
 
+/**
+ * Versions disponibles en boutique (couleurs, capacites).
+ *
+ * Informatif: le client choisit sa version a l'appel de confirmation, puisque le
+ * paiement se fait a la livraison. On n'affiche que ce qui est renseigne.
+ */
+function ProductVersions({
+  couleurs,
+  capacites
+}: {
+  couleurs: Array<{ nom: string; code: string }>;
+  capacites: string[];
+}) {
+  if (couleurs.length === 0 && capacites.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+      {couleurs.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Couleurs disponibles</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {couleurs.map((couleur) => (
+              <li
+                key={couleur.nom}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[0.95rem] text-slate-700"
+              >
+                {couleur.code && (
+                  <span
+                    aria-hidden
+                    className="h-4 w-4 rounded-full border border-slate-300"
+                    style={{ backgroundColor: couleur.code }}
+                  />
+                )}
+                {couleur.nom}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {capacites.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Capacités disponibles</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {capacites.map((capacite) => (
+              <li
+                key={capacite}
+                className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[0.95rem] font-semibold text-slate-700"
+              >
+                {capacite}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p className="text-[0.95rem] text-slate-600">
+        Nous confirmons avec vous la version souhaitée lors de l&apos;appel de confirmation.
+      </p>
+    </div>
+  );
+}
+
 export function ProductPurchasePanel({ product }: { product: Product }) {
   const router = useRouter();
   const firstSelectableVariant =
@@ -100,6 +165,11 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         <h1 className="font-display text-3xl">{product.name}</h1>
         <p className="mt-2 text-sm text-slate-600">{product.short_description}</p>
       </div>
+
+      <ProductVersions
+        couleurs={product.couleurs_disponibles ?? []}
+        capacites={product.capacites_disponibles ?? []}
+      />
 
       <div className="space-y-3">
         {product.variants.map((variant) => {

@@ -15,6 +15,7 @@ from django.db import transaction
 from django.utils.text import slugify
 
 from catalog.models import Product, ProductVariant
+from catalog.options import normaliser_capacites, normaliser_couleurs, options_effectives
 from inventory.models import InventoryItem, InventorySource
 
 
@@ -82,6 +83,7 @@ def read_article(product: Product) -> dict:
     variant = main_variant(product)
     item = main_inventory_item(variant)
     photo_link = product.media_links.select_related("media_asset").order_by("sort_order", "created_at").first()
+    options = options_effectives(product)
 
     return {
         "product": product,
@@ -93,7 +95,20 @@ def read_article(product: Product) -> dict:
         "seuil_alerte": item.low_stock_threshold if item else None,
         "photo_link": photo_link,
         "nombre_variantes": product.variants.count(),
+        "couleurs": options["couleurs"],
+        "capacites": options["capacites"],
     }
+
+
+def _options_validees(couleurs, capacites) -> dict[str, list[str]]:
+    """Traduit une erreur de referentiel en message affichable au gerant."""
+    try:
+        return {
+            "couleurs": normaliser_couleurs(couleurs),
+            "capacites": normaliser_capacites(capacites),
+        }
+    except ValueError as error:
+        raise ArticleError(str(error)) from error
 
 
 def _validate_prices(prix, prix_promo) -> None:
@@ -120,8 +135,11 @@ def create_article(
     description: str = "",
     en_ligne: bool = True,
     mis_en_avant: bool = False,
+    couleurs=None,
+    capacites=None,
 ) -> Product:
     _validate_prices(prix, prix_promo)
+    options = _options_validees(couleurs, capacites)
     if quantite < 0:
         raise ArticleError("La quantite ne peut pas etre negative.")
 
@@ -134,6 +152,7 @@ def create_article(
         description=description.strip(),
         is_active=en_ligne,
         is_featured=mis_en_avant,
+        options=options,
     )
 
     variant = ProductVariant.objects.create(
@@ -165,6 +184,17 @@ def update_article(product: Product, changes: dict) -> Product:
     _validate_prices(prix, prix_promo)
 
     product_fields = []
+
+    if "couleurs" in changes or "capacites" in changes:
+        # On repart des valeurs deja enregistrees, pas de celles deduites des
+        # declinaisons importees: elles peuvent sortir du referentiel actuel.
+        stockees = product.options if isinstance(product.options, dict) else {}
+        product.options = _options_validees(
+            changes.get("couleurs", stockees.get("couleurs") or []),
+            changes.get("capacites", stockees.get("capacites") or []),
+        )
+        product_fields.append("options")
+
     if "nom" in changes and changes["nom"].strip() != product.name:
         product.name = changes["nom"].strip()
         product_fields += ["name"]

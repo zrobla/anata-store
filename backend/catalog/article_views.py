@@ -19,6 +19,7 @@ from catalog.media_service import (
     set_primary_photo,
 )
 from catalog.models import Product, ProductMedia
+from catalog.options import referentiel
 from catalog.serializers import SellerProductPhotoSerializer
 
 
@@ -32,7 +33,7 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
         queryset = (
             Product.objects.select_related("brand", "category")
             .prefetch_related(
-                "variants",
+                "variants__attribute_values",
                 Prefetch("media_links", queryset=ProductMedia.objects.select_related("media_asset").order_by("sort_order")),
             )
             .order_by("-created_at")
@@ -50,7 +51,9 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_required_permission(self):
-        lecture = self.action in {"list", "retrieve"} or (self.action == "photos" and self.request.method == "GET")
+        lecture = self.action in {"list", "retrieve", "referentiel_options"} or (
+            self.action == "photos" and self.request.method == "GET"
+        )
         return "catalog.read" if lecture else "catalog.write"
 
     def get_serializer_class(self):
@@ -74,6 +77,8 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
                 description=data.get("description", ""),
                 en_ligne=data.get("en_ligne", True),
                 mis_en_avant=data.get("mis_en_avant", False),
+                couleurs=data.get("couleurs"),
+                capacites=data.get("capacites"),
             )
         except ArticleError as error:
             return Response({"detail": str(error)}, status=400)
@@ -129,6 +134,11 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
             request_id=getattr(request, "request_id", ""),
         )
         return Response(status=204)
+
+    @action(detail=False, methods=["get"], url_path="options")
+    def referentiel_options(self, request):
+        """Referentiel des couleurs et capacites proposees dans le studio."""
+        return Response(referentiel())
 
     @action(detail=True, methods=["get", "post"], url_path="photos", parser_classes=[MultiPartParser, FormParser])
     def photos(self, request, pk=None):

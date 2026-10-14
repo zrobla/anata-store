@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
+import { ArticleCaracteristiques } from "@/components/boutique/article-caracteristiques";
 import { ArticlePhotos } from "@/components/boutique/article-photos";
 import {
   Bouton,
@@ -15,8 +16,8 @@ import {
 } from "@/components/boutique/kit";
 import { useSellerAuth } from "@/components/seller-auth-provider";
 import { formatFcfa } from "@/lib/currency";
-import { createArticle, updateArticle } from "@/lib/seller-api";
-import { Article, SellerBrand, SellerCategory } from "@/lib/types";
+import { createArticle, fetchArticleOptions, updateArticle } from "@/lib/seller-api";
+import { Article, ArticleOptions, SellerBrand, SellerCategory } from "@/lib/types";
 
 /**
  * Ajout et modification d'un article.
@@ -34,6 +35,8 @@ type Brouillon = {
   prix_promo: string;
   quantite: string;
   seuil_alerte: string;
+  couleurs: string[];
+  capacites: string[];
   description_courte: string;
   description: string;
   en_ligne: boolean;
@@ -49,6 +52,8 @@ function brouillonDepuis(article?: Article | null): Brouillon {
     prix_promo: article?.prix_promo != null ? String(article.prix_promo) : "",
     quantite: article ? String(article.quantite) : "",
     seuil_alerte: article?.seuil_alerte != null ? String(article.seuil_alerte) : "",
+    couleurs: article?.couleurs ? [...article.couleurs] : [],
+    capacites: article?.capacites ? [...article.capacites] : [],
     description_courte: article?.description_courte || "",
     description: article?.description || "",
     en_ligne: article ? article.en_ligne : true,
@@ -87,6 +92,27 @@ export function ArticleEditeur({
   const [enregistrement, setEnregistrement] = useState(false);
   const [erreur, setErreur] = useState("");
   const [erreursChamps, setErreursChamps] = useState<Partial<Record<keyof Brouillon, string>>>({});
+  const [options, setOptions] = useState<ArticleOptions | null>(null);
+
+  // Couleurs et capacites viennent de l'API: un seul referentiel pour tout le site.
+  useEffect(() => {
+    let actif = true;
+    if (!token) {
+      return;
+    }
+    fetchArticleOptions(token)
+      .then((referentiel) => {
+        if (actif) {
+          setOptions(referentiel);
+        }
+      })
+      .catch(() => {
+        // Sans referentiel, on masque la section: le reste du formulaire marche.
+      });
+    return () => {
+      actif = false;
+    };
+  }, [token]);
 
   const articleCourant = article || articleCree;
 
@@ -139,6 +165,8 @@ export function ArticleEditeur({
       prix_promo: nombreOuNull(brouillon.prix_promo),
       quantite: nombreOuNull(brouillon.quantite) ?? 0,
       seuil_alerte: nombreOuNull(brouillon.seuil_alerte),
+      couleurs: brouillon.couleurs,
+      capacites: brouillon.capacites,
       description_courte: brouillon.description_courte.trim(),
       description: brouillon.description.trim(),
       en_ligne: brouillon.en_ligne,
@@ -228,6 +256,14 @@ export function ArticleEditeur({
           placeholder="Écran 6,7 pouces, 128 Go, double SIM"
         />
       </Champ>
+
+      <ArticleCaracteristiques
+        options={options}
+        couleurs={brouillon.couleurs}
+        capacites={brouillon.capacites}
+        onCouleurs={(valeurs) => modifier("couleurs", valeurs)}
+        onCapacites={(valeurs) => modifier("capacites", valeurs)}
+      />
     </div>
   );
 

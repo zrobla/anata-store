@@ -15,6 +15,8 @@ from catalog.models import (
     ProductVariant,
     VariantAttributeValue,
 )
+from catalog.options import code_couleur as _code_couleur
+from catalog.options import options_effectives
 
 LOCAL_MEDIA_HOSTS = {"127.0.0.1", "localhost"}
 
@@ -106,6 +108,8 @@ class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
     media = serializers.SerializerMethodField()
+    couleurs_disponibles = serializers.SerializerMethodField()
+    capacites_disponibles = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -122,7 +126,18 @@ class ProductSerializer(serializers.ModelSerializer):
             "badges",
             "variants",
             "media",
+            "couleurs_disponibles",
+            "capacites_disponibles",
         ]
+
+    def get_couleurs_disponibles(self, obj: Product) -> list[dict]:
+        return [
+            {"nom": nom, "code": _code_couleur(nom)}
+            for nom in options_effectives(obj)["couleurs"]
+        ]
+
+    def get_capacites_disponibles(self, obj: Product) -> list[str]:
+        return options_effectives(obj)["capacites"]
 
     def get_media(self, obj: Product) -> list[dict]:
         links = obj.media_links.select_related("media_asset").order_by("sort_order")

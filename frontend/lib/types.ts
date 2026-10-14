@@ -34,6 +34,8 @@ export type Product = {
     availability: Availability;
     attributes: Array<{ attribute_key: string; value: string; label: string }>;
   }>;
+  couleurs_disponibles: Array<{ nom: string; code: string }>;
+  capacites_disponibles: string[];
 };
 
 export type Cart = {
@@ -274,6 +276,8 @@ export type Article = {
   prix_promo: number | null;
   quantite: number;
   seuil_alerte: number | null;
+  couleurs: string[];
+  capacites: string[];
   description_courte: string;
   description: string;
   en_ligne: boolean;
@@ -301,6 +305,8 @@ export type ArticleCreateInput = {
   prix_promo?: number | null;
   quantite?: number;
   seuil_alerte?: number | null;
+  couleurs?: string[];
+  capacites?: string[];
   description_courte?: string;
   description?: string;
   en_ligne?: boolean;
@@ -308,3 +314,7 @@ export type ArticleCreateInput = {
 };
 
 export type ArticleUpdateInput = Partial<ArticleCreateInput>;
+export type ArticleOptions = {
+  couleurs: Array<{ valeur: string; libelle: string; code: string }>;
+  capacites: string[];
+};

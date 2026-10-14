@@ -72,6 +72,9 @@ class Product(BaseUUIDModel):
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     badges = models.JSONField(default=list, blank=True)
+    # Caracteristiques affichees au client: {"couleurs": [...], "capacites": [...]}.
+    # Choisies par le gerant dans le studio (cf. catalog/options.py).
+    options = models.JSONField(default=dict, blank=True)
     seo_title = models.CharField(max_length=180, blank=True)
     seo_description = models.CharField(max_length=320, blank=True)
 

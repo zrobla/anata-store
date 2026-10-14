@@ -10,7 +10,14 @@ from PIL import Image
 from rest_framework.test import APIClient
 
 from accounts.models import Permission, Role
-from catalog.models import Brand, Category, MediaAsset, Product, ProductVariant
+from catalog.models import (
+    Brand,
+    Category,
+    MediaAsset,
+    Product,
+    ProductVariant,
+    VariantAttributeValue,
+)
 from inventory.models import InventoryItem, InventorySource
 
 User = get_user_model()
@@ -208,3 +215,95 @@ class SellerArticleTests(TestCase):
         )
         self.assertEqual(updated.status_code, 200, updated.content)
         self.assertEqual(updated.json()["disponibilite"], "EN_VENTE")
+
+    # --- Couleurs et capacites disponibles -------------------------------- #
+
+    def test_article_keeps_the_colors_and_capacities_chosen_by_the_manager(self):
+        """Les caracteristiques cochees au studio doivent revenir telles quelles."""
+        response = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(couleurs=["Noir", "Bleu"], capacites=["128 Go", "256 Go"]),
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+
+        body = response.json()
+        self.assertEqual(body["couleurs"], ["Noir", "Bleu"])
+        self.assertEqual(body["capacites"], ["128 Go", "256 Go"])
+
+        product = Product.objects.get(id=body["id"])
+        self.assertEqual(product.options, {"couleurs": ["Noir", "Bleu"], "capacites": ["128 Go", "256 Go"]})
+
+    def test_colors_and_capacities_are_normalised_and_deduplicated(self):
+        """« 256GB » et « 256 Go » designent la meme capacite: une seule doit rester."""
+        response = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(couleurs=["noir", "Noir"], capacites=["256GB", "256 Go", "1TB"]),
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+
+        body = response.json()
+        self.assertEqual(body["couleurs"], ["Noir"])
+        self.assertEqual(body["capacites"], ["256 Go", "1 To"])
+
+    def test_unknown_color_is_refused_with_a_readable_message(self):
+        response = self.client.post(
+            "/api/v1/seller/articles/", self.payload(couleurs=["Fuchsia"]), format="json"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Fuchsia", response.json()["detail"])
+
+    def test_capacities_can_be_changed_without_touching_the_colors(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(couleurs=["Noir"], capacites=["128 Go"]),
+            format="json",
+        ).json()
+
+        updated = self.client.patch(
+            f"/api/v1/seller/articles/{created['id']}/", {"capacites": ["256 Go"]}, format="json"
+        )
+        self.assertEqual(updated.status_code, 200, updated.content)
+        self.assertEqual(updated.json()["couleurs"], ["Noir"])
+        self.assertEqual(updated.json()["capacites"], ["256 Go"])
+
+    def test_imported_product_inherits_its_versions_from_the_variants(self):
+        """Un produit importe n'a pas d'options enregistrees: on lit ses declinaisons."""
+        product = Product.objects.create(
+            name="iPhone importe", slug="iphone-importe", brand=self.brand, category=self.category
+        )
+        variant = ProductVariant.objects.create(product=product, sku="IMPORTE-1", price_amount=500000)
+        VariantAttributeValue.objects.create(variant=variant, attribute_key="color", value="Noir", label="Noir")
+        VariantAttributeValue.objects.create(variant=variant, attribute_key="storage", value="256GB", label="256GB")
+
+        body = self.client.get(f"/api/v1/seller/articles/{product.id}/").json()
+        self.assertEqual(body["couleurs"], ["Noir"])
+        self.assertEqual(body["capacites"], ["256 Go"])
+
+    def test_options_referential_is_served_to_the_studio(self):
+        response = self.client.get("/api/v1/seller/articles/options/")
+        self.assertEqual(response.status_code, 200)
+
+        body = response.json()
+        self.assertIn("1 To", body["capacites"])
+        noms = [couleur["valeur"] for couleur in body["couleurs"]]
+        self.assertIn("Noir", noms)
+        self.assertTrue(all(couleur["code"].startswith("#") for couleur in body["couleurs"]))
+
+    def test_public_product_page_exposes_the_available_versions(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(couleurs=["Noir", "Or"], capacites=["128 Go"]),
+            format="json",
+        ).json()
+
+        public = APIClient().get(f"/api/v1/products/{created['adresse_web']}/")
+        self.assertEqual(public.status_code, 200, public.content)
+
+        body = public.json()
+        self.assertEqual(body["capacites_disponibles"], ["128 Go"])
+        self.assertEqual(
+            body["couleurs_disponibles"],
+            [{"nom": "Noir", "code": "#111827"}, {"nom": "Or", "code": "#D4AF6A"}],
+        )
