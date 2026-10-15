@@ -15,6 +15,7 @@ from catalog.models import (
     ProductVariant,
     VariantAttributeValue,
 )
+from catalog.options import CLE_CAPACITE, capacite_canonique
 from catalog.options import code_couleur as _code_couleur
 from catalog.options import options_effectives
 
@@ -77,9 +78,22 @@ class MediaAssetSerializer(serializers.ModelSerializer):
 
 
 class VariantAttributeValueSerializer(serializers.ModelSerializer):
+    label = serializers.SerializerMethodField()
+
     class Meta:
         model = VariantAttributeValue
         fields = ["attribute_key", "value", "label"]
+
+    def get_label(self, obj: VariantAttributeValue) -> str:
+        """Le catalogue importe ecrit « 128GB »: on l'affiche « 128 Go ».
+
+        Seul l'affichage est harmonise, `value` garde l'ecriture d'origine pour
+        ne pas casser les filtres qui s'appuient dessus.
+        """
+        brut = obj.label or obj.value
+        if obj.attribute_key == CLE_CAPACITE:
+            return capacite_canonique(brut) or brut
+        return brut
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):

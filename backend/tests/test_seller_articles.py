@@ -553,3 +553,16 @@ class SellerArticleTests(TestCase):
         # 949 000 est la promo du 512 Go: l'afficher ici annoncerait un prix inexistant.
         self.assertIsNone(vignette["min_promo_price"])
         self.assertTrue(vignette["has_price_range"])
+
+    def test_imported_capacity_is_displayed_in_the_shop_spelling(self):
+        """« 256GB » en base, « 256 Go » a l'ecran: on n'affiche pas deux ecritures."""
+        product = Product.objects.create(
+            name="iPhone importe 2", slug="iphone-importe-2", brand=self.brand, category=self.category
+        )
+        variant = ProductVariant.objects.create(product=product, sku="IMPORTE-2", price_amount=500000)
+        VariantAttributeValue.objects.create(variant=variant, attribute_key="storage", value="256GB", label="256GB")
+
+        body = APIClient().get(f"/api/v1/products/{product.slug}/").json()
+        attribut = body["variants"][0]["attributes"][0]
+        self.assertEqual(attribut["label"], "256 Go")
+        self.assertEqual(attribut["value"], "256GB")  # la donnee d'origine est intacte
