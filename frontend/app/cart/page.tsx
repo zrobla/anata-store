@@ -7,7 +7,7 @@ import { BackLink } from "@/components/back-link";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { fetchCart, removeCartItem, updateCartItemQty } from "@/lib/api";
 import { formatFcfa } from "@/lib/currency";
-import { availabilityLabel } from "@/lib/labels";
+import { attributeLabel, availabilityLabel } from "@/lib/labels";
 import { Cart } from "@/lib/types";
 
 function fcfa(value: number) {
@@ -23,7 +23,7 @@ function attrsLabel(item: Cart["items"][number]) {
   if (!attrs || attrs.length === 0) {
     return "";
   }
-  return attrs.map((attr) => `${attr.attribute_key}: ${attr.label || attr.value}`).join(" - ");
+  return attrs.map((attr) => `${attributeLabel(attr.attribute_key)} : ${attr.label || attr.value}`).join(" · ");
 }
 
 function whatsappOrderHref(cart: Cart, phone: string): string | null {

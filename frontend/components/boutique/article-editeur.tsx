@@ -2,6 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import {
+  ArticleCapacitesPrix,
+  LigneCapaciteBrouillon
+} from "@/components/boutique/article-capacites-prix";
 import { ArticleCaracteristiques } from "@/components/boutique/article-caracteristiques";
 import { ArticlePhotos } from "@/components/boutique/article-photos";
 import {
@@ -36,7 +40,7 @@ type Brouillon = {
   quantite: string;
   seuil_alerte: string;
   couleurs: string[];
-  capacites: string[];
+  capacites_prix: LigneCapaciteBrouillon[];
   description_courte: string;
   description: string;
   en_ligne: boolean;
@@ -53,12 +57,36 @@ function brouillonDepuis(article?: Article | null): Brouillon {
     quantite: article ? String(article.quantite) : "",
     seuil_alerte: article?.seuil_alerte != null ? String(article.seuil_alerte) : "",
     couleurs: article?.couleurs ? [...article.couleurs] : [],
-    capacites: article?.capacites ? [...article.capacites] : [],
+    capacites_prix: lignesDepuis(article),
     description_courte: article?.description_courte || "",
     description: article?.description || "",
     en_ligne: article ? article.en_ligne : true,
     mis_en_avant: article ? article.mis_en_avant : false
   };
+}
+
+/**
+ * La grille de prix telle qu'on la montre au gerant.
+ *
+ * Un article edite avant cette fonctionnalite peut avoir des capacites sans
+ * prix: on les reprend au prix actuel de l'article, qu'il n'a plus qu'a ajuster.
+ */
+function lignesDepuis(article?: Article | null): LigneCapaciteBrouillon[] {
+  if (!article) {
+    return [];
+  }
+  if (article.capacites_prix?.length) {
+    return article.capacites_prix.map((ligne) => ({
+      capacite: ligne.capacite,
+      prix: String(ligne.prix),
+      prix_promo: ligne.prix_promo != null ? String(ligne.prix_promo) : ""
+    }));
+  }
+  return (article.capacites || []).map((capacite) => ({
+    capacite,
+    prix: article.prix != null ? String(article.prix) : "",
+    prix_promo: ""
+  }));
 }
 
 function nombreOuNull(valeur: string): number | null {
@@ -138,14 +166,30 @@ export function ArticleEditeur({
     }
 
     if (numero === 2) {
-      const prix = nombreOuNull(brouillon.prix);
-      if (prix === null || prix <= 0) {
-        erreurs.prix = "Indiquez le prix de vente en francs CFA.";
+      if (brouillon.capacites_prix.length > 0) {
+        // Grille de prix: c'est elle qui fait foi, le prix unique est ignore.
+        const incomplete = brouillon.capacites_prix.find((ligne) => (nombreOuNull(ligne.prix) ?? 0) <= 0);
+        const promoTropHaute = brouillon.capacites_prix.find((ligne) => {
+          const prix = nombreOuNull(ligne.prix);
+          const promo = nombreOuNull(ligne.prix_promo);
+          return promo !== null && prix !== null && promo >= prix;
+        });
+        if (incomplete) {
+          erreurs.capacites_prix = `Indiquez le prix du ${incomplete.capacite}.`;
+        } else if (promoTropHaute) {
+          erreurs.capacites_prix = `Pour le ${promoTropHaute.capacite}, le prix promotionnel doit être inférieur au prix normal.`;
+        }
+      } else {
+        const prix = nombreOuNull(brouillon.prix);
+        if (prix === null || prix <= 0) {
+          erreurs.prix = "Indiquez le prix de vente en francs CFA.";
+        }
+        const promo = nombreOuNull(brouillon.prix_promo);
+        if (promo !== null && prix !== null && promo >= prix) {
+          erreurs.prix_promo = "Le prix promotionnel doit être inférieur au prix normal.";
+        }
       }
-      const promo = nombreOuNull(brouillon.prix_promo);
-      if (promo !== null && prix !== null && promo >= prix) {
-        erreurs.prix_promo = "Le prix promotionnel doit être inférieur au prix normal.";
-      }
+
       const quantite = nombreOuNull(brouillon.quantite);
       if (quantite !== null && quantite < 0) {
         erreurs.quantite = "La quantité ne peut pas être négative.";
@@ -157,16 +201,24 @@ export function ArticleEditeur({
   }
 
   function chargeUtile() {
+    const grille = brouillon.capacites_prix.map((ligne) => ({
+      capacite: ligne.capacite,
+      prix: nombreOuNull(ligne.prix) ?? 0,
+      prix_promo: nombreOuNull(ligne.prix_promo)
+    }));
+    // Avec une grille, le prix de l'article est celui de sa version la moins chère.
+    const prix = grille.length > 0 ? Math.min(...grille.map((ligne) => ligne.prix)) : nombreOuNull(brouillon.prix) ?? 0;
+
     return {
       nom: brouillon.nom.trim(),
       marque: brouillon.marque,
       categorie: brouillon.categorie,
-      prix: nombreOuNull(brouillon.prix) ?? 0,
-      prix_promo: nombreOuNull(brouillon.prix_promo),
+      prix,
+      prix_promo: grille.length > 0 ? null : nombreOuNull(brouillon.prix_promo),
       quantite: nombreOuNull(brouillon.quantite) ?? 0,
       seuil_alerte: nombreOuNull(brouillon.seuil_alerte),
       couleurs: brouillon.couleurs,
-      capacites: brouillon.capacites,
+      capacites_prix: grille,
       description_courte: brouillon.description_courte.trim(),
       description: brouillon.description.trim(),
       en_ligne: brouillon.en_ligne,
@@ -260,41 +312,64 @@ export function ArticleEditeur({
       <ArticleCaracteristiques
         options={options}
         couleurs={brouillon.couleurs}
-        capacites={brouillon.capacites}
         onCouleurs={(valeurs) => modifier("couleurs", valeurs)}
-        onCapacites={(valeurs) => modifier("capacites", valeurs)}
       />
     </div>
   );
 
+  const prixParCapacite = brouillon.capacites_prix.length > 0;
+  const prixAffiches = brouillon.capacites_prix
+    .map((ligne) => nombreOuNull(ligne.prix_promo) ?? nombreOuNull(ligne.prix) ?? 0)
+    .filter((montant) => montant > 0);
+  const prixLePlusBas = prixAffiches.length > 0 ? Math.min(...prixAffiches) : 0;
+
   const champsPrix = (
     <div className="space-y-5">
-      <div className="grid gap-5 md:grid-cols-2">
-        <Champ label="Prix de vente" aide="Le prix affiché aux clients" requis erreur={erreursChamps.prix}>
-          <ChampMontant
-            value={brouillon.prix}
-            onChange={(event) => modifier("prix", event.target.value)}
-            placeholder="185000"
-          />
-        </Champ>
+      {prixParCapacite ? (
+        <Message type="info">
+          Le prix de cet article dépend de la capacité : indiquez-le ci-dessous pour chacune. Votre boutique
+          affichera « À partir de {formatFcfa(prixLePlusBas)} ».
+        </Message>
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2">
+          <Champ label="Prix de vente" aide="Le prix affiché aux clients" requis erreur={erreursChamps.prix}>
+            <ChampMontant
+              value={brouillon.prix}
+              onChange={(event) => modifier("prix", event.target.value)}
+              placeholder="185000"
+            />
+          </Champ>
 
-        <Champ
-          label="Prix promotionnel"
-          aide="À remplir seulement si l'article est en promotion. Laissez vide sinon."
-          erreur={erreursChamps.prix_promo}
-        >
-          <ChampMontant
-            value={brouillon.prix_promo}
-            onChange={(event) => modifier("prix_promo", event.target.value)}
-            placeholder="Aucune promotion"
-          />
-        </Champ>
-      </div>
+          <Champ
+            label="Prix promotionnel"
+            aide="À remplir seulement si l'article est en promotion. Laissez vide sinon."
+            erreur={erreursChamps.prix_promo}
+          >
+            <ChampMontant
+              value={brouillon.prix_promo}
+              onChange={(event) => modifier("prix_promo", event.target.value)}
+              placeholder="Aucune promotion"
+            />
+          </Champ>
+        </div>
+      )}
+
+      <ArticleCapacitesPrix
+        capacites={options?.capacites || []}
+        lignes={brouillon.capacites_prix}
+        prixDeReference={brouillon.prix}
+        erreur={erreursChamps.capacites_prix}
+        onChange={(lignes) => modifier("capacites_prix", lignes)}
+      />
 
       <div className="grid gap-5 md:grid-cols-2">
         <Champ
           label="Quantité en stock"
-          aide="Combien en avez-vous en boutique ? À zéro, l'article s'affiche « épuisé »."
+          aide={
+            prixParCapacite
+              ? "Le nombre d'appareils que vous avez, toutes capacités confondues. À zéro, l'article s'affiche « épuisé »."
+              : "Combien en avez-vous en boutique ? À zéro, l'article s'affiche « épuisé »."
+          }
           erreur={erreursChamps.quantite}
         >
           <ChampTexte
@@ -352,10 +427,10 @@ export function ArticleEditeur({
       <form onSubmit={onEnregistrerModifications} className="space-y-8">
         {erreur && <Message type="erreur">{erreur}</Message>}
 
-        {article.nombre_variantes > 1 && (
+        {article.nombre_variantes > brouillon.capacites_prix.length && brouillon.capacites_prix.length > 0 && (
           <Message type="info">
-            Cet article existe en {article.nombre_variantes} versions. Les prix et quantités modifiés ici
-            s&apos;appliquent à la version principale.
+            Cet article a {article.nombre_variantes} versions enregistrées, dont{" "}
+            {brouillon.capacites_prix.length} que vous pouvez modifier ici. Les autres restent telles quelles.
           </Message>
         )}
 
@@ -456,6 +531,7 @@ export function ArticleEditeur({
           <Message type="succes">
             « {articleCourant.nom} » est créé
             {brouillon.en_ligne ? " et visible sur votre boutique" : ""}. Prix :{" "}
+            {articleCourant.prix_variable ? "à partir de " : ""}
             {formatFcfa(articleCourant.prix ?? 0)}.
           </Message>
 

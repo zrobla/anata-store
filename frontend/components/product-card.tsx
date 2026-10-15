@@ -45,6 +45,7 @@ export function ProductCard({
         {product.name}
       </h3>
       <p className="mobile-product-card-copy mt-1 text-center text-sm font-semibold text-fuel sm:text-left">
+        {product.has_price_range && <span className="font-normal text-slate-500">À partir de </span>}
         {fcfa(product.min_promo_price ?? product.min_price)}
       </p>
       <p className="mobile-product-card-copy text-center text-xs text-slate-500 sm:text-left">

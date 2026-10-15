@@ -12,6 +12,8 @@ export type ProductListItem = {
   thumbnail_url: string;
   min_price: number;
   min_promo_price: number | null;
+  /** Plusieurs prix selon la version: la vignette affiche « À partir de ». */
+  has_price_range?: boolean;
   availability: Availability;
   badges: string[];
 };
@@ -278,6 +280,8 @@ export type Article = {
   seuil_alerte: number | null;
   couleurs: string[];
   capacites: string[];
+  capacites_prix: LigneCapacite[];
+  prix_variable: boolean;
   description_courte: string;
   description: string;
   en_ligne: boolean;
@@ -307,6 +311,7 @@ export type ArticleCreateInput = {
   seuil_alerte?: number | null;
   couleurs?: string[];
   capacites?: string[];
+  capacites_prix?: LigneCapacite[];
   description_courte?: string;
   description?: string;
   en_ligne?: boolean;
@@ -314,6 +319,13 @@ export type ArticleCreateInput = {
 };
 
 export type ArticleUpdateInput = Partial<ArticleCreateInput>;
+/** Une capacité de stockage et le prix auquel elle se vend. */
+export type LigneCapacite = {
+  capacite: string;
+  prix: number;
+  prix_promo: number | null;
+};
+
 export type ArticleOptions = {
   couleurs: Array<{ valeur: string; libelle: string; code: string }>;
   capacites: string[];

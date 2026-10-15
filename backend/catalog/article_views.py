@@ -79,6 +79,7 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
                 mis_en_avant=data.get("mis_en_avant", False),
                 couleurs=data.get("couleurs"),
                 capacites=data.get("capacites"),
+                capacites_prix=data.get("capacites_prix"),
             )
         except ArticleError as error:
             return Response({"detail": str(error)}, status=400)
@@ -104,7 +105,9 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
         except ArticleError as error:
             return Response({"detail": str(error)}, status=400)
 
-        product.refresh_from_db()
+        # On relit l'objet: les declinaisons prechargees ne refletent plus la
+        # grille de prix qui vient d'etre appliquee.
+        product = self.get_queryset().get(pk=product.pk)
         after = self._render(product)
         log_action(
             actor_user=request.user,

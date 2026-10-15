@@ -3,21 +3,25 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 const internalApiOrigin = process.env.INTERNAL_API_ORIGIN || "http://127.0.0.1:8000";
 
+// En dev, on autorise l'API et le serveur local sur leurs ports reels: les ports
+// par defaut peuvent etre pris par un autre projet de la machine.
+const devPort = process.env.PORT || "3000";
+const devHosts = (port: string) => [`http://localhost:${port}`, `http://127.0.0.1:${port}`];
+const apiPort = new URL(internalApiOrigin).port || "8000";
+
 const connectSrc = isDev
   ? [
       "'self'",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "ws://localhost:3000",
-      "ws://127.0.0.1:3000",
-      "http://localhost:8000",
-      "http://127.0.0.1:8000",
+      ...devHosts(devPort),
+      `ws://localhost:${devPort}`,
+      `ws://127.0.0.1:${devPort}`,
+      ...devHosts(apiPort),
       "https:"
     ].join(" ")
   : ["'self'", "https:"].join(" ");
 
 const imgSrc = isDev
-  ? ["'self'", "data:", "https:", "http://localhost:8000", "http://127.0.0.1:8000"].join(" ")
+  ? ["'self'", "data:", "https:", ...devHosts(apiPort)].join(" ")
   : ["'self'", "data:", "https:"].join(" ");
 
 const scriptSrc = isDev

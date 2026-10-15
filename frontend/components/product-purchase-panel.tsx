@@ -26,11 +26,16 @@ function summarizeAttributes(
   };
 }
 
+/** Le nom lisible d'une version: « 256 Go », « 256 Go - Noir », sinon rien. */
+function libelleVersion(attrs: { storage?: string; color?: string; ram?: string }) {
+  return [attrs.storage, attrs.color, attrs.ram ? `${attrs.ram} RAM` : ""].filter(Boolean).join(" · ");
+}
+
 /**
  * Versions disponibles en boutique (couleurs, capacites).
  *
- * Informatif: le client choisit sa version a l'appel de confirmation, puisque le
- * paiement se fait a la livraison. On n'affiche que ce qui est renseigne.
+ * Les capacites qui portent un prix sont choisies plus bas, dans la liste des
+ * versions: on ne les repete pas ici, sinon le client voit deux listes.
  */
 function ProductVersions({
   couleurs,
@@ -123,9 +128,9 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         router.push("/checkout");
         return;
       }
-      setMessage("Variante ajoutée au panier.");
+      setMessage("Ajouté à votre panier.");
     } catch {
-      setError("Impossible d'ajouter la variante au panier.");
+      setError("Impossible d'ajouter cet article au panier.");
     } finally {
       setBusy("");
     }
@@ -159,6 +164,14 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
     ? selectedVariant.promo_price_amount ?? selectedVariant.price_amount
     : null;
 
+  // Plusieurs capacites a des prix differents: le choix se fait ici, pas au telephone.
+  const capacitesChoisissables =
+    new Set(product.variants.map((variant) => summarizeAttributes(variant.attributes).storage).filter(Boolean))
+      .size > 1;
+  // Une seule version: rien a choisir, on affiche simplement le prix.
+  const choixUnique = product.variants.length === 1 ? product.variants[0] : null;
+  const libelleSelection = selectedVariant ? libelleVersion(summarizeAttributes(selectedVariant.attributes)) : "";
+
   return (
     <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 pb-24 lg:pb-6">
       <div>
@@ -168,43 +181,58 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
       <ProductVersions
         couleurs={product.couleurs_disponibles ?? []}
-        capacites={product.capacites_disponibles ?? []}
+        capacites={capacitesChoisissables ? [] : product.capacites_disponibles ?? []}
       />
 
-      <div className="space-y-3">
-        {product.variants.map((variant) => {
-          const attrs = summarizeAttributes(variant.attributes);
-          const active = variant.id === selectedVariant?.id;
-          return (
-            <button
-              key={variant.id}
-              type="button"
-              onClick={() => setSelectedVariantId(variant.id)}
-              className={`w-full rounded-xl border p-3 text-left transition ${
-                active
-                  ? "border-cyan-500 bg-gradient-to-br from-[#0f172a] to-[#1f2937] text-fuel ring-1 ring-cyan-300/70 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)]"
-                  : "border-slate-200 hover:border-slate-300"
-              }`}
-            >
-              <p className={`text-xs ${active ? "text-fuel/85" : "text-slate-500"}`}>SKU {variant.sku}</p>
-              <p className={`font-semibold ${active ? "text-white" : "text-fuel"}`}>
-                {fcfa(variant.promo_price_amount ?? variant.price_amount)}
-              </p>
-              <p className={`text-xs ${active ? "text-fuel/90" : "text-slate-600"}`}>
-                {attrs.storage ? `Stockage: ${attrs.storage}` : "Stockage standard"}{" "}
-                {attrs.color ? `- Couleur: ${attrs.color}` : ""} {attrs.ram ? `- RAM: ${attrs.ram}` : ""}
-              </p>
-              <p className={`mt-1 text-xs ${active ? "text-fuel" : "text-slate-500"}`}>
-                {availabilityLabel(variant.availability.status)}
-              </p>
-            </button>
-          );
-        })}
-      </div>
-
-      {selectedVariant && (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-          Variante sélectionnée : <span className="font-semibold">{selectedVariant.sku}</span>
+      {choixUnique ? (
+        <div>
+          <p className="text-2xl font-semibold text-fuel">
+            {fcfa(choixUnique.promo_price_amount ?? choixUnique.price_amount)}
+          </p>
+          <p className="text-sm text-slate-500">{availabilityLabel(choixUnique.availability.status)}</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-[0.95rem] font-semibold text-slate-700">
+            {capacitesChoisissables ? "Choisissez la capacité" : "Choisissez votre version"}
+          </p>
+          {product.variants.map((variant) => {
+            const attrs = summarizeAttributes(variant.attributes);
+            const libelle = libelleVersion(attrs);
+            const active = variant.id === selectedVariant?.id;
+            return (
+              <button
+                key={variant.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setSelectedVariantId(variant.id)}
+                className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left transition ${
+                  active
+                    ? "border-cyan-500 bg-gradient-to-br from-[#0f172a] to-[#1f2937] ring-1 ring-cyan-300/70 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)]"
+                    : "border-slate-200 hover:border-slate-300"
+                }`}
+              >
+                <span>
+                  <span className={`block text-base font-semibold ${active ? "text-white" : "text-ink"}`}>
+                    {libelle || "Version standard"}
+                  </span>
+                  <span className={`block text-xs ${active ? "text-fuel" : "text-slate-500"}`}>
+                    {availabilityLabel(variant.availability.status)}
+                  </span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <span className={`block text-base font-semibold ${active ? "text-white" : "text-fuel"}`}>
+                    {fcfa(variant.promo_price_amount ?? variant.price_amount)}
+                  </span>
+                  {variant.promo_price_amount != null && (
+                    <span className={`block text-xs line-through ${active ? "text-fuel/80" : "text-slate-400"}`}>
+                      {fcfa(variant.price_amount)}
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -270,7 +298,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] uppercase tracking-wide text-slate-500">
-              {selectedVariant ? `SKU ${selectedVariant.sku}` : "Sélectionnez une variante"}
+              {libelleSelection || product.name}
             </p>
             <p className="truncate text-base font-semibold text-fuel">
               {activePrice !== null ? fcfa(activePrice) : "-"}

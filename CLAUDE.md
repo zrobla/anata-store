@@ -66,6 +66,20 @@ crée les trois objets d'un coup.
   (import Excel, cas multi-variantes) ; la vue « article » édite la **variante principale**
   (la moins chère active) et le signale à l'écran quand il y en a plusieurs.
 
+**Prix par capacité** — un 512 Go ne se vend pas au prix d'un 128 Go. Le gérant saisit une
+**grille `capacité → prix`** (champ API `capacites_prix`, écran « Prix et stock ») : chaque ligne
+devient une `ProductVariant` réelle portant `VariantAttributeValue(attribute_key="storage")` + son
+`InventoryItem`, et le client choisit sa capacité sur la fiche produit. Les **couleurs** restent
+une caractéristique affichée (même prix, même stock).
+- `catalog/article_service.py` : `sync_capacites()` (aligne les déclinaisons sur la grille),
+  `lignes_capacites()` (relecture), `demonter_grille()` (grille vidée = retour au prix unique).
+- ⚠️ **Invariants** : une capacité retirée est **désactivée, jamais supprimée** (des commandes la
+  référencent) ; le **stock est global** à l'article (la quantité saisie est recopiée sur chaque
+  capacité, relue comme le maximum) ; `min_price`/`min_promo_price` viennent de la **même**
+  variante, sinon la vignette annonce un prix inexistant.
+- Produits importés : leur grille est héritée de leurs variantes. Leur écriture d'origine
+  (`"256GB"`) est conservée dans `value` — seul `label` est harmonisé — pour ne pas casser `?attrs=`.
+
 **Photos** — `MediaAsset.image` (`ImageField`, migration `catalog/0002`) coexiste avec l'ancien
 `url` distant ; `MediaAsset.effective_url` donne la priorité au fichier envoyé, et les
 serializers publics passent par lui. `catalog/media_service.py` normalise à l'envoi :

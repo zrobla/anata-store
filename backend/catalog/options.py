@@ -1,9 +1,12 @@
 """Couleurs et capacites proposees au gerant quand il cree un article.
 
-Ce sont des *caracteristiques affichees*: elles disent au client quelles versions
-existent en boutique. Elles ne creent pas de declinaisons vendables separement
-(un article garde un prix et un stock uniques) - la version exacte se confirme
-a l'appel, comme pour le reste du parcours « paiement a la livraison ».
+Les deux ne jouent pas le meme role:
+
+- les **couleurs** sont une caracteristique affichee (meme prix, meme stock);
+- les **capacites** peuvent porter un prix: un 512 Go ne se vend pas au prix d'un
+  128 Go. Quand le gerant saisit une grille de prix, chaque capacite devient une
+  declinaison vendable (cf. `article_service.sync_capacites`). Sans grille, la
+  capacite reste une simple caracteristique affichee.
 
 Le referentiel est servi par l'API pour que le studio n'ait rien a coder en dur.
 """
@@ -117,11 +120,36 @@ def normaliser_couleurs(valeurs) -> list[str]:
     return _normaliser(valeurs, _index_couleurs(), "couleurs")
 
 
-def normaliser_capacites(valeurs) -> list[str]:
+def _index_capacites() -> dict[str, str]:
     index = {capacite.casefold(): capacite for capacite in CAPACITES}
     index.update(_ALIAS_CAPACITES)
     index.update({capacite.replace(" ", "").casefold(): capacite for capacite in CAPACITES})
-    return _normaliser(valeurs, index, "capacites")
+    return index
+
+
+def normaliser_capacites(valeurs) -> list[str]:
+    return _normaliser(valeurs, _index_capacites(), "capacites")
+
+
+def capacite_canonique(valeur) -> str | None:
+    """« 256GB », « 256 go », « 1TB »... -> « 256 Go », « 1 To ». None si inconnue.
+
+    Sert a reconnaitre la capacite d'une declinaison existante, quelle que soit
+    l'ecriture utilisee a l'import.
+    """
+    texte = str(valeur or "").strip()
+    if not texte:
+        return None
+    index = _index_capacites()
+    return index.get(texte.casefold()) or index.get(texte.replace(" ", "").casefold())
+
+
+def rang_capacite(capacite: str) -> int:
+    """Ordre d'affichage: du plus petit au plus grand stockage."""
+    try:
+        return CAPACITES.index(capacite)
+    except ValueError:
+        return len(CAPACITES)
 
 
 def _depuis_variantes(product: Product) -> dict[str, list[str]]:
@@ -136,7 +164,7 @@ def _depuis_variantes(product: Product) -> dict[str, list[str]]:
             if attribut.attribute_key == CLE_COULEUR and valeur not in couleurs:
                 couleurs.append(valeur)
             elif attribut.attribute_key == CLE_CAPACITE:
-                normalisee = _ALIAS_CAPACITES.get(valeur.replace(" ", "").casefold(), valeur)
+                normalisee = capacite_canonique(valeur) or valeur
                 if normalisee not in capacites:
                     capacites.append(normalisee)
     return {"couleurs": couleurs, "capacites": capacites}

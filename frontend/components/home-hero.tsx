@@ -94,7 +94,7 @@ export function HomeHero({ products }: HomeHeroProps) {
 
                         <div className="min-w-0 xl:mt-1 xl:flex xl:items-center xl:gap-2">
                           <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300 xl:hidden">À partir de</p>
-                          <p className="truncate text-[15px] font-bold leading-none text-fuel drop-shadow-sm xl:text-[11px] xl:font-semibold xl:drop-shadow-none">{fcfa(product.min_promo_price ?? product.min_price)}</p>
+                          <p className="truncate text-[15px] font-bold leading-none text-fuel drop-shadow-sm xl:text-[11px] xl:font-semibold xl:drop-shadow-none">{product.has_price_range ? "dès " : ""}{fcfa(product.min_promo_price ?? product.min_price)}</p>
                           <Link
                             href={`/p/${product.slug}`}
                             className="hidden xl:inline-flex xl:rounded-md xl:border xl:border-white/40 xl:px-1.5 xl:py-0.5 xl:text-[9px] xl:font-normal xl:text-white"
@@ -158,7 +158,7 @@ export function HomeHero({ products }: HomeHeroProps) {
                     <div className="min-w-0">
                       <p className="line-clamp-2 text-[11px] leading-tight">{product.name}</p>
                       <p className="mt-1 text-[10px] font-semibold text-cyan-100">
-                        {fcfa(product.min_promo_price ?? product.min_price)}
+                        {product.has_price_range ? "dès " : ""}{fcfa(product.min_promo_price ?? product.min_price)}
                       </p>
                       <span className="mt-1 inline-flex rounded-md border border-white/40 px-2 py-0.5 text-[10px]">
                         Voir ce modèle

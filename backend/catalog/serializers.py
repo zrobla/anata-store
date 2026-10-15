@@ -106,7 +106,7 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
     category = CategorySerializer(read_only=True)
-    variants = ProductVariantSerializer(many=True, read_only=True)
+    variants = serializers.SerializerMethodField()
     media = serializers.SerializerMethodField()
     couleurs_disponibles = serializers.SerializerMethodField()
     capacites_disponibles = serializers.SerializerMethodField()
@@ -130,6 +130,12 @@ class ProductSerializer(serializers.ModelSerializer):
             "capacites_disponibles",
         ]
 
+    def get_variants(self, obj: Product) -> list[dict]:
+        # Une version retiree de la vente ne doit plus etre proposee: le panier
+        # la refuserait, et le client ne comprendrait pas l'echec.
+        actives = [variant for variant in obj.variants.all() if variant.is_active]
+        return ProductVariantSerializer(actives, many=True, context=self.context).data
+
     def get_couleurs_disponibles(self, obj: Product) -> list[dict]:
         return [
             {"nom": nom, "code": _code_couleur(nom)}
@@ -152,6 +158,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
     thumbnail_url = serializers.SerializerMethodField()
     min_price = serializers.SerializerMethodField()
     min_promo_price = serializers.SerializerMethodField()
+    has_price_range = serializers.SerializerMethodField()
     availability = serializers.SerializerMethodField()
 
     class Meta:
@@ -165,9 +172,27 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "thumbnail_url",
             "min_price",
             "min_promo_price",
+            "has_price_range",
             "availability",
             "badges",
         ]
+
+    def _variante_la_moins_chere(self, obj: Product) -> ProductVariant | None:
+        """La version la moins chere *a payer*, promotion comprise.
+
+        Sans ce rapprochement, `min_price` et `min_promo_price` pourraient venir
+        de deux versions differentes et la vignette afficherait un prix qui
+        n'existe pas (ex. la promo du 512 Go sur un article qui demarre au 256).
+        """
+        actives = [variant for variant in obj.variants.all() if variant.is_active]
+        if not actives:
+            return None
+        return min(actives, key=lambda variant: variant.active_price_amount)
+
+    def get_has_price_range(self, obj: Product) -> bool:
+        """Plusieurs prix (ex. selon la capacite): la vignette dira « a partir de »."""
+        prix = {variant.active_price_amount for variant in obj.variants.all() if variant.is_active}
+        return len(prix) > 1
 
     def get_thumbnail_url(self, obj: Product) -> str:
         media_link = obj.media_links.select_related("media_asset").order_by("sort_order").first()
@@ -175,13 +200,11 @@ class ProductListItemSerializer(serializers.ModelSerializer):
         return _public_media_url(media_link.media_asset.effective_url, request) if media_link else ""
 
     def get_min_price(self, obj: Product) -> int | None:
-        variant = obj.variants.filter(is_active=True).order_by("price_amount").first()
+        variant = self._variante_la_moins_chere(obj)
         return variant.price_amount if variant else None
 
     def get_min_promo_price(self, obj: Product) -> int | None:
-        variant = obj.variants.filter(is_active=True, promo_price_amount__isnull=False).order_by(
-            "promo_price_amount"
-        ).first()
+        variant = self._variante_la_moins_chere(obj)
         return variant.promo_price_amount if variant else None
 
     def get_availability(self, obj: Product) -> dict[str, int | str | None]:

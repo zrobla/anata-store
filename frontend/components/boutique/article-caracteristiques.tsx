@@ -3,12 +3,11 @@
 import { ArticleOptions } from "@/lib/types";
 
 /**
- * Couleurs et capacites disponibles pour un article.
+ * Couleurs disponibles pour un article.
  *
- * Le gerant coche ce qu'il a en boutique: ce sont des informations affichees au
- * client, pas des versions vendables separement (l'article garde un seul prix et
- * un seul stock). On reste donc sur des cases a cocher, pas sur un tableau de
- * declinaisons: zones tactiles larges, libelles en clair, aucun jargon.
+ * Le gerant coche ce qu'il a en boutique: c'est une information affichee au
+ * client, pas une version vendable separement (meme prix, meme stock). Les
+ * capacites, elles, portent un prix et vivent dans `ArticleCapacitesPrix`.
  */
 
 function basculer(liste: string[], valeur: string): string[] {
@@ -32,22 +31,18 @@ function pastilleClaire(code: string) {
 export function ArticleCaracteristiques({
   options,
   couleurs,
-  capacites,
-  onCouleurs,
-  onCapacites
+  onCouleurs
 }: {
   options: ArticleOptions | null;
   couleurs: string[];
-  capacites: string[];
   onCouleurs: (valeurs: string[]) => void;
-  onCapacites: (valeurs: string[]) => void;
 }) {
   if (!options) {
     return null;
   }
 
   return (
-    <div className="space-y-6 rounded-3xl border-2 border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+    <div className="rounded-3xl border-2 border-slate-200 bg-slate-50/70 p-4 sm:p-5">
       <div>
         <h3 className="text-[1.05rem] font-bold text-ink">Couleurs disponibles</h3>
         <p className="mt-1 text-[1rem] leading-relaxed text-slate-600">
@@ -85,42 +80,6 @@ export function ArticleCaracteristiques({
         </div>
       </div>
 
-      <div>
-        <h3 className="text-[1.05rem] font-bold text-ink">Capacités disponibles</h3>
-        <p className="mt-1 text-[1rem] leading-relaxed text-slate-600">
-          La mémoire de l&apos;appareil. Cochez toutes les versions que vous proposez.
-        </p>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {options.capacites.map((capacite) => {
-            const choisie = capacites.includes(capacite);
-            return (
-              <button
-                key={capacite}
-                type="button"
-                aria-pressed={choisie}
-                onClick={() => onCapacites(basculer(capacites, capacite))}
-                className={`min-h-[48px] rounded-full border-2 px-5 text-[1.05rem] font-bold transition ${
-                  choisie
-                    ? "border-fuel bg-fuel text-white"
-                    : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
-                }`}
-              >
-                {capacite}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {(couleurs.length > 0 || capacites.length > 0) && (
-        <p className="rounded-2xl bg-white px-4 py-3 text-[1rem] text-slate-700">
-          Vos clients verront :{" "}
-          <span className="font-bold text-ink">
-            {[couleurs.join(", "), capacites.join(", ")].filter(Boolean).join(" · ")}
-          </span>
-        </p>
-      )}
     </div>
   );
 }

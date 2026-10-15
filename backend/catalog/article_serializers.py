@@ -9,6 +9,14 @@ from catalog.models import Brand, Category, Product
 from catalog.serializers import _public_media_url
 
 
+class LigneCapaciteSerializer(serializers.Serializer):
+    """Une ligne de la grille: « 256 Go -> 215 000 FCFA »."""
+
+    capacite = serializers.CharField(max_length=40)
+    prix = serializers.IntegerField(min_value=1)
+    prix_promo = serializers.IntegerField(min_value=0, required=False, allow_null=True, default=None)
+
+
 class ArticleSerializer(serializers.Serializer):
     """Un article = ce que le gerant manipule: un nom, une photo, un prix, une quantite."""
 
@@ -35,6 +43,12 @@ class ArticleSerializer(serializers.Serializer):
         required=False,
         allow_empty=True,
         help_text="Capacites de stockage disponibles, affichees au client.",
+    )
+    capacites_prix = LigneCapaciteSerializer(
+        many=True,
+        required=False,
+        allow_empty=True,
+        help_text="Prix par capacite. Chaque ligne devient une version vendable de l'article.",
     )
 
     description_courte = serializers.CharField(required=False, allow_blank=True, default="")
@@ -98,6 +112,8 @@ class ArticleSerializer(serializers.Serializer):
             "seuil_alerte": snapshot["seuil_alerte"],
             "couleurs": snapshot["couleurs"],
             "capacites": snapshot["capacites"],
+            "capacites_prix": snapshot["capacites_prix"],
+            "prix_variable": snapshot["prix_variable"],
             "description_courte": obj.short_description,
             "description": obj.description,
             "en_ligne": obj.is_active,

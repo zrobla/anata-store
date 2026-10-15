@@ -307,3 +307,249 @@ class SellerArticleTests(TestCase):
             body["couleurs_disponibles"],
             [{"nom": "Noir", "code": "#111827"}, {"nom": "Or", "code": "#D4AF6A"}],
         )
+
+    # --- Prix par capacite (un 512 Go ne vaut pas un 128 Go) ---------------
+
+    def grille(self, *lignes):
+        return [{"capacite": c, "prix": p, "prix_promo": promo} for c, p, promo in lignes]
+
+    def test_each_capacity_becomes_a_sellable_version_with_its_own_price(self):
+        """Le coeur de la fonctionnalite: trois capacites = trois prix vendables."""
+        response = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(
+                prix=185000,
+                quantite=3,
+                capacites_prix=self.grille(
+                    ("256 Go", 215000, 199000),
+                    ("128 Go", 185000, None),
+                    ("512 Go", 265000, None),
+                ),
+            ),
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        body = response.json()
+
+        # Trie du plus petit au plus grand stockage, quel que soit l'ordre saisi.
+        self.assertEqual([ligne["capacite"] for ligne in body["capacites_prix"]], ["128 Go", "256 Go", "512 Go"])
+        self.assertEqual([ligne["prix"] for ligne in body["capacites_prix"]], [185000, 215000, 265000])
+        self.assertEqual(body["capacites"], ["128 Go", "256 Go", "512 Go"])
+        self.assertTrue(body["prix_variable"])
+        self.assertEqual(body["prix"], 185000)  # « a partir de »
+
+        product = Product.objects.get(pk=body["id"])
+        variantes = list(product.variants.filter(is_active=True))
+        self.assertEqual(len(variantes), 3)
+        for variant in variantes:
+            capacite = variant.attribute_values.get(attribute_key="storage").value
+            self.assertIn(capacite, {"128 Go", "256 Go", "512 Go"})
+            # Chaque version doit etre immediatement vendable, stock global recopie.
+            item = InventoryItem.objects.get(variant=variant)
+            self.assertEqual(item.qty_on_hand, 3)
+            self.assertEqual(variant.availability_info()["status"], "IN_STOCK")
+
+    def test_shoppers_see_one_price_per_capacity_on_the_public_page(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(capacites_prix=self.grille(("128 Go", 185000, None), ("256 Go", 215000, None))),
+            format="json",
+        ).json()
+
+        body = APIClient().get(f"/api/v1/products/{created['adresse_web']}/").json()
+        versions = {
+            variant["attributes"][0]["label"]: variant["price_amount"]
+            for variant in body["variants"]
+            if variant["attributes"]
+        }
+        self.assertEqual(versions, {"128 Go": 185000, "256 Go": 215000})
+
+        liste = APIClient().get("/api/v1/products/", {"q": "Galaxy A56"}).json()
+        vignette = next(item for item in liste["items"] if item["slug"] == created["adresse_web"])
+        self.assertTrue(vignette["has_price_range"])
+        self.assertEqual(vignette["min_price"], 185000)
+
+    def test_capacity_prices_are_normalised_whatever_the_spelling(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(capacites_prix=self.grille(("256GB", 215000, None), ("1tb", 420000, None))),
+            format="json",
+        ).json()
+        self.assertEqual([ligne["capacite"] for ligne in created["capacites_prix"]], ["256 Go", "1 To"])
+
+    def test_a_capacity_without_a_price_is_refused_with_a_readable_message(self):
+        response = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(capacites_prix=[{"capacite": "256 Go", "prix": 0}]),
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertNotIn("Traceback", str(response.content))
+
+    def test_promo_above_the_capacity_price_is_refused(self):
+        response = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(capacites_prix=self.grille(("256 Go", 200000, 250000))),
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("256 Go", response.json()["detail"])
+
+    def test_changing_the_grid_keeps_the_order_history_of_a_removed_capacity(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(capacites_prix=self.grille(("128 Go", 185000, None), ("256 Go", 215000, None))),
+            format="json",
+        ).json()
+        product = Product.objects.get(pk=created["id"])
+        retiree = product.variants.get(attribute_values__value="256 Go")
+
+        updated = self.client.patch(
+            f"/api/v1/seller/articles/{created['id']}/",
+            {"capacites_prix": self.grille(("128 Go", 179000, None))},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, 200, updated.content)
+        self.assertEqual(updated.json()["capacites_prix"], [{"capacite": "128 Go", "prix": 179000, "prix_promo": None}])
+        self.assertFalse(updated.json()["prix_variable"])
+
+        retiree.refresh_from_db()
+        self.assertFalse(retiree.is_active)  # desactivee, jamais supprimee
+        self.assertTrue(ProductVariant.objects.filter(pk=retiree.pk).exists())
+
+    def test_adding_a_grid_reuses_the_existing_version_of_the_article(self):
+        """Mettre un article simple en grille ne doit pas orpheliner sa declinaison."""
+        created = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()
+        product = Product.objects.get(pk=created["id"])
+        origine = product.variants.get()
+
+        self.client.patch(
+            f"/api/v1/seller/articles/{created['id']}/",
+            {"capacites_prix": self.grille(("128 Go", 185000, None), ("256 Go", 215000, None))},
+            format="json",
+        )
+        origine.refresh_from_db()
+        self.assertTrue(origine.is_active)
+        self.assertEqual(origine.attribute_values.get(attribute_key="storage").value, "128 Go")
+        self.assertEqual(product.variants.filter(is_active=True).count(), 2)
+
+    def test_taking_the_article_offline_hides_every_capacity(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(capacites_prix=self.grille(("128 Go", 185000, None), ("256 Go", 215000, None))),
+            format="json",
+        ).json()
+
+        self.client.patch(f"/api/v1/seller/articles/{created['id']}/", {"en_ligne": False}, format="json")
+        product = Product.objects.get(pk=created["id"])
+        self.assertEqual(product.variants.filter(is_active=True).count(), 0)
+
+        # La grille est memorisee: elle revient intacte a la remise en ligne.
+        back = self.client.patch(f"/api/v1/seller/articles/{created['id']}/", {"en_ligne": True}, format="json")
+        self.assertEqual(back.status_code, 200, back.content)
+        self.assertEqual([ligne["prix"] for ligne in back.json()["capacites_prix"]], [185000, 215000])
+        self.assertEqual(product.variants.filter(is_active=True).count(), 2)
+
+    def test_stock_entered_once_applies_to_every_capacity(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(quantite=2, capacites_prix=self.grille(("128 Go", 185000, None), ("256 Go", 215000, None))),
+            format="json",
+        ).json()
+
+        updated = self.client.patch(
+            f"/api/v1/seller/articles/{created['id']}/", {"quantite": 7}, format="json"
+        )
+        self.assertEqual(updated.status_code, 200, updated.content)
+        self.assertEqual(updated.json()["quantite"], 7)
+        quantites = {
+            item.qty_on_hand
+            for item in InventoryItem.objects.filter(variant__product_id=created["id"])
+        }
+        self.assertEqual(quantites, {7})
+
+    def test_imported_product_grid_is_readable_and_editable(self):
+        """Les 150 produits importes ont deja des prix par capacite: on les reprend."""
+        product = Product.objects.create(
+            name="Galaxy S24", slug="galaxy-s24", brand=self.brand, category=self.category
+        )
+        source = InventorySource.objects.get(type=InventorySource.INTERNAL)
+        for sku, valeur, prix in (("S24-256", "256GB", 520000), ("S24-512", "512GB", 610000)):
+            variant = ProductVariant.objects.create(product=product, sku=sku, price_amount=prix)
+            VariantAttributeValue.objects.create(
+                variant=variant, attribute_key="storage", value=valeur, label=valeur
+            )
+            InventoryItem.objects.create(variant=variant, source=source, qty_on_hand=2)
+
+        body = self.client.get(f"/api/v1/seller/articles/{product.id}/").json()
+        self.assertEqual(
+            body["capacites_prix"],
+            [
+                {"capacite": "256 Go", "prix": 520000, "prix_promo": None},
+                {"capacite": "512 Go", "prix": 610000, "prix_promo": None},
+            ],
+        )
+
+        updated = self.client.patch(
+            f"/api/v1/seller/articles/{product.id}/",
+            {"capacites_prix": self.grille(("256 Go", 499000, None), ("512 Go", 610000, None))},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, 200, updated.content)
+        self.assertEqual(updated.json()["capacites_prix"][0]["prix"], 499000)
+
+        # L'ecriture d'origine est conservee, seul le libelle affiche est harmonise.
+        attribut = VariantAttributeValue.objects.get(variant__sku="S24-256", attribute_key="storage")
+        self.assertEqual(attribut.value, "256GB")
+        self.assertEqual(attribut.label, "256 Go")
+
+    def test_removing_every_capacity_goes_back_to_a_single_price(self):
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(capacites_prix=self.grille(("128 Go", 185000, None), ("256 Go", 215000, None))),
+            format="json",
+        ).json()
+
+        updated = self.client.patch(
+            f"/api/v1/seller/articles/{created['id']}/",
+            {"capacites_prix": [], "prix": 190000, "quantite": 5},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, 200, updated.content)
+        body = updated.json()
+        self.assertEqual(body["capacites_prix"], [])
+        self.assertEqual(body["prix"], 190000)
+        self.assertEqual(body["quantite"], 5)
+
+        product = Product.objects.get(pk=created["id"])
+        self.assertEqual(product.variants.filter(is_active=True).count(), 1)
+        self.assertEqual(product.variants.get(is_active=True).availability_info()["status"], "IN_STOCK")
+
+    def test_an_empty_grid_does_not_disturb_an_article_without_capacities(self):
+        created = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()
+        updated = self.client.patch(
+            f"/api/v1/seller/articles/{created['id']}/",
+            {"capacites_prix": [], "prix": 170000, "quantite": 9},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, 200, updated.content)
+        self.assertEqual(updated.json()["prix"], 170000)
+        self.assertEqual(updated.json()["quantite"], 9)
+
+    def test_the_listing_price_is_the_cheapest_version_a_customer_can_pay(self):
+        """Le prix barre et le prix affiche doivent venir de la MEME version."""
+        created = self.client.post(
+            "/api/v1/seller/articles/",
+            self.payload(
+                nom="Galaxy S25 Ultra",
+                capacites_prix=self.grille(("256 Go", 850000, None), ("512 Go", 995000, 949000)),
+            ),
+            format="json",
+        ).json()
+
+        liste = APIClient().get("/api/v1/products/", {"q": "S25 Ultra"}).json()
+        vignette = next(item for item in liste["items"] if item["slug"] == created["adresse_web"])
+        self.assertEqual(vignette["min_price"], 850000)
+        # 949 000 est la promo du 512 Go: l'afficher ici annoncerait un prix inexistant.
+        self.assertIsNone(vignette["min_promo_price"])
+        self.assertTrue(vignette["has_price_range"])
