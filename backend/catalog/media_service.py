@@ -117,6 +117,15 @@ def set_primary_photo(product: Product, link: ProductMedia) -> None:
 @transaction.atomic
 def detach_photo(link: ProductMedia) -> None:
     """Retire la photo de l'article et supprime le fichier s'il n'est plus utilise ailleurs."""
+    detach_media_link(link)
+
+
+def detach_media_link(link) -> None:
+    """Meme logique pour une photo d'article (ProductMedia) ou de declinaison (VariantMedia).
+
+    Le fichier envoye n'est efface que s'il ne sert plus a aucun autre rattachement:
+    deux articles peuvent partager la meme image.
+    """
     asset = link.media_asset
     link.delete()
 

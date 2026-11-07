@@ -20,6 +20,7 @@ import {
   fetchSellerBrands,
   fetchSellerCategories,
   retireArticle,
+  supprimerArticle,
   updateArticle
 } from "@/lib/seller-api";
 import { Article, ArticleDisponibilite, SellerBrand, SellerCategory } from "@/lib/types";
@@ -48,6 +49,25 @@ function correspondAuFiltre(article: Article, filtre: Filtre) {
   return article.disponibilite === "HORS_LIGNE";
 }
 
+/**
+ * Ce que le gerant est en train de confirmer.
+ *
+ * « effacer » n'est propose que si aucune vente ne retient l'article; sinon on
+ * bascule sur « retirer » (l'article disparait de la boutique, l'historique de
+ * commandes reste lisible). Le message vient de la boutique, jamais d'ici.
+ */
+type CibleSuppression = {
+  article: Article;
+  geste: "effacer" | "retirer";
+  message: string;
+};
+
+function cibleDepuisArticle(article: Article): CibleSuppression {
+  return article.suppression_possible
+    ? { article, geste: "effacer", message: "" }
+    : { article, geste: "retirer", message: article.suppression_blocage };
+}
+
 export default function MesArticlesPage() {
   const { token } = useSellerAuth();
 
@@ -62,7 +82,7 @@ export default function MesArticlesPage() {
 
   const [vue, setVue] = useState<"liste" | "ajout" | "modification">("liste");
   const [articleEnEdition, setArticleEnEdition] = useState<Article | null>(null);
-  const [articleARetirer, setArticleARetirer] = useState<Article | null>(null);
+  const [cible, setCible] = useState<CibleSuppression | null>(null);
   const [actionEnCours, setActionEnCours] = useState("");
 
   const charger = useCallback(
@@ -147,19 +167,34 @@ export default function MesArticlesPage() {
     }
   }
 
-  async function confirmerRetrait() {
-    if (!articleARetirer) {
+  async function confirmerSuppression() {
+    if (!cible) {
       return;
     }
+    const { article, geste } = cible;
     try {
-      setActionEnCours(articleARetirer.id);
+      setActionEnCours(article.id);
       setErreur("");
-      await retireArticle(token, articleARetirer.id);
-      setSucces(`« ${articleARetirer.nom} » n'est plus en vente.`);
-      setArticleARetirer(null);
+
+      if (geste === "retirer") {
+        await retireArticle(token, article.id);
+        setSucces(`« ${article.nom} » n'est plus en vente.`);
+      } else {
+        await supprimerArticle(token, article.id);
+        setSucces(`« ${article.nom} » a été supprimé.`);
+      }
+
+      setCible(null);
       await charger(true);
     } catch (error) {
-      setErreur(error instanceof Error ? error.message : "Le retrait n'a pas pu être effectué.");
+      const message = error instanceof Error ? error.message : "L'action n'a pas pu être effectuée.";
+      if (geste === "effacer") {
+        // Une commande est arrivee entre l'affichage de la liste et le clic:
+        // on ne perd pas le gerant, on lui propose le retrait avec l'explication.
+        setCible({ article, geste: "retirer", message });
+      } else {
+        setErreur(message);
+      }
     } finally {
       setActionEnCours("");
     }
@@ -350,11 +385,9 @@ export default function MesArticlesPage() {
                   >
                     {article.en_ligne ? "Retirer du site" : "Remettre en vente"}
                   </Bouton>
-                  {article.en_ligne && (
-                    <Bouton variant="danger" onClick={() => setArticleARetirer(article)}>
-                      Ne plus vendre
-                    </Bouton>
-                  )}
+                  <Bouton variant="danger" onClick={() => setCible(cibleDepuisArticle(article))}>
+                    Supprimer
+                  </Bouton>
                 </div>
               </article>
             </li>
@@ -362,14 +395,24 @@ export default function MesArticlesPage() {
         </ul>
       )}
 
-      {articleARetirer && (
+      {cible && (
         <Confirmation
-          titre="Ne plus vendre cet article ?"
-          texte={`« ${articleARetirer.nom} » disparaîtra de votre boutique. Rien n'est effacé : vos commandes passées sont conservées et vous pourrez le remettre en vente quand vous voulez.`}
-          libelleConfirmer="Oui, ne plus le vendre"
-          onConfirmer={confirmerRetrait}
-          onAnnuler={() => setArticleARetirer(null)}
-          occupe={actionEnCours === articleARetirer.id}
+          titre={
+            cible.geste === "effacer"
+              ? "Supprimer cet article ?"
+              : "Cet article ne peut pas être effacé"
+          }
+          texte={
+            cible.geste === "effacer"
+              ? `« ${cible.article.nom} » sera supprimé de votre boutique, avec ses photos. C'est définitif : il faudra le recréer si vous changez d'avis.`
+              : `${cible.message} Voulez-vous le retirer de la boutique ? Il ne sera plus visible par vos clients et vos commandes passées resteront intactes.`
+          }
+          libelleConfirmer={
+            cible.geste === "effacer" ? "Oui, supprimer" : "Oui, le retirer de la boutique"
+          }
+          onConfirmer={confirmerSuppression}
+          onAnnuler={() => setCible(null)}
+          occupe={actionEnCours === cible.article.id}
         />
       )}
     </div>

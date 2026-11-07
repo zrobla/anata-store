@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from rest_framework import serializers
 
-from catalog.article_service import read_article
+from catalog.article_service import apercu_suppression, read_article
 from catalog.models import Brand, Category, Product
 from catalog.serializers import _public_media_url
 
@@ -99,6 +99,7 @@ class ArticleSerializer(serializers.Serializer):
 
     def to_representation(self, obj: Product) -> dict:
         snapshot = self._snapshot(obj)
+        suppression = apercu_suppression(obj)
         return {
             "id": str(obj.id),
             "nom": obj.name,
@@ -123,6 +124,9 @@ class ArticleSerializer(serializers.Serializer):
             "nombre_variantes": snapshot["nombre_variantes"],
             "disponibilite": self.get_disponibilite(obj),
             "adresse_web": obj.slug,
+            # Le studio adapte son bouton: effacer pour de bon, ou seulement retirer.
+            "suppression_possible": suppression["possible"],
+            "suppression_blocage": suppression["blocage"],
         }
 
 

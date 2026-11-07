@@ -291,6 +291,9 @@ export type Article = {
   nombre_variantes: number;
   disponibilite: ArticleDisponibilite;
   adresse_web: string;
+  /** Faux quand l'article a deja ete vendu: on ne peut alors que le retirer de la boutique. */
+  suppression_possible: boolean;
+  suppression_blocage: string;
 };
 
 export type ArticlePhoto = {

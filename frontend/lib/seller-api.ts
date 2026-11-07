@@ -538,6 +538,19 @@ export async function retireArticle(token: string, id: string): Promise<void> {
   );
 }
 
+/**
+ * Efface l'article pour de bon. Leve une erreur portant le message a afficher si
+ * la boutique refuse (article deja vendu): l'ecran propose alors le retrait.
+ */
+export async function supprimerArticle(token: string, id: string): Promise<void> {
+  await articleRequest<void>(
+    `/seller/articles/${id}/definitif/`,
+    "DELETE",
+    token,
+    "L'article n'a pas pu être supprimé."
+  );
+}
+
 export async function fetchArticlePhotos(token: string, id: string): Promise<ArticlePhoto[]> {
   return articleRequest<ArticlePhoto[]>(
     `/seller/articles/${id}/photos/`,

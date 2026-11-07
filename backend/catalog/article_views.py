@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from django.db.models import Prefetch
+from django.db.models import Exists, OuterRef, Prefetch
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -11,7 +11,14 @@ from rest_framework.response import Response
 from accounts.permissions import HasPermissionKey
 from audit.services import log_action
 from catalog.article_serializers import ArticleSerializer, ArticleUpdateSerializer
-from catalog.article_service import ArticleError, create_article, retire_article, update_article
+from catalog.article_service import (
+    ArticleError,
+    create_article,
+    etat_suppression,
+    retire_article,
+    supprimer_article,
+    update_article,
+)
 from catalog.media_service import (
     PhotoUploadError,
     attach_photo_to_product,
@@ -30,11 +37,22 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
 
     def get_queryset(self):
+        # Imports locaux: le catalogue ne depend pas des commandes au chargement du module.
+        from orders.models import OrderItem
+        from promotions.models import Bundle, BundleItem
+
         queryset = (
             Product.objects.select_related("brand", "category")
             .prefetch_related(
                 "variants__attribute_values",
                 Prefetch("media_links", queryset=ProductMedia.objects.select_related("media_asset").order_by("sort_order")),
+            )
+            # Deux drapeaux calcules en une requete: le studio doit savoir, pour
+            # chaque ligne, si l'article peut etre efface ou seulement retire.
+            .annotate(
+                _a_des_commandes=Exists(OrderItem.objects.filter(variant__product_id=OuterRef("pk"))),
+                _dans_une_offre=Exists(BundleItem.objects.filter(variant__product_id=OuterRef("pk")))
+                | Exists(Bundle.objects.filter(primary_product_id=OuterRef("pk"))),
             )
             .order_by("-created_at")
         )
@@ -51,7 +69,7 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_required_permission(self):
-        lecture = self.action in {"list", "retrieve", "referentiel_options"} or (
+        lecture = self.action in {"list", "retrieve", "referentiel_options", "controle_suppression"} or (
             self.action == "photos" and self.request.method == "GET"
         )
         return "catalog.read" if lecture else "catalog.write"
@@ -137,6 +155,33 @@ class SellerArticleViewSet(viewsets.ModelViewSet):
             request_id=getattr(request, "request_id", ""),
         )
         return Response(status=204)
+
+    @action(detail=True, methods=["delete"], url_path="definitif")
+    def supprimer_definitivement(self, request, pk=None):
+        """Efface l'article pour de bon, quand aucune vente ne le retient."""
+        product = self.get_object()
+        before = self._render(product)
+        try:
+            supprimer_article(product)
+        except ArticleError as error:
+            # Article deja vendu ou engage dans une offre: on ne force rien,
+            # le studio proposera de le retirer de la boutique a la place.
+            return Response({"detail": str(error), "suppression_possible": False}, status=409)
+
+        log_action(
+            actor_user=request.user,
+            action="delete",
+            resource="article",
+            resource_id=str(before["id"]),
+            before=before,
+            request_id=getattr(request, "request_id", ""),
+        )
+        return Response(status=204)
+
+    @action(detail=True, methods=["get"], url_path="suppression")
+    def controle_suppression(self, request, pk=None):
+        """Dit au studio si le bouton doit effacer ou seulement retirer."""
+        return Response(etat_suppression(self.get_object()))
 
     @action(detail=False, methods=["get"], url_path="options")
     def referentiel_options(self, request):

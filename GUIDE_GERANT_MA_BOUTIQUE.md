@@ -10,7 +10,7 @@ Vous pouvez tout faire depuis votre téléphone.
 ## 1. Me connecter
 
 1. Ouvrez votre navigateur et allez sur **anatastore.ci/seller**
-2. Entrez votre email et votre mot de passe, puis appuyez sur **Me connecter**
+2. Entrez votre email (bah) et votre mot de passe( Ebene-Banane-Tamarin-Hibiscus-2448), puis appuyez sur **Me connecter**
 
 > **Astuce** : cochez « Afficher le mot de passe » pour vérifier votre saisie.
 > Enregistrez la page dans vos favoris pour y revenir en un geste.
@@ -73,16 +73,21 @@ L'article est en ligne immédiatement.
 
 ---
 
-## 5. Retirer un article de la vente
+## 5. Retirer ou supprimer un article
 
-Deux possibilités, selon votre besoin :
+Deux gestes différents, selon votre besoin :
 
-- **Retirer du site** : l'article disparaît de la boutique mais reste dans votre liste.
-  Utilisez-le pour une rupture temporaire. Un appui sur **Remettre en vente** le fait revenir.
-- **Ne plus vendre** : pour un article que vous ne proposez plus.
+- **Retirer du site** : l'article disparaît de la boutique mais **reste dans votre liste**.
+  C'est le bon choix pour une rupture passagère. Un appui sur **Remettre en vente** le fait revenir.
+- **Supprimer** : l'article s'en va **pour de bon**, avec ses photos. C'est ce qu'il faut pour un
+  article créé par erreur ou en double. La boutique demande confirmation, car c'est définitif.
 
-**Rien n'est jamais effacé** : vos commandes passées sont conservées, et vous pouvez toujours
-remettre un article en vente plus tard.
+**Un article déjà vendu ne peut pas être supprimé.** La boutique vous l'explique et vous propose
+à la place de le **retirer de la boutique** : il ne sera plus visible par vos clients, et vos
+commandes passées restent lisibles.
+
+**Vos ventes ne sont jamais touchées** : supprimer un article ne change rien aux commandes
+déjà enregistrées.
 
 ---
 
@@ -150,9 +155,13 @@ WhatsApp, puis enregistrez celle que vous recevez.
 Modifiez l'article et enregistrez : le nouveau prix s'applique tout de suite. Les commandes
 déjà passées gardent le prix d'origine.
 
-**J'ai supprimé un article par erreur.**
+**J'ai retiré un article par erreur.**
 Rien n'est perdu. Dans **Mes articles**, choisissez le filtre **Retirés du site** et appuyez
 sur **Remettre en vente**.
+
+**J'ai supprimé un article par erreur.**
+La suppression est définitive : il faut le recréer. C'est pourquoi la boutique vous demande
+toujours de confirmer avant.
 
 **Le site me demande de me reconnecter.**
 C'est normal après un long moment d'inactivité, c'est une sécurité. Reconnectez-vous.

@@ -80,6 +80,20 @@ une caractéristique affichée (même prix, même stock).
 - Produits importés : leur grille est héritée de leurs variantes. Leur écriture d'origine
   (`"256GB"`) est conservée dans `value` — seul `label` est harmonisé — pour ne pas casser `?attrs=`.
 
+**Supprimer un article** — deux gestes distincts dans le studio. `retire_article()` (archive :
+`is_active=False`, rien n'est effacé) et `supprimer_article()` (effacement réel : variantes,
+stock, photos, lignes de panier). `etat_suppression()` tranche : un article référencé par une
+`OrderItem` (ou par une offre groupée) n'est **jamais** effacé — l'API répond **409** avec le
+motif en français et l'écran bascule sur l'archivage.
+- Endpoints : `DELETE /seller/articles/{id}/` = archive · `DELETE /seller/articles/{id}/definitif/`
+  = effacement · `GET …/suppression/` = contrôle préalable.
+- Le queryset de liste annote `_a_des_commandes` / `_dans_une_offre` (deux `Exists`, pas de N+1) ;
+  le serializer en tire `suppression_possible` / `suppression_blocage` pour que le bouton soit
+  juste **avant** le clic. `apercu_suppression()` retombe sur le contrôle complet sans annotation.
+- ⚠️ **Invariant** : ne jamais « forcer » la suppression d'un article vendu (les FK `OrderItem` →
+  `ProductVariant` sont en `PROTECT` exprès) ; un `ProtectedError` inattendu est converti en
+  message lisible, pas en 500.
+
 **Photos** — `MediaAsset.image` (`ImageField`, migration `catalog/0002`) coexiste avec l'ancien
 `url` distant ; `MediaAsset.effective_url` donne la priorité au fichier envoyé, et les
 serializers publics passent par lui. `catalog/media_service.py` normalise à l'envoi :
@@ -96,7 +110,8 @@ phrases). Briques communes : `components/boutique/kit.tsx`.
 `app/seller/inventory/items` subsiste en jargon technique mais **n'est plus dans la
 navigation** (le stock se gère depuis la fiche article).
 
-Tests : `backend/tests/test_seller_articles.py` (11 tests — invariant de vente, photos, RBAC).
+Tests : `backend/tests/test_seller_articles.py` (37 tests — invariant de vente, grille de
+capacités, suppression/archivage, photos, RBAC).
 
 ## 4) Démarrer en local
 

@@ -1,6 +1,7 @@
 """Couverture de la surface « articles » et des photos du studio boutique."""
 
 import io
+import os
 import shutil
 import tempfile
 
@@ -123,6 +124,105 @@ class SellerArticleTests(TestCase):
         product = Product.objects.get(id=article["id"])
         self.assertFalse(product.is_active)
         self.assertFalse(product.variants.filter(is_active=True).exists())
+
+    def _commander(self, variant):
+        """Enregistre une vente sur cette declinaison, comme un vrai passage en caisse."""
+        from orders.models import DeliveryZone, Order, OrderItem
+
+        zone = DeliveryZone.objects.create(name="Treichville", fee_amount=1000)
+        order = Order.objects.create(
+            order_number=Order.generate_order_number(),
+            address_json={"ville": "Abidjan"},
+            delivery_zone=zone,
+            subtotal_amount=variant.price_amount,
+            total_amount=variant.price_amount + 1000,
+        )
+        OrderItem.objects.create(
+            order=order,
+            variant=variant,
+            product_snapshot_json={"nom": variant.product.name},
+            qty=1,
+            unit_price_amount=variant.price_amount,
+            line_total_amount=variant.price_amount,
+        )
+        return order
+
+    def test_an_unsold_article_can_be_deleted_for_good(self):
+        """Le besoin du gerant: un article cree par erreur doit pouvoir disparaitre."""
+        created = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()
+        self.assertTrue(created["suppression_possible"])
+        product_id = created["id"]
+        variant_ids = list(ProductVariant.objects.filter(product_id=product_id).values_list("id", flat=True))
+
+        response = self.client.delete(f"/api/v1/seller/articles/{product_id}/definitif/")
+        self.assertEqual(response.status_code, 204, response.content)
+
+        self.assertFalse(Product.objects.filter(pk=product_id).exists())
+        self.assertFalse(ProductVariant.objects.filter(id__in=variant_ids).exists())
+        # Le stock part avec l'article: aucune ligne orpheline ne doit subsister.
+        self.assertFalse(InventoryItem.objects.filter(variant_id__in=variant_ids).exists())
+
+    def test_a_sold_article_is_never_erased_and_says_why(self):
+        """Effacer un article vendu rendrait les commandes passees illisibles."""
+        created = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()
+        product = Product.objects.get(pk=created["id"])
+        self._commander(product.variants.first())
+
+        response = self.client.delete(f"/api/v1/seller/articles/{product.id}/definitif/")
+        self.assertEqual(response.status_code, 409, response.content)
+        self.assertIn("commande", response.json()["detail"])
+        self.assertTrue(Product.objects.filter(pk=product.id).exists())
+
+        # La liste previent le gerant avant meme qu'il clique.
+        liste = self.client.get("/api/v1/seller/articles/").json()
+        lignes = liste["results"] if isinstance(liste, dict) else liste
+        ligne = next(a for a in lignes if a["id"] == str(product.id))
+        self.assertFalse(ligne["suppression_possible"])
+        self.assertTrue(ligne["suppression_blocage"])
+
+    def test_deleting_an_article_removes_its_photo_file(self):
+        created = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()
+        self.client.post(
+            f"/api/v1/seller/articles/{created['id']}/photos/",
+            {"file": photo_file()},
+            format="multipart",
+        )
+        asset = MediaAsset.objects.latest("created_at")
+        chemin = asset.image.path
+
+        self.client.delete(f"/api/v1/seller/articles/{created['id']}/definitif/")
+
+        self.assertFalse(MediaAsset.objects.filter(pk=asset.pk).exists())
+        self.assertFalse(os.path.exists(chemin))
+
+    def test_deleting_an_article_clears_it_from_shopper_carts(self):
+        """Un panier pointant sur un article efface bloquerait le passage en caisse."""
+        from orders.models import Cart, CartItem
+
+        created = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()
+        product = Product.objects.get(pk=created["id"])
+        cart = Cart.objects.create(session_key="visiteur-1")
+        CartItem.objects.create(
+            cart=cart, variant=product.variants.first(), qty=1, unit_price_amount=185000
+        )
+
+        response = self.client.delete(f"/api/v1/seller/articles/{product.id}/definitif/")
+        self.assertEqual(response.status_code, 204, response.content)
+        self.assertEqual(cart.items.count(), 0)
+
+    def test_read_only_account_cannot_delete_an_article(self):
+        created = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()
+
+        lecteur = User.objects.create_user(email="lecteur", username="lecteur", password="strong-pass-123")
+        role = Role.objects.create(key="LECTURE", name="Lecture")
+        role.permissions.add(Permission.objects.get(key="catalog.read"))
+        lecteur.roles.add(role)
+
+        autre = APIClient()
+        autre.force_authenticate(user=lecteur)
+        response = autre.delete(f"/api/v1/seller/articles/{created['id']}/definitif/")
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Product.objects.filter(pk=created["id"]).exists())
 
     def test_photo_upload_is_resized_and_becomes_the_public_thumbnail(self):
         article = self.client.post("/api/v1/seller/articles/", self.payload(), format="json").json()

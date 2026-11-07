@@ -18,6 +18,7 @@ global** a l'article: la quantite saisie est recopiee sur chaque capacite.
 from __future__ import annotations
 
 from django.db import transaction
+from django.db.models import ProtectedError
 from django.utils.text import slugify
 
 from catalog.models import Product, ProductVariant, VariantAttributeValue
@@ -565,3 +566,117 @@ def retire_article(product: Product) -> None:
     product.is_active = False
     product.save(update_fields=["is_active", "updated_at"])
     product.variants.filter(is_active=True).update(is_active=False)
+
+
+def etat_suppression(product: Product) -> dict:
+    """Dit si l'article peut etre efface pour de bon, et sinon pourquoi.
+
+    Un article deja vendu ne peut pas disparaitre: ses lignes de commande
+    pointent dessus (en base: PROTECT) et une facture passee doit rester
+    lisible. Dans ce cas le studio propose l'archivage (retire_article).
+    """
+    # Imports locaux: le catalogue ne doit pas dependre des commandes au
+    # chargement du module (dependance circulaire a l'import des apps).
+    from orders.models import OrderItem
+    from promotions.models import BundleItem
+
+    variantes = list(product.variants.values_list("id", flat=True))
+
+    commandes = (
+        OrderItem.objects.filter(variant_id__in=variantes).values("order_id").distinct().count()
+        if variantes
+        else 0
+    )
+    if commandes:
+        return {
+            "possible": False,
+            "raison": (
+                f"Cet article figure déjà dans {commandes} commande"
+                f"{'s' if commandes > 1 else ''}. Il ne peut pas être effacé, sinon vos "
+                "ventes passées deviendraient illisibles. Vous pouvez le retirer "
+                "définitivement de la boutique : il ne sera plus visible par vos clients."
+            ),
+            "commandes": commandes,
+        }
+
+    offres = BundleItem.objects.filter(variant_id__in=variantes).exists() if variantes else False
+    if offres or product.bundles.exists():
+        return {
+            "possible": False,
+            "raison": (
+                "Cet article fait partie d'une offre groupée. Retirez-le d'abord de cette "
+                "offre, ou retirez simplement l'article de la boutique."
+            ),
+            "commandes": 0,
+        }
+
+    return {"possible": True, "raison": "", "commandes": 0}
+
+
+def apercu_suppression(product: Product) -> dict:
+    """Version economique de etat_suppression, pour afficher la liste d'articles.
+
+    Le queryset du studio annote chaque article (`_a_des_commandes`,
+    `_dans_une_offre`) pour eviter deux requetes par ligne. Sans annotation
+    on retombe sur le controle complet.
+    """
+    vendu = getattr(product, "_a_des_commandes", None)
+    engage = getattr(product, "_dans_une_offre", None)
+
+    if vendu is None or engage is None:
+        etat = etat_suppression(product)
+        return {"possible": etat["possible"], "blocage": etat["raison"]}
+
+    if vendu:
+        return {
+            "possible": False,
+            "blocage": (
+                "Cet article a déjà été vendu : il reste dans votre historique de "
+                "commandes et ne peut pas être effacé."
+            ),
+        }
+    if engage:
+        return {
+            "possible": False,
+            "blocage": "Cet article fait partie d'une offre groupée.",
+        }
+    return {"possible": True, "blocage": ""}
+
+
+@transaction.atomic
+def supprimer_article(product: Product) -> None:
+    """Efface l'article pour de bon: declinaisons, stock et photos compris.
+
+    Reserve aux articles jamais vendus (cf. etat_suppression). Les paniers en
+    cours qui le referencent sont nettoyes: sans cela, la variante protegee
+    empecherait la suppression et le client garderait un article fantome.
+    """
+    from orders.models import CartItem, StockReservation
+
+    etat = etat_suppression(product)
+    if not etat["possible"]:
+        raise ArticleError(etat["raison"])
+
+    variantes = list(product.variants.values_list("id", flat=True))
+    if variantes:
+        CartItem.objects.filter(variant_id__in=variantes).delete()
+        StockReservation.objects.filter(variant_id__in=variantes).delete()
+
+    # Les photos partent par media_service: il supprime le fichier envoye
+    # seulement s'il n'est plus utilise par un autre article.
+    from catalog.media_service import detach_media_link
+
+    for lien in list(product.media_links.select_related("media_asset")):
+        detach_media_link(lien)
+    for variante in product.variants.all():
+        for lien in list(variante.media_links.select_related("media_asset")):
+            detach_media_link(lien)
+
+    try:
+        # CASCADE: variantes, caracteristiques, lignes de stock, avis, questions.
+        product.delete()
+    except ProtectedError as error:  # garde-fou: une reference inattendue subsiste
+        raise ArticleError(
+            "Cet article est encore utilisé ailleurs dans la boutique et n'a pas pu être "
+            "effacé. Retirez-le de la boutique : il ne sera plus visible par vos clients."
+        ) from error
