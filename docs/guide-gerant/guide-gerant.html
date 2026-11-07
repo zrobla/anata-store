@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Ma boutique — mode d'emploi</title>
+<style>
+:root{
+  --encre:#16202b;
+  --encre-doux:#4a5a6b;
+  --or:#b8863b;
+  --or-clair:#f6ecdb;
+  --vert:#1f7a54;
+  --vert-clair:#e6f4ed;
+  --rouge:#b3402f;
+  --rouge-clair:#fbeae7;
+  --bleu:#2b5f8f;
+  --bleu-clair:#e9f1f8;
+  --trait:#dfe4ea;
+  --fond-doux:#f7f8fa;
+}
+*{box-sizing:border-box;}
+@page{ size:A4; margin:0; }
+html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+body{
+  margin:0;
+  font-family:"Liberation Sans","DejaVu Sans",Arial,sans-serif;
+  font-size:11.6pt;
+  line-height:1.62;
+  color:var(--encre);
+}
+p{margin:0 0 .75em;}
+strong{color:var(--encre);}
+em{font-style:normal;background:var(--or-clair);padding:0 .2em;border-radius:3px;}
+
+/* ---------- Couverture ---------- */
+.couverture{
+  display:flex;flex-direction:column;justify-content:space-between;
+  page-break-after:always;
+  background:linear-gradient(160deg,#10191f 0%,#1d2b36 55%,#2a3a46 100%);
+  color:#fff;
+  padding:30mm 20mm 18mm 20mm;
+  height:296.5mm;
+}
+.couv-illus{display:flex;gap:9mm;align-items:center;justify-content:center;margin:6mm 0;}
+.couv-tel{
+  width:50mm;border:2px solid rgba(255,255,255,.35);border-radius:10px;overflow:hidden;
+  background:rgba(255,255,255,.06);font-size:8pt;line-height:1.35;
+}
+.couv-tel .b{background:rgba(217,181,122,.9);color:#16202b;font-weight:700;padding:.35em .6em;font-size:7.6pt;}
+.couv-tel .c{padding:.55em;}
+.couv-tel .l{border:1px solid rgba(255,255,255,.22);border-radius:6px;padding:.35em .5em;margin-bottom:.32em;color:#dbe4ea;display:flex;justify-content:space-between;}
+.couv-tel .l b{color:#e9c58e;}
+.couv-fleche{color:#d9b57a;font-size:16pt;}
+.couv-marque{font-size:10.5pt;letter-spacing:.32em;text-transform:uppercase;color:#d9b57a;}
+.couv-titre{font-size:40pt;line-height:1.08;margin:.35em 0 0;font-weight:700;}
+.couv-sous{font-size:15pt;color:#c8d3dc;margin-top:.5em;max-width:120mm;line-height:1.5;}
+.couv-bloc{display:flex;gap:10mm;align-items:flex-end;}
+.couv-points{list-style:none;padding:0;margin:0;font-size:12pt;color:#e7edf2;}
+.couv-points li{margin:.45em 0;padding-left:1.6em;position:relative;}
+.couv-points li::before{content:"";position:absolute;left:0;top:.52em;width:.75em;height:.75em;border-radius:50%;background:#d9b57a;}
+.couv-pied{border-top:1px solid rgba(255,255,255,.18);padding-top:5mm;font-size:10.5pt;color:#9fb0bd;display:flex;justify-content:space-between;}
+
+/* ---------- Structure ---------- */
+.page{page-break-after:always;height:296.5mm;display:flex;flex-direction:column;padding:16mm 15mm 14mm 15mm;}
+.folio{
+  margin-top:auto;padding-top:5mm;border-top:1px solid var(--trait);
+  display:flex;justify-content:space-between;font-size:9.5pt;color:#9aa6b1;
+}
+.page:last-child{page-break-after:auto;}
+h2{
+  font-size:20pt;line-height:1.2;margin:0 0 .15em;
+  display:flex;align-items:center;gap:.5em;
+}
+h2 .num{
+  flex:0 0 auto;width:1.55em;height:1.55em;border-radius:50%;
+  background:var(--encre);color:#fff;font-size:.62em;
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+.chapo{color:var(--encre-doux);font-size:12pt;margin:0 0 1.1em;}
+h3{font-size:12.5pt;margin:1.4em 0 .4em;color:var(--encre);}
+hr.filet{border:0;border-top:2px solid var(--or);width:60px;margin:.7em 0 1.1em;}
+
+/* ---------- Sommaire ---------- */
+.sommaire{list-style:none;padding:0;margin:0;}
+.sommaire li{
+  display:flex;align-items:baseline;gap:.7em;
+  padding:.55em 0;border-bottom:1px dotted var(--trait);font-size:12.2pt;
+}
+.sommaire .n{
+  flex:0 0 1.9em;height:1.9em;border-radius:50%;background:var(--or-clair);color:var(--or);
+  font-weight:700;font-size:.82em;display:flex;align-items:center;justify-content:center;
+}
+.sommaire .quoi{color:var(--encre-doux);font-size:.92em;}
+
+/* ---------- Étapes ---------- */
+.etapes{counter-reset:etape;list-style:none;padding:0;margin:0;}
+.etapes>li{
+  counter-increment:etape;position:relative;padding:0 0 .9em 2.6em;margin:0;
+  break-inside:avoid;
+}
+.etapes>li::before{
+  content:counter(etape);position:absolute;left:0;top:.05em;
+  width:1.75em;height:1.75em;border-radius:50%;
+  background:var(--or);color:#fff;font-weight:700;font-size:.85em;
+  display:flex;align-items:center;justify-content:center;
+}
+.etapes ul{margin:.3em 0 0;padding-left:1.1em;}
+.etapes ul li{margin:.2em 0;}
+
+/* ---------- Encadrés ---------- */
+.note{
+  border-left:4px solid var(--bleu);background:var(--bleu-clair);
+  padding:.85em 1.1em;border-radius:0 6px 6px 0;margin:1em 0;break-inside:avoid;
+}
+.note.attention{border-color:var(--rouge);background:var(--rouge-clair);}
+.note.ok{border-color:var(--vert);background:var(--vert-clair);}
+.note .t{display:block;font-weight:700;margin-bottom:.15em;}
+.note p:last-child{margin-bottom:0;}
+
+.encadre-saisie{
+  border:2px dashed var(--or);border-radius:10px;background:var(--or-clair);
+  padding:1em 1.2em;margin:1em 0;break-inside:avoid;
+}
+.encadre-saisie .t{font-weight:700;display:block;margin-bottom:.6em;}
+.ligne-saisie{display:flex;align-items:baseline;gap:.6em;margin:.55em 0;font-size:11.5pt;}
+.ligne-saisie .lab{flex:0 0 42mm;color:var(--encre-doux);}
+.ligne-saisie .champ{flex:1;border-bottom:1.5px solid var(--or);height:1.5em;}
+
+/* ---------- Tableaux ---------- */
+table{width:100%;border-collapse:collapse;margin:.8em 0 1em;font-size:11pt;break-inside:avoid;}
+th,td{text-align:left;padding:.6em .7em;border-bottom:1px solid var(--trait);vertical-align:top;}
+th{background:var(--fond-doux);font-size:10.5pt;text-transform:uppercase;letter-spacing:.04em;color:var(--encre-doux);}
+tbody tr:nth-child(even){background:#fbfcfd;}
+
+/* ---------- Maquettes téléphone ---------- */
+.mockup{
+  width:64mm;border:2px solid var(--encre);border-radius:12px;overflow:hidden;
+  background:#fff;break-inside:avoid;font-size:9.2pt;line-height:1.4;
+}
+.mockup .barre{
+  background:var(--encre);color:#fff;padding:.45em .7em;font-weight:700;font-size:9pt;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.mockup .corps{padding:.7em;}
+.mockup .ligne{
+  border:1px solid var(--trait);border-radius:7px;padding:.45em .6em;margin-bottom:.4em;
+  display:flex;justify-content:space-between;align-items:center;gap:.4em;
+}
+.mockup .ligne.actif{border-color:var(--or);background:var(--or-clair);}
+.mockup .bouton{
+  background:var(--or);color:#fff;text-align:center;border-radius:7px;
+  padding:.5em;font-weight:700;margin-top:.5em;
+}
+.mockup .bouton.sombre{background:var(--encre);}
+.mockup .champ{border:1px solid var(--trait);border-radius:7px;padding:.45em .6em;margin-bottom:.45em;color:#98a3ad;}
+.mockup .pastille{font-size:8pt;padding:.1em .5em;border-radius:20px;background:var(--vert-clair);color:var(--vert);font-weight:700;}
+.mockup .pastille.rouge{background:var(--rouge-clair);color:var(--rouge);}
+.mockup .nav{display:flex;border-top:1px solid var(--trait);font-size:7.6pt;text-align:center;color:var(--encre-doux);}
+.mockup .nav div{flex:1;padding:.45em .2em;}
+.mockup .nav div.on{color:var(--or);font-weight:700;}
+.legende{font-size:10pt;color:var(--encre-doux);margin-top:.45em;font-style:italic;}
+
+.duo{display:flex;gap:8mm;align-items:flex-start;margin:1em 0;break-inside:avoid;}
+.duo .texte{flex:1;}
+
+/* ---------- Frise commandes ---------- */
+.frise{margin:1em 0;}
+.frise-etape{
+  display:flex;gap:.9em;align-items:flex-start;padding:.7em .9em;
+  border:1px solid var(--trait);border-left:5px solid var(--or);border-radius:8px;
+  margin-bottom:.5em;break-inside:avoid;background:#fff;
+}
+.frise-etape .badge{
+  flex:0 0 auto;padding:.15em .7em;border-radius:20px;font-size:9.5pt;font-weight:700;
+  background:var(--encre);color:#fff;white-space:nowrap;
+}
+.frise-etape .quoi{flex:1;}
+.frise-etape .quoi>b.titre{display:block;}
+.frise-etape .action{
+  flex:0 0 auto;background:var(--or);color:#fff;border-radius:6px;padding:.3em .7em;
+  font-size:9.5pt;font-weight:700;text-align:center;max-width:36mm;
+}
+.fleche{text-align:center;color:var(--or);font-size:13pt;line-height:1;margin:-.25em 0 .25em;}
+
+/* ---------- FAQ ---------- */
+.faq{break-inside:avoid;margin-bottom:1.1em;}
+.faq .q{font-weight:700;display:flex;gap:.5em;align-items:baseline;}
+.faq .q .ic{
+  flex:0 0 auto;width:1.5em;height:1.5em;border-radius:50%;background:var(--bleu-clair);color:var(--bleu);
+  font-size:.8em;display:inline-flex;align-items:center;justify-content:center;font-weight:700;
+}
+.faq .r{margin:.15em 0 0 2.1em;color:var(--encre-doux);}
+
+/* ---------- Pense-bête final ---------- */
+.pense{
+  border:2px solid var(--encre);border-radius:12px;padding:1.2em 1.4em;background:var(--fond-doux);
+}
+.pense h3{margin-top:0;}
+.grille{display:flex;gap:6mm;flex-wrap:wrap;}
+.carte{
+  flex:1 1 68mm;border:1px solid var(--trait);border-radius:10px;padding:.9em 1em;background:#fff;
+  break-inside:avoid;
+}
+.carte .t{font-weight:700;display:block;margin-bottom:.2em;}
+.carte .d{color:var(--encre-doux);font-size:10.8pt;}
+.pied-page{
+  margin-top:8mm;border-top:1px solid var(--trait);padding-top:3mm;
+  font-size:10pt;color:var(--encre-doux);text-align:center;
+}
+</style>
+</head>
+<body>
+
+<!-- ====================== COUVERTURE ====================== -->
+<section class="couverture">
+  <div>
+    <div class="couv-marque">Anata Store · Treichville</div>
+    <h1 class="couv-titre">Ma boutique<br>mode d'emploi</h1>
+    <p class="couv-sous">Gérer votre boutique en ligne vous-même, depuis votre téléphone :
+    ajouter un article, changer un prix, suivre vos commandes.</p>
+  </div>
+
+  <div class="couv-illus">
+    <div class="couv-tel">
+      <div class="b">Accueil — à faire aujourd'hui</div>
+      <div class="c">
+        <div class="l"><span>Commandes à confirmer</span><b>2</b></div>
+        <div class="l"><span>Articles épuisés</span><b>1</b></div>
+        <div class="l"><span>Articles sans photo</span><b>3</b></div>
+      </div>
+    </div>
+    <div class="couv-fleche">➜</div>
+    <div class="couv-tel">
+      <div class="b">Commande de M. Koffi</div>
+      <div class="c">
+        <div class="l"><span>Galaxy A56 128 Go</span><b>149 000 F</b></div>
+        <div class="l"><span>À encaisser</span><b>149 000 F</b></div>
+        <div class="l" style="border-color:rgba(217,181,122,.8);color:#e9c58e;justify-content:center;"><b>Le client a confirmé</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="couv-bloc">
+    <ul class="couv-points">
+      <li>Aucune connaissance technique nécessaire</li>
+      <li>Tout se fait depuis le téléphone</li>
+      <li>Vos ventes passées sont toujours conservées</li>
+      <li>Vos clients paient à la livraison</li>
+    </ul>
+  </div>
+
+  <div class="couv-pied">
+    <span>Guide du gérant — M. BAH</span>
+    <span>anatastore.ci</span>
+  </div>
+</section>
+
+<!-- ====================== SOMMAIRE ====================== -->
+<section class="page">
+  <h2>Ce que contient ce guide</h2>
+  <hr class="filet">
+  <p class="chapo">Chaque partie est indépendante : allez directement à celle dont vous avez besoin.</p>
+
+  <ul class="sommaire">
+    <li><span class="n">1</span><span><b>Me connecter</b> <span class="quoi">— ouvrir mon espace de gestion</span></span></li>
+    <li><span class="n">2</span><span><b>Mon accueil</b> <span class="quoi">— ce qu'il faut faire aujourd'hui</span></span></li>
+    <li><span class="n">3</span><span><b>Ajouter un article</b> <span class="quoi">— nom, prix, stock, photos</span></span></li>
+    <li><span class="n">4</span><span><b>Modifier un article</b> <span class="quoi">— prix, promotion, stock, photo</span></span></li>
+    <li><span class="n">5</span><span><b>Retirer un article de la vente</b></span></li>
+    <li><span class="n">6</span><span><b>Suivre mes commandes</b> <span class="quoi">— de l'appel client au paiement</span></span></li>
+    <li><span class="n">7</span><span><b>Ma vitrine</b> <span class="quoi">— les articles mis en avant</span></span></li>
+    <li><span class="n">8</span><span><b>Mes pages</b> <span class="quoi">— les textes du site</span></span></li>
+    <li><span class="n">9</span><span><b>Mon historique</b> <span class="quoi">— ce qui a été modifié, et quand</span></span></li>
+    <li><span class="n">?</span><span><b>Questions fréquentes</b> <span class="quoi">— les petits problèmes du quotidien</span></span></li>
+    <li><span class="n">★</span><span><b>Pense-bête</b> <span class="quoi">— la dernière page, à garder sous la main</span></span></li>
+  </ul>
+
+  <h3>En une minute : les trois gestes de tous les jours</h3>
+  <div class="grille">
+    <div class="carte">
+      <span class="t">Le matin</span>
+      <span class="d">J'ouvre <b>Accueil</b> et je regarde la liste « À faire aujourd'hui ».</span>
+    </div>
+    <div class="carte">
+      <span class="t">Une commande arrive</span>
+      <span class="d">J'appelle le client pour confirmer, puis j'appuie sur le bouton proposé.</span>
+    </div>
+    <div class="carte">
+      <span class="t">Un nouvel arrivage</span>
+      <span class="d">Je vais dans <b>Mes articles</b> et je mets à jour la quantité en stock.</span>
+    </div>
+  </div>
+
+  <div class="note ok">
+    <span class="t">Vous ne pouvez rien casser</span>
+    <p>Aucune action de ce guide n'efface définitivement quelque chose. Un article retiré peut
+    être remis en vente, un prix modifié peut être remis comme avant, et toutes vos commandes
+    passées sont conservées.</p>
+  </div>
+  <div class="folio"><span>Sommaire</span><span>2</span></div>
+</section>
+
+<!-- ====================== 1. CONNEXION ====================== -->
+<section class="page">
+  <h2><span class="num">1</span> Me connecter</h2>
+  <hr class="filet">
+  <p class="chapo">Votre espace de gestion est une page web privée. Personne ne peut y entrer sans vos identifiants.</p>
+
+  <div class="duo">
+    <div class="texte">
+      <ol class="etapes">
+        <li>Ouvrez le navigateur de votre téléphone (Chrome, Safari…).</li>
+        <li>Tapez l'adresse <b>anatastore.ci/seller</b> dans la barre du haut, puis validez.</li>
+        <li>Entrez <b>votre identifiant</b> et <b>votre mot de passe</b>.</li>
+        <li>Appuyez sur <b>Me connecter</b>.</li>
+      </ol>
+
+      <div class="note">
+        <span class="t">Deux astuces qui font gagner du temps</span>
+        <p>• Cochez « <b>Afficher le mot de passe</b> » pour vérifier ce que vous tapez.<br>
+        • Enregistrez la page dans vos <b>favoris</b> (ou ajoutez-la à l'écran d'accueil de votre
+        téléphone) : vous y reviendrez en un seul geste, sans retaper l'adresse.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="mockup">
+        <div class="barre"><span>Ma boutique</span><span>●</span></div>
+        <div class="corps">
+          <div style="font-weight:700;margin-bottom:.5em;">Me connecter</div>
+          <div class="champ">Votre identifiant</div>
+          <div class="champ">Mot de passe</div>
+          <div style="font-size:8.5pt;color:#98a3ad;margin-bottom:.3em;">☐ Afficher le mot de passe</div>
+          <div class="bouton">Me connecter</div>
+        </div>
+      </div>
+      <p class="legende">L'écran de connexion.</p>
+    </div>
+  </div>
+
+  <div class="encadre-saisie">
+    <span class="t">✎ Mes identifiants (à écrire ici, de votre main)</span>
+    <div class="ligne-saisie"><span class="lab">Adresse à taper</span><span class="champ">&nbsp;anatastore.ci/seller</span></div>
+    <div class="ligne-saisie"><span class="lab">Mon identifiant</span><span class="champ"></span></div>
+    <div class="ligne-saisie"><span class="lab">Mon mot de passe</span><span class="champ"></span></div>
+  </div>
+
+  <div class="note attention">
+    <span class="t">Sécurité : gardez ces informations pour vous</span>
+    <p>Vos identifiants ne sont pas imprimés dans ce guide, exprès : un document se prête, se
+    photographie et se partage facilement. Ils vous ont été communiqués à part. Ne les envoyez
+    à personne. <b>Mot de passe oublié ?</b> Contactez votre prestataire, il le remplacera
+    immédiatement.</p>
+  </div>
+  <div class="folio"><span>Me connecter</span><span>3</span></div>
+</section>
+
+<!-- ====================== 2. ACCUEIL ====================== -->
+<section class="page">
+  <h2><span class="num">2</span> Mon accueil : ce qu'il faut faire aujourd'hui</h2>
+  <hr class="filet">
+  <p class="chapo">Dès la connexion, l'écran <b>Accueil</b> vous dit ce qui vous attend. C'est votre point de départ chaque matin.</p>
+
+  <div class="duo">
+    <div class="texte">
+      <p>Il vous signale trois choses :</p>
+      <ul>
+        <li>les <b>nouvelles commandes</b> à confirmer ;</li>
+        <li>les <b>articles épuisés</b> qu'il faut réapprovisionner ;</li>
+        <li>les <b>articles en vente sans photo</b> (ils se vendent beaucoup moins bien).</li>
+      </ul>
+      <p><b>Chaque ligne est cliquable</b> et vous emmène directement au bon endroit : vous n'avez
+      pas à chercher dans les menus.</p>
+
+      <div class="note ok">
+        <span class="t">Quand tout est à jour</span>
+        <p>Un message vert vous confirme qu'il n'y a rien à faire. Vous pouvez fermer la page
+        l'esprit tranquille.</p>
+      </div>
+
+      <div class="note">
+        <span class="t">Se déplacer dans l'espace de gestion</span>
+        <p>Sur téléphone, les grands boutons du <b>bas de l'écran</b> permettent de passer d'une
+        partie à l'autre : Accueil, Mes articles, Commandes, Ma vitrine.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="mockup">
+        <div class="barre"><span>Accueil</span><span>Bonjour 👋</span></div>
+        <div class="corps">
+          <div style="font-weight:700;margin-bottom:.45em;">À faire aujourd'hui</div>
+          <div class="ligne actif"><span>2 commandes à confirmer</span><span class="pastille rouge">À faire</span></div>
+          <div class="ligne"><span>1 article épuisé</span><span class="pastille rouge">Stock</span></div>
+          <div class="ligne"><span>3 articles sans photo</span><span class="pastille">Photo</span></div>
+          <div style="margin-top:.6em;background:var(--vert-clair);color:var(--vert);border-radius:7px;padding:.5em;font-weight:700;font-size:8.6pt;">
+            ✓ Le reste de la boutique est à jour
+          </div>
+        </div>
+        <div class="nav"><div class="on">Accueil</div><div>Articles</div><div>Commandes</div><div>Vitrine</div></div>
+      </div>
+      <p class="legende">L'écran d'accueil sur téléphone.</p>
+    </div>
+  </div>
+  <div class="folio"><span>Mon accueil</span><span>4</span></div>
+</section>
+
+<!-- ====================== 3. AJOUTER UN ARTICLE ====================== -->
+<section class="page">
+  <h2><span class="num">3</span> Ajouter un article</h2>
+  <hr class="filet">
+  <p class="chapo">Trois étapes guidées. L'article est en vente sur le site dès que vous avez terminé.</p>
+
+  <div class="duo">
+    <div class="texte">
+      <h3>Étape 1 — L'article</h3>
+      <p>Son <b>nom</b>, sa <b>marque</b>, sa <b>catégorie</b>.</p>
+      <div class="note">
+        <span class="t">Écrivez le nom comme vos clients le cherchent</span>
+        <p>Par exemple « <b>Samsung Galaxy A56 128 Go</b> » plutôt que « A56 ». C'est ce nom que
+        les clients tapent dans la recherche, sur le site comme sur Google.</p>
+      </div>
+
+      <h3>Étape 2 — Prix et stock</h3>
+      <table>
+        <tr><th>Le champ</th><th>Ce qu'on y met</th></tr>
+        <tr><td><b>Prix de vente</b></td><td>Le prix affiché aux clients (en FCFA).</td></tr>
+        <tr><td><b>Prix promotionnel</b></td><td>Seulement si l'article est en promotion. Sinon, <b>laissez vide</b>.</td></tr>
+        <tr><td><b>Quantité en stock</b></td><td>Combien vous en avez. <b>À zéro, l'article s'affiche « épuisé ».</b></td></tr>
+        <tr><td><b>M'alerter à partir de</b></td><td>Vous êtes prévenu quand il ne reste plus que ce nombre.</td></tr>
+      </table>
+      <p>Puis appuyez sur <b>Créer l'article</b>.</p>
+    </div>
+
+    <div>
+      <div class="mockup">
+        <div class="barre"><span>Nouvel article</span><span>2 / 3</span></div>
+        <div class="corps">
+          <div style="font-size:8.4pt;color:var(--encre-doux);margin-bottom:.4em;">Étape 2 — Prix et stock</div>
+          <div class="ligne"><span>Prix de vente</span><b>149 000 F</b></div>
+          <div class="ligne"><span>Prix promotionnel</span><span style="color:#98a3ad;">—</span></div>
+          <div class="ligne actif"><span>Quantité en stock</span><b>5</b></div>
+          <div class="ligne"><span>M'alerter à partir de</span><b>2</b></div>
+          <div class="bouton">Créer l'article</div>
+        </div>
+      </div>
+      <p class="legende">Étape 2 : les prix et le stock.</p>
+    </div>
+  </div>
+
+  <div class="note ok">
+    <span class="t">Une fois créé, l'article existe</span>
+    <p>Il ne reste plus qu'à lui ajouter ses photos : c'est l'étape 3, page suivante.</p>
+  </div>
+  <div class="folio"><span>Ajouter un article</span><span>5</span></div>
+</section>
+
+<!-- ====================== 3 bis. LES PHOTOS ====================== -->
+<section class="page">
+  <h2><span class="num">3</span> Étape 3 — Les photos</h2>
+  <hr class="filet">
+  <p class="chapo">C'est la photo qui donne envie d'acheter. Prenez le temps de la soigner : c'est cinq minutes bien investies.</p>
+
+  <div class="duo">
+    <div class="texte">
+      <ol class="etapes">
+        <li>Dans la fiche de l'article, appuyez sur <b>Ajouter une photo</b>.</li>
+        <li>Choisissez la photo dans votre téléphone (ou prenez-la sur le moment).</li>
+        <li>Recommencez pour en ajouter d'autres — <b>jusqu'à 8 par article</b> : face, dos,
+        écran allumé, accessoires.</li>
+        <li>Pour choisir celle qui s'affiche en premier sur le site, appuyez sur
+        <b>Mettre en avant</b> sous la bonne photo.</li>
+      </ol>
+
+      <div class="note ok">
+        <span class="t">Ne vous occupez pas de la technique</span>
+        <p><b>Pas besoin de retoucher ni de réduire la photo</b> : le site la redresse, la
+        recadre au bon format et l'allège automatiquement, même si elle est lourde ou prise
+        de travers.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="mockup" style="width:52mm;">
+        <div class="barre"><span>Photos</span><span>3 / 8</span></div>
+        <div class="corps">
+          <div class="ligne actif"><span>Photo 1</span><span class="pastille">En premier</span></div>
+          <div class="ligne"><span>Photo 2</span><span style="color:var(--or);font-weight:700;">Mettre</span></div>
+          <div class="ligne"><span>Photo 3</span><span style="color:var(--or);font-weight:700;">Mettre</span></div>
+          <div class="bouton">＋ Ajouter une photo</div>
+        </div>
+      </div>
+      <p class="legende">Les photos d'un article.</p>
+    </div>
+  </div>
+
+  <h3>Une bonne photo, une mauvaise photo</h3>
+  <div class="grille">
+    <div class="carte" style="border-left:5px solid var(--vert);">
+      <span class="t" style="color:var(--vert);">✓ À faire</span>
+      <span class="d">
+        • Fond <b>clair et uni</b> (un mur blanc, une feuille de papier)<br>
+        • Produit <b>entier et bien au centre</b><br>
+        • <b>Lumière du jour</b>, sans ombre portée<br>
+        • Téléphone tenu <b>droit</b>, à deux mains<br>
+        • L'écran <b>propre</b>, sans traces de doigts
+      </span>
+    </div>
+    <div class="carte" style="border-left:5px solid var(--rouge);">
+      <span class="t" style="color:var(--rouge);">✗ À éviter</span>
+      <span class="d">
+        • Fond chargé (comptoir encombré, autres produits)<br>
+        • Photo <b>floue</b> ou prise de trop loin<br>
+        • Photo <b>trouvée sur internet</b> : le client reçoit autre chose et se plaint<br>
+        • Photo sur laquelle on voit <b>un prix</b> ou un autre logo<br>
+        • Flash direct sur un écran (reflet blanc)
+      </span>
+    </div>
+  </div>
+
+  <div class="note attention">
+    <span class="t">Un article sans photo ne se vend presque pas</span>
+    <p>Si vous manquez de temps, mettez au moins <b>une</b> photo correcte : c'est toujours mieux
+    que rien. L'écran <b>Accueil</b> vous rappelle chaque jour les articles auxquels il en
+    manque une.</p>
+  </div>
+
+  <div class="folio"><span>Les photos</span><span>6</span></div>
+</section>
+
+<!-- ====================== 4. MODIFIER ====================== -->
+<section class="page">
+  <h2><span class="num">4</span> Modifier un article</h2>
+  <hr class="filet">
+  <p class="chapo">Prix, promotion, stock, photos : tout se change à tout moment, et le site se met à jour tout de suite.</p>
+
+  <ol class="etapes">
+    <li>Allez dans <b>Mes articles</b> et retrouvez l'article (la <b>recherche</b> par nom ou par
+    marque est le plus rapide quand la liste est longue).</li>
+    <li>Appuyez sur <b>Modifier</b>.</li>
+    <li>Changez ce que vous voulez, puis appuyez sur <b>Enregistrer les modifications</b>.</li>
+  </ol>
+
+  <h3>Les cas les plus fréquents</h3>
+  <table>
+    <thead><tr><th>Ce que vous voulez faire</th><th>Ce qu'il faut changer</th></tr></thead>
+    <tbody>
+      <tr><td>Augmenter ou baisser un prix</td><td>Le champ <b>Prix de vente</b></td></tr>
+      <tr><td>Mettre l'article en promotion</td><td>Remplir <b>Prix promotionnel</b> (toujours inférieur au prix normal)</td></tr>
+      <tr><td>Arrêter la promotion</td><td><b>Vider</b> le champ Prix promotionnel</td></tr>
+      <tr><td>Vous venez d'être réapprovisionné</td><td><b>Quantité en stock</b></td></tr>
+      <tr><td>Changer la photo</td><td>Section <b>Photos</b> : supprimez l'ancienne, ajoutez la nouvelle</td></tr>
+      <tr><td>Changer la photo affichée en premier</td><td><b>Mettre en avant</b>, sous la bonne photo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <span class="t">Le nouveau prix s'applique aux prochaines commandes</span>
+    <p>Les commandes <b>déjà passées</b> gardent le prix auquel le client a acheté. C'est normal,
+    et c'est ce qui protège votre comptabilité.</p>
+  </div>
+  <div class="folio"><span>Modifier un article</span><span>7</span></div>
+</section>
+
+<!-- ====================== 5. RETIRER ====================== -->
+<section class="page">
+  <h2><span class="num">5</span> Retirer ou supprimer un article</h2>
+  <hr class="filet">
+  <p class="chapo">Deux gestes différents, selon que l'arrêt est provisoire ou définitif.</p>
+
+  <div class="grille">
+    <div class="carte" style="border-left:5px solid var(--bleu);">
+      <span class="t">Retirer du site — c'est provisoire</span>
+      <span class="d">L'article disparaît de la boutique mais <b>reste dans votre liste</b>.
+      C'est le bon choix en cas de rupture de stock passagère. Un appui sur
+      <b>Remettre en vente</b> et il revient.</span>
+    </div>
+    <div class="carte" style="border-left:5px solid var(--rouge);">
+      <span class="t">Supprimer — c'est définitif</span>
+      <span class="d">L'article s'en va <b>pour de bon</b>, avec ses photos. C'est ce qu'il faut
+      pour un article créé par erreur ou en double. La boutique demande confirmation avant.</span>
+    </div>
+  </div>
+
+  <div class="note ok">
+    <span class="t">Vos ventes ne sont jamais touchées</span>
+    <p>Un article <b>déjà vendu ne peut pas être supprimé</b> : la boutique vous l'explique et
+    propose de le <b>retirer</b> à la place. Vos <b>commandes passées restent lisibles</b> quoi
+    qu'il arrive.</p>
+  </div>
+
+  <h3>Retrouver et remettre en vente un article retiré</h3>
+  <div class="duo">
+    <div class="texte">
+      <ol class="etapes">
+        <li>Allez dans <b>Mes articles</b>.</li>
+        <li>En haut de la liste, changez le filtre <b>En vente</b> pour <b>Retirés du site</b> :
+        la liste affiche alors les articles qui ne sont plus visibles par vos clients.</li>
+        <li>Trouvez l'article et appuyez sur <b>Remettre en vente</b>.</li>
+      </ol>
+      <div class="note">
+        <span class="t">Pensez au stock en même temps</span>
+        <p>Un article remis en vente avec une <b>quantité à zéro</b> s'affichera « épuisé ».
+        Profitez-en pour mettre la quantité à jour dans la même fiche.</p>
+      </div>
+    </div>
+    <div>
+      <div class="mockup" style="width:56mm;">
+        <div class="barre"><span>Mes articles</span><span>🔍</span></div>
+        <div class="corps">
+          <div style="display:flex;gap:.25em;margin-bottom:.5em;font-size:8pt;">
+            <span style="border:1px solid var(--trait);border-radius:20px;padding:.15em .6em;">En vente</span>
+            <span style="background:var(--or);color:#fff;border-radius:20px;padding:.15em .6em;font-weight:700;">Retirés du site</span>
+          </div>
+          <div class="ligne"><span>Galaxy A14</span><span style="color:var(--or);font-weight:700;">Remettre</span></div>
+          <div class="ligne"><span>Chargeur 25W</span><span style="color:var(--or);font-weight:700;">Remettre</span></div>
+        </div>
+      </div>
+      <p class="legende">Le filtre « Retirés du site ».</p>
+    </div>
+  </div>
+
+  <div class="note attention">
+    <span class="t">Attention à ne pas confondre</span>
+    <p>Un article <b>retiré du site</b> n'est pas supprimé : il attend simplement son retour.
+    Si vous ne le retrouvez pas dans votre liste habituelle, c'est presque toujours qu'il est
+    dans ce filtre. Un article <b>supprimé</b>, lui, ne revient pas : il faut le recréer.</p>
+  </div>
+  <div class="folio"><span>Retirer de la vente</span><span>8</span></div>
+</section>
+
+<!-- ====================== 6. COMMANDES ====================== -->
+<section class="page">
+  <h2><span class="num">6</span> Suivre mes commandes</h2>
+  <hr class="filet">
+  <p class="chapo">Vos clients <b>paient à la livraison</b>. Votre travail : confirmer, préparer, livrer, encaisser.</p>
+
+  <p>Allez dans <b>Commandes</b>. Chaque commande affiche le nom du client, le montant, et
+  surtout <b>la seule action à faire maintenant</b>. Suivez le bouton proposé, dans l'ordre :</p>
+
+  <div class="frise">
+    <div class="frise-etape">
+      <span class="badge">Nouvelle</span>
+      <span class="quoi"><b class="titre">Appelez le client</b>Confirmez sa commande et son adresse — boutons <b>Appeler</b> ou <b>WhatsApp</b>.</span>
+      <span class="action">Le client a confirmé</span>
+    </div>
+    <div class="fleche">▼</div>
+    <div class="frise-etape">
+      <span class="badge">Confirmée</span>
+      <span class="quoi"><b class="titre">Préparez le colis</b>Rassemblez et emballez les articles commandés.</span>
+      <span class="action">Commande préparée</span>
+    </div>
+    <div class="fleche">▼</div>
+    <div class="frise-etape">
+      <span class="badge">En préparation</span>
+      <span class="quoi"><b class="titre">Confiez-le au livreur</b>Remettez le colis et indiquez-lui le montant à encaisser.</span>
+      <span class="action">Remise au livreur</span>
+    </div>
+    <div class="fleche">▼</div>
+    <div class="frise-etape">
+      <span class="badge">En livraison</span>
+      <span class="quoi"><b class="titre">Le livreur encaisse</b>Le client paie la marchandise à la réception.</span>
+      <span class="action">Livrée et payée</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="t">Le détail d'une commande</span>
+    <p>Appuyez sur <b>Voir le détail</b> pour connaître les articles commandés, l'adresse de
+    livraison et <b>le montant exact à encaisser</b>. C'est l'écran à regarder avant de remettre
+    le colis au livreur.</p>
+  </div>
+
+  <div class="note ok">
+    <span class="t">Les commandes terminées</span>
+    <p>Elles sont automatiquement rangées dans l'onglet <b>Terminées</b>. Votre liste principale
+    ne garde que ce qui demande une action de votre part.</p>
+  </div>
+  <div class="folio"><span>Suivre mes commandes</span><span>9</span></div>
+</section>
+
+<!-- ====================== 7 / 8 / 9 ====================== -->
+<section class="page">
+  <h2><span class="num">7</span> Ma vitrine</h2>
+  <hr class="filet">
+  <p class="chapo">La vitrine, ce sont les articles qui apparaissent en <b>bonne place sur la page d'accueil</b> du site — ceux que vos visiteurs voient en premier.</p>
+
+  <div class="duo">
+    <div class="texte">
+      <p>Dans <b>Ma vitrine</b>, appuyez sur <b>Mettre en avant</b> pour ajouter un article,
+      ou sur <b>Retirer</b> pour l'enlever. Le site change immédiatement.</p>
+      <div class="note">
+        <span class="t">Conseil de commerçant</span>
+        <p>Une vitrine <b>courte (6 à 8 articles)</b> attire plus l'attention qu'une longue liste.
+        Choisissez vos <b>meilleures ventes</b> et vos <b>nouveautés</b>, et changez-la de temps
+        en temps.</p>
+      </div>
+    </div>
+    <div>
+      <div class="mockup" style="width:52mm;">
+        <div class="barre"><span>Ma vitrine</span><span>6</span></div>
+        <div class="corps">
+          <div class="ligne actif"><span>Galaxy A56</span><span class="pastille">En avant</span></div>
+          <div class="ligne actif"><span>iPhone 15</span><span class="pastille">En avant</span></div>
+          <div class="ligne"><span>Écouteurs Pro</span><span style="color:var(--or);font-weight:700;">Mettre</span></div>
+        </div>
+      </div>
+      <p class="legende">Un appui suffit.</p>
+    </div>
+  </div>
+
+  <h2 style="margin-top:1.6em;"><span class="num">8</span> Mes pages</h2>
+  <hr class="filet">
+  <p class="chapo">Les textes fixes de votre site : À propos, Livraison, Conditions…</p>
+  <p>Écrivez <b>normalement</b>, comme dans un message :</p>
+  <ul>
+    <li>laissez <b>une ligne vide</b> entre deux paragraphes ;</li>
+    <li>commencez une ligne par un tiret <b>«&nbsp;-&nbsp;»</b> pour faire une liste à puces.</li>
+  </ul>
+  <div class="note attention">
+    <span class="t">Une page reste invisible tant que…</span>
+    <p>…vous n'avez pas activé <b>Publier cette page</b>. Rédigez tranquillement, publiez quand
+    vous êtes satisfait.</p>
+  </div>
+
+  <h2 style="margin-top:1.6em;"><span class="num">9</span> Mon historique</h2>
+  <hr class="filet">
+  <p>Retrouvez les dernières modifications faites sur votre boutique, <b>classées par jour</b> et
+  écrites en toutes lettres. Utile pour vérifier ce qui a été changé, par qui, et quand —
+  par exemple si un prix ne vous semble pas correct.</p>
+  <div class="folio"><span>Vitrine, pages, historique</span><span>10</span></div>
+</section>
+
+<!-- ====================== FAQ ====================== -->
+<section class="page">
+  <h2>Questions fréquentes</h2>
+  <hr class="filet">
+  <p class="chapo">Les petits blocages du quotidien, et leur solution en deux lignes.</p>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> Mon article n'apparaît pas sur le site.</div>
+    <div class="r">Vérifiez <b>deux choses</b> dans sa fiche : « <b>Visible sur le site</b> » doit
+    être activé, et la <b>quantité en stock</b> ne doit pas être à zéro — sinon l'article
+    s'affiche « épuisé ».</div>
+  </div>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> Ma photo est refusée.</div>
+    <div class="r">Si le message parle du format iPhone (HEIC) : allez dans
+    <b>Réglages → Appareil photo → Formats</b> et choisissez « <b>Plus compatible</b> ».
+    Solution immédiate, sur n'importe quel téléphone : envoyez-vous la photo par <b>WhatsApp</b>,
+    puis enregistrez celle que vous recevez et utilisez celle-là.</div>
+  </div>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> Je me suis trompé de prix.</div>
+    <div class="r">Modifiez l'article et enregistrez : le nouveau prix s'applique tout de suite.
+    Les commandes déjà passées gardent le prix d'origine.</div>
+  </div>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> J'ai retiré un article par erreur.</div>
+    <div class="r">Rien n'est perdu. Dans <b>Mes articles</b>, choisissez le filtre
+    <b>Retirés du site</b>, puis appuyez sur <b>Remettre en vente</b>.</div>
+  </div>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> J'ai supprimé un article par erreur.</div>
+    <div class="r">La suppression est <b>définitive</b> : il faut recréer l'article. C'est pour
+    cela que la boutique vous demande toujours de confirmer avant.</div>
+  </div>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> Le site me demande de me reconnecter.</div>
+    <div class="r">C'est normal après un long moment sans activité : c'est une <b>sécurité</b>
+    qui protège votre boutique si votre téléphone reste ouvert. Reconnectez-vous simplement.</div>
+  </div>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> Un client m'appelle pour commander.</div>
+    <div class="r">Rien ne change pour vous : la vente se conclut comme d'habitude. L'espace de
+    gestion sert à suivre les commandes passées <b>depuis le site</b>.</div>
+  </div>
+
+  <div class="faq">
+    <div class="q"><span class="ic">?</span> Je ne trouve pas un article dans ma liste.</div>
+    <div class="r">Utilisez la <b>recherche</b> en haut de <b>Mes articles</b> (tapez une partie
+    du nom ou la marque). S'il reste introuvable, il est peut-être <b>retiré du site</b> :
+    changez de filtre pour l'afficher.</div>
+  </div>
+  <div class="folio"><span>Questions fréquentes</span><span>11</span></div>
+</section>
+
+<!-- ====================== PENSE-BÊTE ====================== -->
+<section class="page">
+  <h2>★ Pense-bête</h2>
+  <hr class="filet">
+  <p class="chapo">La page à garder sous la main — ou à afficher dans la boutique.</p>
+
+  <div class="pense">
+    <h3>Les 4 réflexes</h3>
+    <div class="grille">
+      <div class="carte">
+        <span class="t">1. Je commence par l'Accueil</span>
+        <span class="d">Il me dit tout ce qu'il y a à faire : commandes, stocks, photos manquantes.</span>
+      </div>
+      <div class="carte">
+        <span class="t">2. Je suis le bouton proposé</span>
+        <span class="d">Sur une commande, il n'y a jamais qu'une seule action possible. Je n'ai pas à réfléchir.</span>
+      </div>
+      <div class="carte">
+        <span class="t">3. Stock à zéro = article épuisé</span>
+        <span class="d">Après chaque arrivage, je mets la quantité à jour, sinon le client ne peut pas acheter.</span>
+      </div>
+      <div class="carte">
+        <span class="t">4. Une photo, toujours</span>
+        <span class="d">Fond clair, produit au centre, bonne lumière. C'est ce qui fait vendre.</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Le parcours d'une commande, en une ligne</h3>
+  <p style="font-size:12.5pt;">
+    <b>Nouvelle</b> → j'appelle → <b>Confirmée</b> → j'emballe → <b>En préparation</b> →
+    je donne au livreur → <b>En livraison</b> → il encaisse → <b>Livrée et payée</b>.
+  </p>
+
+  <div class="encadre-saisie">
+    <span class="t">✎ Mes contacts utiles</span>
+    <div class="ligne-saisie"><span class="lab">Mon prestataire</span><span class="champ"></span></div>
+    <div class="ligne-saisie"><span class="lab">Mon livreur</span><span class="champ"></span></div>
+    <div class="ligne-saisie"><span class="lab">Notes</span><span class="champ"></span></div>
+  </div>
+
+  <div class="note">
+    <span class="t">Un doute, un blocage ?</span>
+    <p>Ne forcez rien et ne recommencez pas plusieurs fois la même action : notez ce que vous
+    faisiez et contactez votre prestataire. Votre boutique et vos commandes sont sauvegardées.</p>
+  </div>
+
+  <div class="folio"><span>Anata Store — Guide du gérant · anatastore.ci</span><span>12</span></div>
+</section>
+
+</body>
+</html>
